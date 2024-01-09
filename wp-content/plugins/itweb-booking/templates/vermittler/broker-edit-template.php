@@ -26,7 +26,6 @@ $broker = Database::getInstance()->getBroker($id);
 $brokerProducts = Database::getInstance()->getBrokerProducts($id);
 $brokerProducts = wp_list_pluck($brokerProducts, 'product_id');
 $brokerCommisions = Database::getInstance()->getBrokerCommissions($id);
-$locations = Database::getInstance()->getLocations();
 
 ?>
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
@@ -79,14 +78,7 @@ $locations = Database::getInstance()->getLocations();
 								</div>
 								<div class="col-12 col-sm-6 broker-item">
 									<label for="">Ort</label>
-									<select name="broker_location" class="form-control on-change-show" data-target=".tabs">
-										<option value=""></option>
-										<?php foreach ($locations as $location) : ?>
-											<option value="<?php echo $location->id ?>" <?php if($location->id == $broker->location_id) echo "selected" ?>>
-												<?php echo $location->location ?>
-											</option>
-										<?php endforeach; ?>
-									</select>
+									<input type="text" name="broker_location" class="form-control" value="<?php echo $broker->location_id ?>">
 								</div>
 							</div>
 						</div>

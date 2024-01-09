@@ -1,6 +1,5 @@
 <?php
 $products = Database::getInstance()->getBrokerLots();
-$locations = Database::getInstance()->getLocations();
 if (isok($_POST, 'broker_company')) {
     $insertId = Database::getInstance()->saveBroker($_POST['broker_company'], $_POST['broker_title'], $_POST['broker_firstname'], $_POST['broker_lastname'], $_POST['broker_street'], $_POST['broker_zip'], $_POST['broker_location'], $_POST['broker_short']);
     Database::getInstance()->saveBrokerProducts($insertId, $_POST['broker_products_id']);
@@ -65,21 +64,7 @@ if (isok($_POST, 'broker_company')) {
 						</div>
 						<div class="col-12 col-sm-2">
 							<label for="">Ort</label>
-							<select name="broker_location" class="form-control on-change-show" data-target=".tabs">
-								<option value=""></option>
-								<?php foreach ($locations as $location) : ?>
-									<option value="<?php echo $location->id ?>">
-										<?php echo $location->location ?>
-									</option>
-								<?php endforeach; ?>
-							</select>
-						</div>
-						<div class="col-12 col-sm-2">
-							<label for="">Standort hinzufügen</label>
-							<input type="text" name="newLocation" class="newLocation" placeholder="">
-						</div>
-						<div class="col-12 col-sm-2">
-							<a class="btn btn-secondary add_new_locationBtn">Hinzufügen</a>
+							<input type="text" name="broker_location" class="form-control">
 						</div>
 					</div>
 				</div>

@@ -2,7 +2,7 @@
 $id = $_GET['edit'];
 
 if(isset($_POST['update'])){
-	Database::getInstance()->updateClient($_POST['client'], $_POST['location'], $_POST['tax_number'], $_POST['contact'],
+	Database::getInstance()->updateClient($_POST['client'], $_POST['tax_number'], $_POST['contact'],
 	$_POST['tel'], $_POST['email'], $_POST['address'], $_POST['inv_date'], $_POST['short'], ['id' => $id]);
 	Database::getInstance()->updateClientProducts($id, $_POST['client_products_id']);
 }
@@ -10,7 +10,6 @@ $products = Database::getInstance()->getClientLots();
 $client = Database::getInstance()->getClient($id);
 $clientProducts = Database::getInstance()->getClientProducts($id);
 $clientProducts = wp_list_pluck($clientProducts, 'product_id');
-$locations = Database::getInstance()->getLocations();
 ?>
 
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
@@ -27,14 +26,6 @@ $locations = Database::getInstance()->getLocations();
 							<label for="">Betreiber</label>
 							<input type="text" name="client" class="form-control" value="<?php echo $client->client ?>">
 							<input type="hidden" name="update" value="update">
-						</div>
-						<div class="col-sm-12 col-md-3">
-							<label for="">Standort</label>
-							<select name="location" class="form-control">
-								<?php foreach($locations as $location): ?>
-									<option value="<?php echo $location->id ?>" <?php if($location->id == $client->location_id) echo "selected" ?>><?php echo $location->location ?></option>
-								<?php endforeach; ?>
-							</select>
 						</div>
 						<div class="col-sm-12 col-md-3">
 							<label for="">Rechnugsanschrift</label>

@@ -501,6 +501,13 @@ jQuery(document).ready(function ($) {
         // initTimepickers($, $lastItem);
         initRangeDatepickers($, $lastItem);
     });
+	
+	// add new api_code template
+    $(document).on('click', '.add-api_code-template', function () {
+        $clone = $(this).closest('.api-item').clone();
+        $('.api_code-wrapper').append(emptyFields($, $clone));
+        $lastItem = $('.api_code-wrapper .api-item').last();
+    });
 
     // delete table row
     $(document).on('click', '.del-table-row', function (e) {

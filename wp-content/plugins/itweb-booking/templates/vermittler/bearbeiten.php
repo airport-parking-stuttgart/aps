@@ -27,7 +27,7 @@ if (!isset($_GET['edit'])) :
                         <td><?php echo $broker->company ?></td>
                         <td><?php echo $broker->street ?></td>
                         <td><?php echo $broker->zip ?></td>
-                        <td><?php echo $broker->location ?></td>
+                        <td><?php echo $broker->location_id ?></td>
                         <td style="width: 130px;text-align: right;">
                             <a href="/wp-admin/admin.php?page=vermittler-bearbeiten&edit=<?php echo $broker->id ?>"
                                class="btn btn-secondary btn-sm">

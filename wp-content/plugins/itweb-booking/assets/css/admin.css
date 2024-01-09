@@ -90,7 +90,8 @@ select {
 .service-item,
 .broker-item,
 .group-item,
-.child-group-item {
+.child-group-item,
+.api-item {
     margin: 10px 0;
 }
 
@@ -100,7 +101,8 @@ select {
 .commission-item:last-child .plus-icon,
 .service-item:last-child .plus-icon,
 .group-item:last-child .plus-icon,
-.child-group-item:last-child .plus-icon {
+.child-group-item:last-child .plus-icon,
+.api-item:last-child .plus-icon {
     display: inline-block;
 }
 

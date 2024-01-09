@@ -22,6 +22,14 @@ $_SESSION['dateTo'] = $dateTo;
 
 $allorders = Database::getInstance()->get_fahrerliste("Abreise", $filter);
 
+foreach($allorders as $order){
+	$grput_sql = Database::getInstance()->getProductGroupsById($order->group_id);
+	if($grput_sql->perent_id != null)
+		$order->perent_id = $grput_sql->perent_id;
+	else
+		$order->perent_id = $grput_sql->id;
+}
+
 $user = wp_get_current_user();
 if ($user->user_login == 'aras' || $user->user_login == 'cakir' || $user->user_login == 'sergej')
 	$editOK = "";

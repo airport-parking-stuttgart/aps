@@ -709,6 +709,7 @@ function custom_hide_jetpack_menu_css() {
 		echo '<style>#wpcontent #wp-admin-bar-wp-logo { display: none; }</style>';
 		echo '<style>#wpcontent #wp-admin-bar-updates { display: none; }</style>';
 		echo '<style>#wp-toolbar #wp-admin-bar-view-store { display: none; }</style>';
+		echo '<style>#adminmenu #toplevel_page_srfw-get_woo { display: none; }</style>';
     }
 	
 	$allowed_roles = array('fahrer', 'koordinator');
@@ -728,12 +729,17 @@ function custom_hide_jetpack_menu_css() {
 		echo '<style>#adminmenu #personalplanung-8 { display: none; }</style>';
 		echo '<style>#adminmenu #personalplanung-9 { display: none; }</style>';
 		echo '<style>#adminmenu #personalplanung-10 { display: none; }</style>';
+		echo '<style>#adminmenu #toplevel_page_api { display: none; }</style>';
 	}
 	$allowed_roles = array('admin2');
 	$current_user = wp_get_current_user();
 	if (array_intersect($allowed_roles, $current_user->roles)) {
 		if($current_user->user_login != 'sergej' && $current_user->user_login != 'aras' && $current_user->user_login != 'cakir' && $current_user->user_login != 'soner' && $current_user->user_login != 'birten'){
 			echo '<style>#adminmenu #berichte-10 { display: none; }</style>';
+		}
+		
+		if($current_user->user_login != 'sergej'){
+			echo '<style>#adminmenu #toplevel_page_api { display: none; }</style>';
 		}
 	}
 }

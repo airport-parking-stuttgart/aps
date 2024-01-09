@@ -503,11 +503,10 @@ class Database
         header('Location: ' . $_SERVER['HTTP_REFERER']);
     }
 
-    static function saveClient($client, $location, $tax_number, $contact, $tel, $email, $address, $inv_date, $short)
+    static function saveClient($client, $tax_number, $contact, $tel, $email, $address, $inv_date, $short)
     {
         self::$db->insert(self::$prefix . 'clients', [
             'client' => $client,
-            'location_id' => $location,
             'tax_number' => $tax_number,
             'contact' => $contact,
             'tel' => $tel,
@@ -519,11 +518,10 @@ class Database
 		return self::$db->insert_id;
     }
 
-    static function updateClient($client, $location, $tax_number, $contact, $tel, $email, $address, $inv_date, $short, $condition)
+    static function updateClient($client, $tax_number, $contact, $tel, $email, $address, $inv_date, $short, $condition)
     {
         return self::$db->update(self::$prefix . 'clients', [
             'client' => $client,
-            'location_id' => $location,
             'tax_number' => $tax_number,
             'contact' => $contact,
             'tel' => $tel,
@@ -751,10 +749,22 @@ class Database
             ]);
     }
 	
+	// get product groups table
+    static function getProductGroupsTable()
+    {
+        return self::$db->get_results("select * from " . self::$prefix . "product_groups");
+    }
+	
 	// get all product groups
     static function getProductGroups()
     {
         return self::$db->get_results("select * from " . self::$prefix . "product_groups where perent_id is null order by id asc");
+    }
+	
+	// get product group id by child id
+    static function getProductGroupsById($id)
+    {
+        return self::$db->get_row("select * from " . self::$prefix . "product_groups where id = ".$id);
     }
 	
 	// get child product groups
@@ -1947,7 +1957,7 @@ class Database
 			LEFT JOIN " . self::$prefix . "clients c ON c.id = cp.client_id
 			LEFT JOIN " . self::$prefix . "brokers_products bp ON bp.product_id = parklots.product_id
 			LEFT JOIN " . self::$prefix . "brokers b ON b.id = bp.broker_id
-			WHERE o.deleted = 0 AND (p.post_status = 'wc-processing') AND parklots.is_for != 'hotel' AND DATE(o.date_from) BETWEEN '" . $date1 . "' AND '" . $date2 . "' 
+			WHERE o.deleted = 0 AND (p.post_status = 'wc-processing') AND parklots.is_for != 'hotel' AND DATE(o.Anreisedatum) BETWEEN '" . $date1 . "' AND '" . $date2 . "' 
 			" . $andFor . " 
 			GROUP BY Datum ORDER BY Datum ASC");
     }
@@ -2885,12 +2895,12 @@ class Database
 			$where_ot .= " AND ot.token = '".$filter['token']."' ";
 		}
 		elseif ($filter['buchung_von'] != null && $filter['buchung_bis'] != null){
-			$where .= " AND DATE(o.post_date) >= '" . $filter['buchung_von'] . "' AND DATE(o.post_date) <= '" . $filter['buchung_bis'] . "' ";
-			$where_ot .= " AND DATE(ot.post_date) >= '" . $filter['buchung_von'] . "' AND DATE(ot.post_date) <= '" . $filter['buchung_bis'] . "' ";
+			$where .= " AND (DATE(o.post_date) BETWEEN '" . $filter['buchung_von'] . "' AND '" . $filter['buchung_bis'] . "') ";
+			$where_ot .= " AND (DATE(ot.post_date) BETWEEN '" . $filter['buchung_von'] . "' AND '" . $filter['buchung_bis'] . "') ";
 		}			
 		elseif ($filter['datum_von'] != null && $filter['datum_bis'] != null){
-			$where .= " AND DATE(o.Anreisedatum) >= '" . $filter['datum_von'] . "' AND DATE(o.Abreisedatum) <= '" . $filter['datum_bis'] . "' ";
-			$where_ot .= " AND DATE(ot.datefrom) >= '" . $filter['datum_von'] . "' AND DATE(ot.dateto) <= '" . $filter['datum_bis'] . "' ";
+			$where .= " AND (DATE(o.Anreisedatum) BETWEEN '" . $filter['datum_von'] . "' AND '" . $filter['datum_bis'] . "') ";
+			$where_ot .= " AND (DATE(ot.datefrom) BETWEEN '" . $filter['datum_von'] . "' AND '" . $filter['datum_bis'] . "') ";
 		}			
 		if ($filter['product'] != null){
 			$where .= " AND o.product_id = '" . $filter['product'] . "' ";
@@ -3272,7 +3282,7 @@ class Database
 		$where = " WHERE o.product_id != '' ";
 		if ($filter['datum'] != null){
 			$datum = $filter['datum'];
-			$where .=" AND '$datum' BETWEEN DATE(o.Anreisedatum) AND DATE(o.Abreisedatum)";
+			$where .=" AND ('$datum' BETWEEN DATE(o.Anreisedatum) AND DATE(o.Abreisedatum))";
 		}
 		if($filter['token'] != null) {
 			$where .= " AND o.token = '".$filter['token']."' ";
@@ -3525,7 +3535,8 @@ class Database
 			pl.order_lot AS order_lot,
 			pl.parklot_short AS Code,
 			pl.color AS Color,
-			pl.is_for AS is_for
+			pl.is_for AS is_for,
+			pl.group_id AS group_id
 						
 		FROM " . self::$prefix . "orders o
 		JOIN (SELECT @num := 0 FROM DUAL) AS n ON 1=1
@@ -3571,7 +3582,8 @@ class Database
 			pl.order_lot AS order_lot,
 			pl.parklot_short AS Code,
 			pl.color AS Color,
-			pl.is_for AS is_for
+			pl.is_for AS is_for,
+			pl.group_id AS group_id
 						
 		FROM " . self::$prefix . "hotel_transfers ot
 		JOIN (SELECT @num := 0 FROM DUAL) AS n ON 1=1
@@ -3899,8 +3911,8 @@ class Database
 		$where = " WHERE o.product_id != '' ";
 		$where_ot = " WHERE ot.product_id != '' ";
 				
-		$where .= " AND DATE(o.Abreisedatum) >= '" . $filter['datum_von'] . "' AND DATE(o.Abreisedatum) <= '" . $filter['datum_bis'] . "' ";
-		$where_ot .= " AND DATE(ot.dateto) >= '" . $filter['datum_von'] . "' AND DATE(ot.dateto) <= '" . $filter['datum_bis'] . "' ";		
+		$where .= " AND DATE(o.Abreisedatum) BETWEEN '" . $filter['datum_von'] . "' AND '" . $filter['datum_bis'] . "' ";
+		$where_ot .= " AND DATE(ot.dateto) BETWEEN '" . $filter['datum_von'] . "' AND '" . $filter['datum_bis'] . "' ";		
 
 		
 		$produkt_query = 1;
@@ -4700,148 +4712,152 @@ class Database
         return self::$db->get_row("SELECT ROUND(SUM(nts),2) AS Bonus FROM " . self::$prefix . "stempelsystem WHERE user_id = $user_id AND year = '$year' AND month = '$month' AND nts > 0 GROUP BY user_id");
     }
 	
+	// get api codes by broker id
+    static function getAPICodesById($id){
+        return self::$db->get_results("SELECT * FROM " . self::$prefix . "extern_api_codes WHERE broker_id = '$id'");
+    }
+	
+	// save api codes
+    static function saveAPICodes($api_code, $product_id, $api_ws, $broker_id, $type, $service)
+    {
+        return self::$db->insert(self::$prefix . 'extern_api_codes', [
+            'broker_id' => $broker_id,
+			'product_id' => $product_id,
+            'ws' => $api_ws,
+			'code' => $api_code,
+			'type' => $type,
+			'service' => $service
+        ]);
+    }
+	
+	// update api codes
+    static function updateAPICodes($api_id, $api_code, $product_id, $api_ws, $broker_id, $type, $service)
+    {
+        self::$db->update(self::$prefix . "extern_api_codes", [
+            'broker_id' => $broker_id,
+			'product_id' => $product_id,
+            'ws' => $api_ws,
+			'code' => $api_code,
+			'type' => $type,
+			'service' => $service
+        ], ['id' => $api_id]);
+    }
+	
+	
 	
 	static function saveOrderFomAPS($data, $lot)
     {
-		if($lot == 'aps'){
-			if($data['id'] == 2){
-				$data['product'] = 537;
-				$commission = '0.00';
-			}				
-			elseif($data['id'] == 24){
-				$data['product'] = 592;
-				$commission = '0.00';
-			}				
-			elseif($data['id'] == 25){
-				$data['product'] = 619;
-				$commission = '0.00';
-			}				
-			/*elseif($data['id'] == 12)
-				$data['product'] = 621;
-			elseif($data['id'] == 11)
-				$data['product'] = 624;*/
-			elseif($data['id'] == 1){
-				$data['product'] = 873;
-				$commission = '0.00';
-			}				
-			else
-				return false;
-		}
-		elseif($lot == 'aps_ext'){
 
-			$order_id = self::$db->get_row("
-				SELECT pm.post_id
-				FROM 59hkh_postmeta pm 
-				WHERE pm.meta_key = 'token' and pm.meta_value = '" . trim($data["bookingCode"]) . "'
-				");
-			if($order_id->post_id != null){
-				wp_mail('it@airport-parking-stuttgart.de', 'HEX Umbuchung', print_r($data, true), $headers);
-				self::updateOrderFomHEX($data);
-				return false;
-			}
-			
-			if($data['internalADPrefix'] == 'STR4' || $data['internalADPrefix'] == 'STR8' || $data['internalADPrefix'] == 'STR2' || $data['internalADPrefix'] == 'STB2' || $data['internalADPrefix'] == 'STB1'){
-				$data['product'] = 621;
-				$productSQL = self::getParklotByProductId($data['product']);
-				if($data['internalADPrefix'] == 'STR4' || $data['internalADPrefix'] == 'STR8' || $data['internalADPrefix'] == 'STB2' || $data['internalADPrefix'] == 'STB1'){
-					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-				}
-				if($data['internalADPrefix'] == 'STR2'){
-					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-				}
-			}
-			elseif($data['internalADPrefix'] == 'STRH'){
-				$data['product'] = 683;
-				$productSQL = self::getParklotByProductId($data['product']);
+		$order_id = self::$db->get_row("
+			SELECT pm.post_id
+			FROM 59hkh_postmeta pm 
+			WHERE pm.meta_key = 'token' and pm.meta_value = '" . trim($data["bookingCode"]) . "'
+			");
+		if($order_id->post_id != null){
+			wp_mail('it@airport-parking-stuttgart.de', 'HEX Umbuchung', print_r($data, true), $headers);
+			self::updateOrderFomHEX($data);
+			return false;
+		}
+		
+		if($data['internalADPrefix'] == 'STR4' || $data['internalADPrefix'] == 'STR8' || $data['internalADPrefix'] == 'STR2' || $data['internalADPrefix'] == 'STB2' || $data['internalADPrefix'] == 'STB1'){
+			$data['product'] = 621;
+			$productSQL = self::getParklotByProductId($data['product']);
+			if($data['internalADPrefix'] == 'STR4' || $data['internalADPrefix'] == 'STR8' || $data['internalADPrefix'] == 'STB2' || $data['internalADPrefix'] == 'STB1'){
 				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
 				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
 			}
-			elseif($data['internalADPrefix'] == 'STR6' || $data['internalADPrefix'] == 'STR7' || $data['internalADPrefix'] == 'STRD' || $data['internalADPrefix'] == 'STR0'){
-				$data['product'] = 624;
-				$productSQL = self::getParklotByProductId($data['product']);
-				if($data['internalADPrefix'] == 'STR6' || $data['internalADPrefix'] == 'STR7' || $data['internalADPrefix'] == 'STRD'){
-					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-				}
-				if($data['internalADPrefix'] == 'STR0'){
-					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-				}
-			}
-			elseif($data['internalADPrefix'] == 'STR1' || $data['internalADPrefix'] == 'STR9' || $data['internalADPrefix'] == 'STRW'){
-				$data['product'] = 901;
-				$productSQL = self::getParklotByProductId($data['product']);
-				if($data['internalADPrefix'] == 'STR1' || $data['internalADPrefix'] == 'STR9'){
-					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-				}
-				if($data['internalADPrefix'] == 'STRW'){
-					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-				}
-			}
-			elseif($data['internalADPrefix'] == 'ST10' || $data['internalADPrefix'] == 'ST11' || $data['internalADPrefix'] == 'ST12'){
-				$data['product'] = 24261;
-				$productSQL = self::getParklotByProductId($data['product']);
-				if($data['internalADPrefix'] == 'ST10' || $data['internalADPrefix'] == 'ST11'){
-					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-				}
-				if($data['internalADPrefix'] == 'ST12'){
-					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-				}
-			}
-			elseif($data['internalADPrefix'] == 'ST13' || $data['internalADPrefix'] == 'ST14' || $data['internalADPrefix'] == 'ST15'){
-				$data['product'] = 24263;
-				$productSQL = self::getParklotByProductId($data['product']);
-				if($data['internalADPrefix'] == 'ST13' || $data['internalADPrefix'] == 'ST14'){
-					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-				}
-				if($data['internalADPrefix'] == 'ST15'){
-					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-				}
-			}
-			elseif($data['internalADPrefix'] == 'ST16'){
-				$data['product'] = 24609;
-				$productSQL = self::getParklotByProductId($data['product']);
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-			}
-			elseif($data['internalADPrefix'] == 'STRI'){
-				$data['product'] = 28878;
-				$productSQL = self::getParklotByProductId($data['product']);
+			if($data['internalADPrefix'] == 'STR2'){
 				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;				
-			}
-			elseif($data['internalADPrefix'] == 'ST17' || $data['internalADPrefix'] == 'ST18' || $data['internalADPrefix'] == 'ST19'){
-				$data['product'] = 82130;
-				$productSQL = self::getParklotByProductId($data['product']);
-				if($data['internalADPrefix'] == 'ST17' || $data['internalADPrefix'] == 'ST18'){
-					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-				}
-				if($data['internalADPrefix'] == 'ST19'){
-					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-				}
-			}
-			else{
-				wp_mail('it@airport-parking-stuttgart.de', 'HEX Fehler Produktzuordnung', print_r($data, true), $headers);
-				return false;
-			}
-			
-			if($data['bookingState'] != 'N' && $data['bookingState'] != 'CHANGED'){
-				wp_mail('it@airport-parking-stuttgart.de', 'HEX Fehler Status', print_r($data, true), $headers);
-				return false;
+				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
 			}
 		}
-		else
+		elseif($data['internalADPrefix'] == 'STRH'){
+			$data['product'] = 683;
+			$productSQL = self::getParklotByProductId($data['product']);
+			$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
+			$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
+		}
+		elseif($data['internalADPrefix'] == 'STR6' || $data['internalADPrefix'] == 'STR7' || $data['internalADPrefix'] == 'STRD' || $data['internalADPrefix'] == 'STR0'){
+			$data['product'] = 624;
+			$productSQL = self::getParklotByProductId($data['product']);
+			if($data['internalADPrefix'] == 'STR6' || $data['internalADPrefix'] == 'STR7' || $data['internalADPrefix'] == 'STRD'){
+				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
+				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
+			}
+			if($data['internalADPrefix'] == 'STR0'){
+				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
+				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
+			}
+		}
+		elseif($data['internalADPrefix'] == 'STR1' || $data['internalADPrefix'] == 'STR9' || $data['internalADPrefix'] == 'STRW'){
+			$data['product'] = 901;
+			$productSQL = self::getParklotByProductId($data['product']);
+			if($data['internalADPrefix'] == 'STR1' || $data['internalADPrefix'] == 'STR9'){
+				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
+				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
+			}
+			if($data['internalADPrefix'] == 'STRW'){
+				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
+				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
+			}
+		}
+		elseif($data['internalADPrefix'] == 'ST10' || $data['internalADPrefix'] == 'ST11' || $data['internalADPrefix'] == 'ST12'){
+			$data['product'] = 24261;
+			$productSQL = self::getParklotByProductId($data['product']);
+			if($data['internalADPrefix'] == 'ST10' || $data['internalADPrefix'] == 'ST11'){
+				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
+				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
+			}
+			if($data['internalADPrefix'] == 'ST12'){
+				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
+				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
+			}
+		}
+		elseif($data['internalADPrefix'] == 'ST13' || $data['internalADPrefix'] == 'ST14' || $data['internalADPrefix'] == 'ST15'){
+			$data['product'] = 24263;
+			$productSQL = self::getParklotByProductId($data['product']);
+			if($data['internalADPrefix'] == 'ST13' || $data['internalADPrefix'] == 'ST14'){
+				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
+				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
+			}
+			if($data['internalADPrefix'] == 'ST15'){
+				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
+				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
+			}
+		}
+		elseif($data['internalADPrefix'] == 'ST16'){
+			$data['product'] = 24609;
+			$productSQL = self::getParklotByProductId($data['product']);
+			$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
+			$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
+		}
+		elseif($data['internalADPrefix'] == 'STRI'){
+			$data['product'] = 28878;
+			$productSQL = self::getParklotByProductId($data['product']);
+			$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
+			$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;				
+		}
+		elseif($data['internalADPrefix'] == 'ST17' || $data['internalADPrefix'] == 'ST18' || $data['internalADPrefix'] == 'ST19'){
+			$data['product'] = 82130;
+			$productSQL = self::getParklotByProductId($data['product']);
+			if($data['internalADPrefix'] == 'ST17' || $data['internalADPrefix'] == 'ST18'){
+				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
+				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
+			}
+			if($data['internalADPrefix'] == 'ST19'){
+				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
+				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
+			}
+		}
+		else{
+			wp_mail('it@airport-parking-stuttgart.de', 'HEX Fehler Produktzuordnung', print_r($data, true), $headers);
 			return false;
+		}
+		
+		if($data['bookingState'] != 'N' && $data['bookingState'] != 'CHANGED'){
+			wp_mail('it@airport-parking-stuttgart.de', 'HEX Fehler Status', print_r($data, true), $headers);
+			return false;
+		}
 		
 		if($data['internalADPrefix'] != null)
 			$code = $data['internalADPrefix'];
@@ -5215,18 +5231,6 @@ class Database
 		elseif($data['product_id'] == 4655)
 			$data['product'] = 24228;
 
-		elseif($data['product_id'] == 5949)
-			$data['product'] = 41577;
-		elseif($data['product_id'] == 5951)
-			$data['product'] = 41581;
-		elseif($data['product_id'] == 5953)
-			$data['product'] = 41584;
-		elseif($data['product_id'] == 5955)
-			$data['product'] = 41582;
-		elseif($data['product_id'] == 5957)
-			$data['product'] = 41585;
-		elseif($data['product_id'] == 5958)
-			$data['product'] = 41580;
 		elseif($data['product_id'] == 7050)
 			$data['product'] = 82029;
 		elseif($data['product_id'] == 7053)

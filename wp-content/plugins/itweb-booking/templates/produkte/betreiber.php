@@ -5,7 +5,7 @@
 <?php else: ?>
 <?php
 if (isset($_POST['save'])) {
-    $insertId = Database::getInstance()->saveClient($_POST['client'], $_POST['location'], $_POST['tax_number'], $_POST['contact'],
+    $insertId = Database::getInstance()->saveClient($_POST['client'], $_POST['tax_number'], $_POST['contact'],
         $_POST['tel'], $_POST['email'], $_POST['address'], $_POST['inv_date'], $_POST['short']);
 	Database::getInstance()->saveClientProducts($insertId, $_POST['client_products_id']);
 }
@@ -18,7 +18,6 @@ if(isset($_GET['d'])){
 }
 $products = Database::getInstance()->getClientLots();
 $clients = Database::getInstance()->getAllClients();
-$locations = Database::getInstance()->getLocations();
 ?>
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
 	<div class="page <?php echo $_GET['page'] ?>">
@@ -38,14 +37,6 @@ $locations = Database::getInstance()->getLocations();
 								<label for="">Betreiber</label>
 								<input type="text" name="client" class="form-control">
 								<input type="hidden" name="save" value="save">
-							</div>
-							<div class="col-sm-12 col-md-3">							
-								<label for="">Standort</label>
-								<select name="location" class="form-control">
-									<?php foreach($locations as $location): ?>
-										<option value="<?php echo $location->id ?>"><?php echo $location->location ?></option>
-									<?php endforeach; ?>
-								</select>
 							</div>
 							<div class="col-sm-12 col-md-3">
 								<label for="">Rechnugsanschrift</label>

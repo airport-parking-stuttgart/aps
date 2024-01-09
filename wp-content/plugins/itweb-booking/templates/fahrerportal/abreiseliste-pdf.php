@@ -31,7 +31,21 @@ $html .= "<style>@page {
 			}</style>";
 
 
-$locations = Database::getInstance()->getLocations();
+$all_groups = Database::getInstance()->getProductGroupsTable();
+$g = 0;
+foreach($all_groups as $group){
+	if($group->perent_id == null){
+		$locations_array[$g] = $group->id;
+		$g++;
+	}
+	else{
+		$locations_array[$g] = $group->perent_id;
+		$g++;
+	}		
+}
+$locations = array_unique($locations_array);
+
+
 foreach ($result as $key => $r) {
 	if ($r->Status == "wc-cancelled") {
         $abreisezeit = date('H:i', strtotime("23:59"));
@@ -78,12 +92,10 @@ foreach ($result as $key => $r) {
 	
 	if($zeit[strtoupper($rueckflug_nr)][$abreisezeit] >= 3){
 		foreach($locations as $location){
-			if($location->id == 2)
-				continue;
-			if($location->id == $r->location_id)
-				$sum_pseronen[strtoupper($rueckflug_nr)][$abreisezeit][$r->location_id] += $r->Personenanzahl;
+			if($location == $r->perent_id)
+				$sum_pseronen[strtoupper($rueckflug_nr)][$abreisezeit][$r->perent_id] += $r->Personenanzahl;
 			else
-				$sum_pseronen[strtoupper($rueckflug_nr)][$abreisezeit][$location->id] += 0;			
+				$sum_pseronen[strtoupper($rueckflug_nr)][$abreisezeit][$location] += 0;			
 		}		
 	}
 }
@@ -109,12 +121,10 @@ foreach ($result as $key => $r) {
 	if($zeit[strtoupper($rueckflug_nr)][$abreisezeit] < 3){
 		
 		foreach($locations as $location){
-			if($location->id == 2)
-				continue;
-			if($location->id == $r->location_id)
-				$free[$c][$r->location_id] += $r->Personenanzahl;
+			if($location == $r->perent_id)
+				$free[$c][$r->perent_id] += $r->Personenanzahl;
 			else
-				$free[$c][$location->id] += 0;			
+				$free[$c][$location] += 0;			
 		}
 			
 	}
@@ -151,9 +161,7 @@ foreach ($result as $key => $r) {
 		if($stop == 0){
 			for($i = $d; $i < $c; $i++){
 				foreach($locations as $location){
-					if($location->id == 2)
-						continue;
-					$pers[$c-1][$location->id] += $free[$i][$location->id];	
+					$pers[$c-1][$location] += $free[$i][$location];	
 				}
 			}
 			$stop = 1;			

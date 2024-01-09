@@ -1,722 +1,305 @@
 <?php
-	
+//$products = Database::getInstance()->getProducts();
+// Get All Orders
+$filter['list'] = 1;
+
+if(isok($_GET, 'filter')){
+	unset($_GET['step']);
+	unset($_GET['filter']);
+}
 $db = Database::getInstance();
-$current_user = wp_get_current_user();
-$users_fahrer = $db->getActivUser_einsatzplan();
-if(isset($_GET['cw']))
-	$get_cw = "&cw=" . $_GET['cw'];
-else
-	$get_cw = "";
+$product_groups = Database::getInstance()->getProductGroups();
+$dateFrom = isok($_GET, 'dateFrom') ? dateFormat($_GET['dateFrom']) : date('Y-m-d');
+$dateTo = isok($_GET, 'dateTo') ? dateFormat($_GET['dateTo']) : date('Y-m-d');
+$year = isok($_GET, 'dateFrom') ? date("Y", strtotime($_GET['dateFrom'])) : date('Y');
+$filter['datum_von'] = $dateFrom;
+$filter['datum_bis'] = $dateTo;
+$filter['filter_product'] = $_GET['product'];
 
-if (isset($_GET["year"]))
-    $year1 = $_GET["year"];
-else
-    $year1 = date('Y');
+$_SESSION['dateFrom'] = $dateFrom;
+$_SESSION['dateTo'] = $dateTo;
 
-if(isset($_GET['cw'])){
-	$kw1 = $_GET['cw'];
+
+$allorders = Database::getInstance()->get_fahrerliste("Abreise", $filter);
+
+foreach($allorders as $order){
+	$grput_sql = Database::getInstance()->getProductGroupsById($order->group_id);
+	if($grput_sql->perent_id != null)
+		$order->perent_id = $grput_sql->perent_id;
+	else
+		$order->perent_id = $grput_sql->id;
 }
-else{
-	$kw1 = date('W');
-}
-$query = "";
-if(isset($_GET['year']))
-	$query .= "&year=" . $_GET['year'];
+
+$user = wp_get_current_user();
+if ($user->user_login == 'aras' || $user->user_login == 'cakir' || $user->user_login == 'sergej')
+	$editOK = "";
 else
-	$query .= "";
+	$editOK = "readonly";
 
-if(isset($_GET['role']))
-	$query .= "&role=" . $_GET['role'];
-else
-	$query .= "";
+$datum = strtotime($dateFrom);
+$kw = date("W", $datum);
+$wochentage = array("so", "mo", "di", "mi", "do", "fr", "sa");
+$w = $wochentage[date("w", strtotime($dateFrom))];
+$fahrer = $db->getEinsatzplanOfDay($kw, $year, $w);
 
-$k = $kw1;
-$timestamp_montag = strtotime("{$year1}-W{$k}");
-$firstDay = date("d.m.Y", $timestamp_montag);
-$firstDay_kw1 = date("d.m.Y", $timestamp_montag);
-$lastDay = date('d.m.Y', strtotime("+6 day", strtotime($firstDay)));
-$week1 = $firstDay . " - " . $lastDay;
-
-$date = new DateTime;
-$date->setISODate($year1, 53);
-$weeks = ($date->format("W") === "53" ? 53 : 52);
-
-if($year1 >= date('Y'))
-	$kws = date('W', strtotime(date('Y-m-d')));
-else
-	$kws = $weeks;
-
-if(isset($_POST)){
-	if($_POST['btn'] == $kw1){
-		$kw = $_POST['kw_1'];
-		unset($_POST['btn']);
-		unset($_POST['kw_1']);
-
-		foreach($users_fahrer as $fahrer){			
-			if(isset($_GET['role'])){
-				if($_GET['role'] == "buro" && $fahrer->role == "fahrer")
-					continue;
-				elseif($_GET['role'] == "fahrer" && $fahrer->role != "fahrer")
-					continue;
-			}
-								
-		}
-		
-		foreach($_POST as $key => $val){
-			$key_parts = explode("_", $key);
-			$data['state'] = $key_parts[1];
-			$data['user_id'] = $key_parts[3];
-			$data['id'] = $key_parts[9];
-			if($data['state'] == 'in' && $data['id'] != null){
-				$data['time_in'] = $val != null ? $val : null;		
-				$db->updateStempelIn($data);
-			}
-			if($data['state'] == 'out' && $data['id'] != null){
-				$data['time_out'] = $val != null ? $val : null;		
-				$db->updateStempelOut($data);
-			}
-			if($data['id'] != null){
-				$stempel = $db->getStempelById($data['id']);				
-				
-				if($stempel->time_in != null && $stempel->time_out != null){
-					$check_in = $stempel->time_in;
-					$check_out = $stempel->time_out;
-					
-					if(strtotime($check_in) > strtotime($check_out))
-						$nex_day = 24;
-					else
-						$nex_day = 0;
-					
-					$diff_times = number_format(abs((strtotime($check_in) - strtotime($check_out)) / 3600 - $nex_day), 2, ".", ".");
-					
-					if($diff_times > 4.5 && $diff_times <= 7.5)
-						$diff_times -= 0.5;
-					elseif($diff_times > 7.5)
-						$diff_times -= 1;					
-					
-					$user_id = $data['user_id'];
-					$bonusFrom = get_user_meta($user_id, 'bonusab', true ).":00";
-					$bonusTo = get_user_meta($user_id, 'bonusbis', true ).":00";
-					
-					// Convert to timestamps
-					$check_in_time = strtotime($check_in);
-					$check_out_time = strtotime($check_out);
-					$bonusFrom_time = strtotime($bonusFrom);
-					$bonusTo_time = strtotime($bonusTo);
-					
-					// If the shift crosses midnight, adjust the check_out time
-					if ($check_out_time < $check_in_time) {
-						$check_out_time += 86400;
-					}
-					
-					// If the bonus period crosses midnight, adjust the bonusTo time
-					if ($bonusTo_time < $bonusFrom_time) {
-						$bonusTo_time += 86400;
-					}
-					
-					$overlap = 0;
-					
-					// Calculate overlap with the current day's bonus period
-					if ($check_in_time < $bonusTo_time) {
-						$overlap += max(0, min($check_out_time, $bonusTo_time) - max($check_in_time, $bonusFrom_time));
-					}
-					
-					// If the bonus period crosses midnight, calculate overlap with the previous day's bonus period
-					if ($bonusFrom_time < $bonusTo_time) {
-						$overlap += max(0, min($check_out_time, $bonusTo_time - 86400) - max($check_in_time, $bonusFrom_time - 86400));
-					}
-					
-					$overlap_hours = $overlap / 3600;
-								
-					$bonus = $overlap_hours;
-					
-					$data['std'] = $diff_times;
-					$data['nts'] = $bonus;
-					$data['state'] = 'out';
-					$db->updateStempelStd($data);
-					$data = null;
-				}
-				else{
-					$data['std'] = 0;
-					$data['nts'] = 0;
-					$data['state'] = 'in';
-					$db->updateStempelStd($data);
-					$data = null;
-				}
-				
-				if($stempel->time_in == null && $stempel->time_out == null){
-					$db->deleteStempel($stempel->id);
-				}
-			}
-			
-			if($data['id'] == null && $data['state'] == 'in' && $val != null){
-				$data['rf_id'] = $key_parts[5];
-				$data['date'] = date('Y-m-d', strtotime($key_parts[7]));
-				$data['c_year'] = date('Y', strtotime($data['date']));
-				$data['month'] =  date('m', strtotime($data['date']));
-				$data['c_day'] =  date('d', strtotime($data['date']));
-				$data['kw'] =  date('W', strtotime($data['date']));
-				$data['weekday'] = $key_parts[12];
-				$data['time'] = $val;
-				addStempal($data['user_id'], $data['rf_id'], $data, 'in', 0, 0);
-				//echo "<pre>"; print_r($data); echo "</pre>";
-				$data = null;
-			}
-			if($data['id'] == null && $data['state'] == 'out' && $val != null){
-				$data['date'] = date('Y-m-d', strtotime($key_parts[7]));
-				$data['c_year'] = date('Y', strtotime($data['date']));
-				$data['kw'] =  date('W', strtotime($data['date']));
-				$data['weekday'] = $key_parts[12];
-				$data['time_out'] = $val;
-				$stempel = $db->getStempelKWWeekday($data['user_id'], $data['c_year'], $data['kw'], $data['weekday']);
-				$data['id'] = $stempel->id;
-				if($stempel->time_in){
-					$db->updateStempelOut($data);
-					$stempel = $db->getStempelKWWeekday($data['user_id'], $data['c_year'], $data['kw'], $data['weekday']);
-					if($stempel->time_in != null && $stempel->time_out != null){
-						$check_in = $stempel->time_in;
-						$check_out = $stempel->time_out;
-						
-						if(strtotime($check_in) > strtotime($check_out))
-							$nex_day = 24;
-						else
-							$nex_day = 0;
-						
-						$diff_times = number_format(abs((strtotime($check_in) - strtotime($check_out)) / 3600 - $nex_day), 2, ".", ".");
-						
-						if($diff_times > 4.5 && $diff_times <= 7.5)
-							$diff_times -= 0.5;
-						elseif($diff_times > 7.5)
-							$diff_times -= 1;					
-						
-						$user_id = $data['user_id'];
-						$bonusFrom = get_user_meta($user_id, 'bonusab', true ).":00";
-						$bonusTo = get_user_meta($user_id, 'bonusbis', true ).":00";
-						
-						// Convert to timestamps
-						$check_in_time = strtotime($check_in);
-						$check_out_time = strtotime($check_out);
-						$bonusFrom_time = strtotime($bonusFrom);
-						$bonusTo_time = strtotime($bonusTo);
-						
-						// If the shift crosses midnight, adjust the check_out time
-						if ($check_out_time < $check_in_time) {
-							$check_out_time += 86400;
-						}
-						
-						// If the bonus period crosses midnight, adjust the bonusTo time
-						if ($bonusTo_time < $bonusFrom_time) {
-							$bonusTo_time += 86400;
-						}
-						
-						$overlap = 0;
-						
-						// Calculate overlap with the current day's bonus period
-						if ($check_in_time < $bonusTo_time) {
-							$overlap += max(0, min($check_out_time, $bonusTo_time) - max($check_in_time, $bonusFrom_time));
-						}
-						
-						// If the bonus period crosses midnight, calculate overlap with the previous day's bonus period
-						if ($bonusFrom_time < $bonusTo_time) {
-							$overlap += max(0, min($check_out_time, $bonusTo_time - 86400) - max($check_in_time, $bonusFrom_time - 86400));
-						}
-						
-						$overlap_hours = $overlap / 3600;
-									
-						$bonus = $overlap_hours;
-						
-						$data['std'] = $diff_times;
-						$data['nts'] = $bonus;
-						$data['state'] = 'out';
-						$db->updateStempelStd($data);
-						$data = null;
-					}
-					else{
-						$data['std'] = 0;
-						$data['nts'] = 0;
-						$data['state'] = 'in';
-						$db->updateStempelStd($data);
-						$data = null;
-					}
-				}
-			}
-		}
-		
-		//echo("<script>location.href = '/wp-admin/admin.php?page=einsatzplan';</script>");
+$all_groups = Database::getInstance()->getProductGroupsTable();
+$g = 0;
+foreach($all_groups as $group){
+	if($group->perent_id == null){
+		$locations_array[$g] = $group->id;
+		$g++;
 	}
+	else{
+		$locations_array[$g] = $group->perent_id;
+		$g++;
+	}		
 }
-
-function addStempal($user_id, $rf_id, $data, $state, $diff_times, $bonus){
-	$db = Database::getInstance();
-	$db->addStempel($user_id, $rf_id, $data, $state, $diff_times, $bonus);
-}
-
+$locations = array_unique($locations_array);
+echo "<pre>"; print_r($locations); echo "</pre>";
 ?>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>  
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>  
+
 <style>
-.table tbody tr:nth-child(even) {background: #dae5f0;}
-
-.border_left{
-	border-left: 1px solid;
-}
-
-th, td {white-space: nowrap;}
-
-th, td{
-	border: 1px solid black !important;
-}
-
-.table thead th{
-	vertical-align:top; !important;
-	background: #2d4154; 
-	color: #fff;
-}
-
-.table-wrapper
-{
-    width: 100%;
-    overflow: auto;
-}
-
-.headcol {
-  position: absolute;
-  width: 5em;
-  left: 0;
-  top: auto;
-  border-top-width: 1px;
-  /*only relevant for first row*/
-  margin-top: -1px;
-  /*compensate for top border*/
-}
-
-.headcol:before {
-  content: 'Row ';
-}
-
-.bus_mr{
-	width: 35px;
-	height: 25px;
-	min-height: 20px !important;
-}
-.pause{
-	width: 40px;
-	height: 25px;
-	min-height: 20px !important;
-}
-.day_val{
-	width: 60px;
-	height: 25px;
-	min-height: 20px !important;
-}
-tr{
-	font-size: 0.8rem; !important;
+.dataTables_length{
+	display: none !important;
 }
 </style>
-<div class="page container-fluid <?php echo $_GET['page'] ?>">
 
-    <div class="page-title itweb_adminpage_head">
-		<h3>Stempelübersicht</h3>
+<div class="page container-fluid <?php echo $_GET['page'] ?>">
+	<div class="page-title itweb_adminpage_head">
+		<h3>Abreiseliste Shuttle</h3>
 	</div>
-	<div class="page-body">		
-		<?php if($current_user->user_login == 'sergej' || $current_user->user_login == 'aras' || $current_user->user_login == 'cakir' || $current_user->user_login == 'soner' || $current_user->user_login == 'birten'  || $current_user->user_login == 'hakan'): ?>
-		<div class="row">
-			<div class="col-sm-12 col-md-1">
-				<select name="year" id="year" onchange="change_year(this)">
-					<?php for ($i = 2021; $i <= date('Y'); $i++) : ?>
-						<option value="<?php echo $i ?>" <?php echo $i == $year1 ? ' selected' : '' ?>>
-							<?php echo $i ?>
-						</option>
-					<?php endfor; ?>
-				</select>
-			</div>
-			<div class="col-sm-12 col-md-3" >
-				<?php if($kw1 != 1): ?>
-					<a href="<?php echo '/wp-admin/admin.php?page=stempelansicht&cw='.($kw1 - 1).$query ?>" class="btn btn-primary"><</a>
-				<?php endif; ?>
-				<select name="cw" id="cw" onchange="change_cw(this)">						
-					<?php for($cw = ($kws*1); $cw >= 1 ; $cw--): ?>
-					<?php
-					$cw = $cw >= 10 ? $cw : "0".$cw;
-					if(isset($_GET['cw']))
-						$c_aw = $_GET['cw'];
-					else
-						$c_aw = $kw1;
-					$c_k = $cw;
-					$c_timestamp_montag = strtotime("{$year1}-W{$c_k}");
-					$c_firstDay = date("d.m.Y", $c_timestamp_montag);
-					$c_firstDay_kw1 = date("d.m.Y", $c_timestamp_montag);
-					$c_lastDay = date('d.m.Y', strtotime("+6 day", strtotime($c_firstDay)));
-					$c_week = $c_firstDay . " - " . $c_lastDay;
-					?>
-					<option value="<?php echo $cw ?>" <?php echo $cw == $c_aw ? ' selected' : '' ?>><?php echo "KW " . $cw . ": " . $c_week ?></option>
-					<?php endfor; ?>
-				</select>
-				<?php if($kw1 < ($kws*1)): ?>
-					<a href="<?php echo '/wp-admin/admin.php?page=stempelansicht&cw='.($kw1 + 1).$query ?>" class="btn btn-primary">></a>
-				<?php endif; ?>
-			</div>
-			<div class="col-sm-12 col-md-1" >
-				<select name="role" id="role" onchange="change_role(this)">						
-					<option value="all" <?php echo $_GET['role'] == "all" ? ' selected' : '' ?>>Alle</option>
-					<option value="buro" <?php echo $_GET['role'] == "buro" ? ' selected' : '' ?>>Büro</option>
-					<option value="fahrer" <?php echo $_GET['role'] == "fahrer" ? ' selected' : '' ?>>Fahrer</option>
-				</select>
-			</div>
-			<div class="col-sm-12 col-md-3" >				
-				<form action="<?= get_site_url() . '/wp-content/plugins/itweb-booking/templates/personalplanung/stempelansicht-pdf.php'; ?>" method="post">
-					<button type="submit" id="btnExport" value="Export to PDF" class="btn btn-success">Einsatzplan exportieren</button>
-				</form>
-			</div>
-		</div>
-		<br>
-		<?php endif; ?>
-		<form method="post" action="<?php echo $_SERVER['PHP_SELF'] . "?page=stempelansicht".$get_cw.$query; ?>">				
-			<div class="row">
-				<div class="col-sm-12 col-md-12" >
-					<div class="table-wrapper" style="width: 100%; overflow: scroll;" >						
-						<table class="table table-sm" id="table1">
-							<thead>
-								<tr>
-									<?php if($current_user->user_login == 'sergej' || $current_user->user_login == 'aras' || $current_user->user_login == 'cakir' || $current_user->user_login == 'soner' || $current_user->user_login == 'birten' || $current_user->user_login == 'hakan'): ?>
-									<th style="position: sticky;left:0;">KW <input type="text" name="kw_1" size="3" min="1" max="52" value="<?php echo $kw1; ?>" readonly></th>
-									<?php else:?>
-									<th style="position: sticky;left:0;">KW <?php echo $kw1; ?></th>
+	<div class="page-body">
+		<form class="form-filter" id="myForm">
+			<input type="hidden" name="page" value="abreiseliste">
+			<div class="row ui-lotdata-block ui-lotdata-block-next">
+				<h5 class="ui-lotdata-title">Nach Datum filtern</h5>
+				<div class="col-sm-12 col-md-12 ui-lotdata">
+					<div class="row">
+						<div class="col-sm-12 col-md-1 ui-lotdata-date">
+							<input type="text" id="dateFrom" name="dateFrom" placeholder="Datum von" class="form-item form-control single-datepicker" value="<?php echo dateFormat($dateFrom, 'de') ?>">
+						</div>
+						<div class="col-sm-12 col-md-1 ui-lotdata-date">
+							<input type="text" id="dateTo" name="dateTo" placeholder="Datum bis" class="form-item form-control single-datepicker" value="<?php echo dateFormat($dateTo, 'de') ?>">
+						</div>
+						<div class="col-sm-12 col-md-2">
+							<select name="product" class="form-item form-control">
+								<option value="">Standort</option>
+								<?php foreach ($product_groups as $group) : ?>						
+									<option value="<?php echo $group->id ?>" <?php echo $group->id == $_GET['product'] ? "selected" : "" ?>><?php echo $group->name ?></option>						
+									<?php $child_product_groups = Database::getInstance()->getChildProductGroupsByPerentId($group->id); ?>
+									<?php if(count($child_product_groups) > 0): ?>
+										<?php foreach ($child_product_groups as $child_group) : ?>
+										<option value="<?php echo $child_group->id ?>" <?php echo $child_group->id == $_GET['product'] ? "selected" : "" ?>><?php echo " - " . $child_group->name ?></option>
+										<?php endforeach; ?>
 									<?php endif; ?>
-									<?php if(date('Y-m-d', strtotime("+0 day", strtotime($firstDay_kw1))) <= date('Y-m-d', strtotime(date('Y-m-d')))): ?>
-									<th style="border-left: 3px solid !important;">MO<br><?php echo date('d.m.', strtotime("+0 day", strtotime($firstDay_kw1))) ?></th>
-									<th>Check-In</th>
-									<th>Check-Out</th>
-									<?php endif; ?>
-									<?php if(date('Y-m-d', strtotime("+1 day", strtotime($firstDay_kw1))) <= date('Y-m-d', strtotime(date('Y-m-d')))): ?>
-									<th style="border-left: 3px solid !important;">DI<br><?php echo date('d.m.', strtotime("+1 day", strtotime($firstDay_kw1))) ?></th>
-									<th>Check-In</th>
-									<th>Check-Out</th>
-									<?php endif; ?>
-									<?php if(date('Y-m-d', strtotime("+2 day", strtotime($firstDay_kw1))) <= date('Y-m-d', strtotime(date('Y-m-d')))): ?>
-									<th style="border-left: 3px solid !important;">MI<br><?php echo date('d.m.', strtotime("+2 day", strtotime($firstDay_kw1))) ?></th>
-									<th>Check-In</th>
-									<th>Check-Out</th>
-									<?php endif; ?>
-									<?php if(date('Y-m-d', strtotime("+3 day", strtotime($firstDay_kw1))) <= date('Y-m-d', strtotime(date('Y-m-d')))): ?>
-									<th style="border-left: 3px solid !important;">DO<br><?php echo date('d.m.', strtotime("+3 day", strtotime($firstDay_kw1))) ?></th>
-									<th>Check-In</th>
-									<th>Check-Out</th>
-									<?php endif; ?>
-									<?php if(date('Y-m-d', strtotime("+4 day", strtotime($firstDay_kw1))) <= date('Y-m-d', strtotime(date('Y-m-d')))): ?>
-									<th style="border-left: 3px solid !important;">FR<br><?php echo date('d.m.', strtotime("+4 day", strtotime($firstDay_kw1))) ?></th>
-									<th>Check-In</th>
-									<th>Check-Out</th>
-									<?php endif; ?>
-									<?php if(date('Y-m-d', strtotime("+5 day", strtotime($firstDay_kw1))) <= date('Y-m-d', strtotime(date('Y-m-d')))): ?>
-									<th style="border-left: 3px solid !important;">SA<br><?php echo date('d.m.', strtotime("+5 day", strtotime($firstDay_kw1))) ?></th>
-									<th>Check-In</th>
-									<th>Check-Out</th>
-									<?php endif; ?>
-									<?php if(date('Y-m-d', strtotime("+6 day", strtotime($firstDay_kw1))) <= date('Y-m-d', strtotime(date('Y-m-d')))): ?>
-									<th style="border-left: 3px solid !important;">SO<br><?php echo date('d.m.', strtotime("+6 day", strtotime($firstDay_kw1))) ?></th>
-									<th>Check-In</th>
-									<th>Check-Out</th>
-									<?php endif; ?>
-								</tr>
-							</thead>
-							<tbody class="row_position_table1">
-							<?php $i = 1; foreach($users_fahrer as $fahrer): ?>
-								<?php
-									if(isset($_GET['role'])){
-										if($_GET['role'] == "buro" && $fahrer->role == "fahrer")
-											continue;
-										elseif($_GET['role'] == "fahrer" && $fahrer->role != "fahrer")
-											continue;
-									}
-									
-									if(get_user_meta($fahrer->user_id, 'stempel_nr', true ) == null)
-										continue;
-								?>
-								<?php $wp_user = get_user_by('id', $fahrer->user_id); ?>
-								<?php $data =  $db->getEinsatzplanByUserID($kw1, $year1, $fahrer->user_id) ?>						
-								<tr style="background: <?php echo ($i % 2) != 1 ? '#dae5f0' : '#ffffff'?>" id="<?php echo $fahrer->user_id ?>">									
-									<td style="position: sticky;left:0;background-color:<?php echo $left_color ?>;"><?php echo $wp_user->display_name; echo get_user_meta( $fahrer->user_id, 'type', true ) != null && get_user_meta( $fahrer->user_id, 'type', true ) != '-' ? ", " . get_user_meta( $fahrer->user_id, 'type', true ) : ""; ?></td>							
-									<?php if(date('Y-m-d', strtotime("+0 day", strtotime($firstDay_kw1))) <= date('Y-m-d', strtotime(date('Y-m-d')))): ?>
-										<td style="border-left: 3px solid !important;"><?php echo $data->mo != null ? $data->mo : "" ?></td>
-										<?php $stempel =  $db->getStempelKWWeekday($fahrer->user_id, $year1, $kw1, 'mo') ?>
-										<?php if($stempel->time_in): ?>										
-											<td style="background: #ccffcc"><input type="time" style="width:75px;" name="time_in_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+0 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_mo" value="<?php echo date('H:i', strtotime($stempel->time_in)) ?>"></td>			
-										<?php else: ?>
-											<td style="background: #ccffcc"><input type="time" style="width:75px;" name="time_in_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+0 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_mo" value=""></td>
-										<?php endif; ?>
-										<?php if($stempel->time_out): ?>
-											<td style="background: #ffcccc"><input type="time" style="width:75px;" name="time_out_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+0 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_mo" value="<?php echo date('H:i', strtotime($stempel->time_out)) ?>"></td>			
-										<?php else: ?>
-											<td style="background: #ffcccc"><input type="time" style="width:75px;" name="time_out_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+0 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_mo" value=""></td>
-										<?php endif; ?>
-									<?php endif; ?>
-									
-									<?php if(date('Y-m-d', strtotime("+1 day", strtotime($firstDay_kw1))) <= date('Y-m-d', strtotime(date('Y-m-d')))): ?>
-										<td style="border-left: 3px solid !important;"><?php echo $data->di != null ? $data->di : "" ?></td>
-										<?php $stempel =  $db->getStempelKWWeekday($fahrer->user_id, $year1, $kw1, 'di') ?>
-										<?php if($stempel->time_in): ?>
-											<td style="background: #ccffcc"><input type="time" style="width:75px;" name="time_in_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+1 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_di" value="<?php echo date('H:i', strtotime($stempel->time_in)) ?>"></td>			
-										<?php else: ?>
-											<td style="background: #ccffcc"><input type="time" style="width:75px;" name="time_in_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+1 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_di" value=""></td>
-										<?php endif; ?>
-										<?php if($stempel->time_out): ?>
-											<td style="background: #ffcccc"><input type="time" style="width:75px;" name="time_out_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+1 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_di" value="<?php echo date('H:i', strtotime($stempel->time_out)) ?>"></td>			
-										<?php else: ?>
-											<td style="background: #ffcccc"><input type="time" style="width:75px;" name="time_out_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+1 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_di" value=""></td>
-										<?php endif; ?>
-									<?php endif; ?>
-									
-									<?php if(date('Y-m-d', strtotime("+2 day", strtotime($firstDay_kw1))) <= date('Y-m-d', strtotime(date('Y-m-d')))): ?>
-										<td style="border-left: 3px solid !important;"><?php echo $data->mi != null ? $data->mi : "" ?></td>
-										<?php $stempel =  $db->getStempelKWWeekday($fahrer->user_id, $year1, $kw1, 'mi') ?>
-										<?php if($stempel->time_in): ?>
-											<td style="background: #ccffcc"><input type="time" style="width:75px;" name="time_in_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+2 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_mi" value="<?php echo date('H:i', strtotime($stempel->time_in)) ?>"></td>			
-										<?php else: ?>
-											<td style="background: #ccffcc"><input type="time" style="width:75px;" name="time_in_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+2 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_mi" value=""></td>
-										<?php endif; ?>
-										<?php if($stempel->time_out): ?>
-											<td style="background: #ffcccc"><input type="time" style="width:75px;" name="time_out_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+2 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_mi" value="<?php echo date('H:i', strtotime($stempel->time_out)) ?>"></td>			
-										<?php else: ?>
-											<td style="background: #ffcccc"><input type="time" style="width:75px;" name="time_out_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+2 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_mi" value=""></td>
-										<?php endif; ?>
-									<?php endif; ?>
-									
-									<?php if(date('Y-m-d', strtotime("+3 day", strtotime($firstDay_kw1))) <= date('Y-m-d', strtotime(date('Y-m-d')))): ?>
-										<td style="border-left: 3px solid !important;"><?php echo $data->do != null ? $data->do : "" ?></td>
-										<?php $stempel =  $db->getStempelKWWeekday($fahrer->user_id, $year1, $kw1, 'do') ?>
-										<?php if($stempel->time_in): ?>
-											<td style="background: #ccffcc"><input type="time" style="width:75px;" name="time_in_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+3 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_do" value="<?php echo date('H:i', strtotime($stempel->time_in)) ?>"></td>			
-										<?php else: ?>
-											<td style="background: #ccffcc"><input type="time" style="width:75px;" name="time_in_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+3 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_do" value=""></td>
-										<?php endif; ?>
-										<?php if($stempel->time_out): ?>
-											<td style="background: #ffcccc"><input type="time" style="width:75px;" name="time_out_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+3 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_do" value="<?php echo date('H:i', strtotime($stempel->time_out)) ?>"></td>			
-										<?php else: ?>
-											<td style="background: #ffcccc"><input type="time" style="width:75px;" name="time_out_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+3 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_do" value=""></td>
-										<?php endif; ?>
-									<?php endif; ?>
-									
-									<?php if(date('Y-m-d', strtotime("+4 day", strtotime($firstDay_kw1))) <= date('Y-m-d', strtotime(date('Y-m-d')))): ?>
-										<td style="border-left: 3px solid !important;"><?php echo $data->fr != null ? $data->fr : "" ?></td>
-										<?php $stempel =  $db->getStempelKWWeekday($fahrer->user_id, $year1, $kw1, 'fr') ?>
-										<?php if($stempel->time_in): ?>
-											<td style="background: #ccffcc"><input type="time" style="width:75px;" name="time_in_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+4 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_fr" value="<?php echo date('H:i', strtotime($stempel->time_in)) ?>"></td>			
-										<?php else: ?>
-											<td style="background: #ccffcc"><input type="time" style="width:75px;" name="time_in_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+4 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_fr" value=""></td>
-										<?php endif; ?>
-										<?php if($stempel->time_out): ?>
-											<td style="background: #ffcccc"><input type="time" style="width:75px;" name="time_out_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+4 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_fr" value="<?php echo date('H:i', strtotime($stempel->time_out)) ?>"></td>			
-										<?php else: ?>
-											<td style="background: #ffcccc"><input type="time" style="width:75px;" name="time_out_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+4 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_fr" value=""></td>
-										<?php endif; ?>
-									<?php endif; ?>
-									
-									<?php if(date('Y-m-d', strtotime("+5 day", strtotime($firstDay_kw1))) <= date('Y-m-d', strtotime(date('Y-m-d')))): ?>
-										<td style="border-left: 3px solid !important;"><?php echo $data->sa != null ? $data->sa : "" ?></td>
-										<?php $stempel =  $db->getStempelKWWeekday($fahrer->user_id, $year1, $kw1, 'sa') ?>
-										<?php if($stempel->time_in): ?>
-											<td style="background: #ccffcc"><input type="time" style="width:75px;" name="time_in_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+5 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_sa" value="<?php echo date('H:i', strtotime($stempel->time_in)) ?>"></td>			
-										<?php else: ?>
-											<td style="background: #ccffcc"><input type="time" style="width:75px;" name="time_in_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+5 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_sa" value=""></td>
-										<?php endif; ?>
-										<?php if($stempel->time_out): ?>
-											<td style="background: #ffcccc"><input type="time" style="width:75px;" name="time_out_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+5 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_sa" value="<?php echo date('H:i', strtotime($stempel->time_out)) ?>"></td>			
-										<?php else: ?>
-											<td style="background: #ffcccc"><input type="time" style="width:75px;" name="time_out_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+5 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_sa" value=""></td>
-										<?php endif; ?>
-									<?php endif; ?>
-									
-									<?php if(date('Y-m-d', strtotime("+6 day", strtotime($firstDay_kw1))) <= date('Y-m-d', strtotime(date('Y-m-d')))): ?>
-										<td style="border-left: 3px solid !important;"><?php echo $data->so != null ? $data->so : "" ?></td>
-										<?php $stempel =  $db->getStempelKWWeekday($fahrer->user_id, $year1, $kw1, 'so') ?>
-										<?php if($stempel->time_in): ?>
-											<td style="background: #ccffcc"><input type="time" style="width:75px;" name="time_in_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+6 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_so" value="<?php echo date('H:i', strtotime($stempel->time_in)) ?>"></td>			
-										<?php else: ?>
-											<td style="background: #ccffcc"><input type="time" style="width:75px;" name="time_in_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+6 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_so" value=""></td>
-										<?php endif; ?>
-										<?php if($stempel->time_out): ?>
-											<td style="background: #ffcccc"><input type="time" style="width:75px;" name="time_out_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+6 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_so" value="<?php echo date('H:i', strtotime($stempel->time_out)) ?>"></td>			
-										<?php else: ?>
-											<td style="background: #ffcccc"><input type="time" style="width:75px;" name="time_out_user_<?php echo $fahrer->user_id ?>_rfid_<?php echo get_user_meta($fahrer->user_id, 'stempel_nr', true ) ?>_date_<?php echo date('Y-m-d', strtotime("+6 day", strtotime($firstDay_kw1))) ?>_group_<?php echo $stempel->id ?>_kw_<?php echo $kw1 ?>_so" value=""></td>
-										<?php endif; ?>
-									<?php endif; ?>
-								</tr>
-								<?php $i ++; endforeach; ?>
-							</tbody>
-						</table>						
+								<?php endforeach; ?>
+							</select>
+						</div>
+						<div class="col-sm-12 col-md-1">
+							<button class="btn btn-primary d-block w-100 form-item form-control" name="filter" value="1" type="submit">Filter</button>
+						</div>
+						<div class="col-sm-12 col-md-2">
+							<a href="<?php echo '/wp-admin/admin.php?page=abreiseliste' ?>" class="btn btn-secondary d-block w-100">Zurücksetzen</a>
+						</div>
+					</div><br>
+					<div class="row">
+						<div class="col-sm-12 col-md-3 col-lg-2">
+							<a href="<?php echo '/wp-admin/admin.php?page=anreiseliste' ?>" class="btn btn-primary d-block w-100">Anreiseliste Shuttle</a>
+						</div>
+						<!--
+						<div class="col-sm-12 col-md-3 col-lg-2">                    
+							<a href="<?php echo '/wp-admin/admin.php?page=anreiseliste-valet' ?>" class="btn btn-primary d-block w-100" >Anreiseliste Valet</a>
+						</div>
+						<div class="col-sm-12 col-md-3 col-lg-2">                    
+							<a href="<?php echo '/wp-admin/admin.php?page=abreiseliste-valet' ?>" class="btn btn-primary d-block w-100" >Abreiseliste Valet</a>
+						</div>
+						-->
 					</div>
-					<?php if($current_user->user_login == 'sergej' || $current_user->user_login == 'aras' || $current_user->user_login == 'cakir' || $current_user->user_login == 'soner' || $current_user->user_login == 'birten'  || $current_user->user_login == 'hakan'): ?>
-					<button class="btn btn-primary" type="submit" name="btn" value="<?php echo $kw1; ?>">Speichern</button>
-					<?php endif; ?>						
 				</div>
 			</div>
 		</form>
-		<?php ob_start(); ?>
-		<style>
-		th{
-			vertical-align:top; font-size: 11px; border: 1px solid black; padding:3px; font-weight: bold; background-color: #2d4154; color: #fff; white-space: nowrap; width: auto;
-		}
-		td{
-			font-size: 11px; border: 1px solid black; padding:3px; white-space: nowrap; width: auto;
-		}
-		</style>
-		<div class="row">
-			<div class="col-sm-12 col-md-12" >
-				<h3 style='text-align:center'>Stempelübersicht - KW <?php echo $kw1 . ", " . $week1 ?></h3>
-				<table class="table" style=' font-size: 12px; border-collapse:collapse; width: 100%'>
-					<thead>
-						<tr>							
-							<th>KW <?php echo $kw1; ?></th>
-							<th>MO<br><?php echo date('d.m.', strtotime("+0 day", strtotime($firstDay_kw1))) ?></th>
-							<th>In</th>
-							<th>Out</th>
-							<th>DI<br><?php echo date('d.m.', strtotime("+1 day", strtotime($firstDay_kw1))) ?></th>
-							<th>In</th>
-							<th>Out</th>
-							<th>MI<br><?php echo date('d.m.', strtotime("+2 day", strtotime($firstDay_kw1))) ?></th>
-							<th>In</th>
-							<th>Out</th>
-							<th>DO<br><?php echo date('d.m.', strtotime("+3 day", strtotime($firstDay_kw1))) ?></th>
-							<th>In</th>
-							<th>Out</th>
-							<th>FR<br><?php echo date('d.m.', strtotime("+4 day", strtotime($firstDay_kw1))) ?></th>
-							<th>In</th>
-							<th>Out</th>
-							<th>SA<br><?php echo date('d.m.', strtotime("+5 day", strtotime($firstDay_kw1))) ?></th>
-							<th>In</th>
-							<th>Out</th>
-							<th>SO<br><?php echo date('d.m.', strtotime("+6 day", strtotime($firstDay_kw1))) ?></th>
-							<th>In</th>
-							<th>Out</th>
-						</tr>
-					</thead>
-					<tbody class="row_position_table1">
-						<?php foreach($users_fahrer as $fahrer): ?>
-						<?php
-							if(isset($_GET['role'])){
-								if($_GET['role'] == "buro" && $fahrer->role == "fahrer")
-									continue;
-								elseif($_GET['role'] == "fahrer" && $fahrer->role != "fahrer")
-									continue;
-							}
-							if(get_user_meta($fahrer->user_id, 'stempel_nr', true ) == null)
-								continue;
-						?>
-						<?php $wp_user = get_user_by('id', $fahrer->user_id); ?>
-						<?php $data =  $db->getEinsatzplanByUserID($kw1, $year1, $fahrer->user_id) ?>
-						<tr>
-							<td><?php echo $wp_user->display_name; echo get_user_meta( $fahrer->user_id, 'type', true ) != null && get_user_meta( $fahrer->user_id, 'type', true ) != '-' ? ", " . get_user_meta( $fahrer->user_id, 'type', true ) : ""; ?></td>																						
-							<td><?php echo $data->mo != null ? $data->mo : "" ?></td>
-							<?php $stempel =  $db->getStempelKWWeekday($fahrer->user_id, $year1, $kw1, 'mo') ?>
-							<?php if($stempel->time_in): ?>										
-								<td style="background: #ccffcc"><?php echo date('H:i', strtotime($stempel->time_in)) ?></td>			
-							<?php else: ?>
-								<td style="background: #ccffcc">-</td>
-							<?php endif; ?>
-							<?php if($stempel->time_out): ?>
-								<td style="background: #ffcccc"><?php echo date('H:i', strtotime($stempel->time_out)) ?></td>			
-							<?php else: ?>
-								<td style="background: #ffcccc">-</td>
-							<?php endif; ?>
-							<td><?php echo $data->di != null ? $data->di : "" ?></td>
-							<?php $stempel =  $db->getStempelKWWeekday($fahrer->user_id, $year1, $kw1, 'di') ?>
-							<?php if($stempel->time_in): ?>										
-								<td style="background: #ccffcc"><?php echo date('H:i', strtotime($stempel->time_in)) ?></td>			
-							<?php else: ?>
-								<td style="background: #ccffcc">-</td>
-							<?php endif; ?>
-							<?php if($stempel->time_out): ?>
-								<td style="background: #ffcccc"><?php echo date('H:i', strtotime($stempel->time_out)) ?></td>			
-							<?php else: ?>
-								<td style="background: #ffcccc">-</td>
-							<?php endif; ?>
-							<td><?php echo $data->mi != null ? $data->mi : "" ?></td>
-							<?php $stempel =  $db->getStempelKWWeekday($fahrer->user_id, $year1, $kw1, 'mi') ?>
-							<?php if($stempel->time_in): ?>										
-								<td style="background: #ccffcc"><?php echo date('H:i', strtotime($stempel->time_in)) ?></td>			
-							<?php else: ?>
-								<td style="background: #ccffcc">-</td>
-							<?php endif; ?>
-							<?php if($stempel->time_out): ?>
-								<td style="background: #ffcccc"><?php echo date('H:i', strtotime($stempel->time_out)) ?></td>			
-							<?php else: ?>
-								<td style="background: #ffcccc">-</td>
-							<?php endif; ?>
-							<td><?php echo $data->do != null ? $data->do : "" ?></td>
-							<?php $stempel =  $db->getStempelKWWeekday($fahrer->user_id, $year1, $kw1, 'do') ?>
-							<?php if($stempel->time_in): ?>										
-								<td style="background: #ccffcc"><?php echo date('H:i', strtotime($stempel->time_in)) ?></td>			
-							<?php else: ?>
-								<td style="background: #ccffcc">-</td>
-							<?php endif; ?>
-							<?php if($stempel->time_out): ?>
-								<td style="background: #ffcccc"><?php echo date('H:i', strtotime($stempel->time_out)) ?></td>			
-							<?php else: ?>
-								<td style="background: #ffcccc">-</td>
-							<?php endif; ?>
-							<td><?php echo $data->fr != null ? $data->fr : "" ?></td>
-							<?php $stempel =  $db->getStempelKWWeekday($fahrer->user_id, $year1, $kw1, 'fr') ?>
-							<?php if($stempel->time_in): ?>										
-								<td style="background: #ccffcc"><?php echo date('H:i', strtotime($stempel->time_in)) ?></td>			
-							<?php else: ?>
-								<td style="background: #ccffcc">-</td>
-							<?php endif; ?>
-							<?php if($stempel->time_out): ?>
-								<td style="background: #ffcccc"><?php echo date('H:i', strtotime($stempel->time_out)) ?></td>			
-							<?php else: ?>
-								<td style="background: #ffcccc">-</td>
-							<?php endif; ?>
-							<td><?php echo $data->sa != null ? $data->sa : "" ?></td>
-							<?php $stempel =  $db->getStempelKWWeekday($fahrer->user_id, $year1, $kw1, 'sa') ?>
-							<?php if($stempel->time_in): ?>										
-								<td style="background: #ccffcc"><?php echo date('H:i', strtotime($stempel->time_in)) ?></td>			
-							<?php else: ?>
-								<td style="background: #ccffcc">-</td>
-							<?php endif; ?>
-							<?php if($stempel->time_out): ?>
-								<td style="background: #ffcccc"><?php echo date('H:i', strtotime($stempel->time_out)) ?></td>			
-							<?php else: ?>
-								<td style="background: #ffcccc">-</td>
-							<?php endif; ?>
-							<td><?php echo $data->so != null ? $data->so : "" ?></td>
-							<?php $stempel =  $db->getStempelKWWeekday($fahrer->user_id, $year1, $kw1, 'so') ?>
-							<?php if($stempel->time_in): ?>										
-								<td style="background: #ccffcc"><?php echo date('H:i', strtotime($stempel->time_in)) ?></td>			
-							<?php else: ?>
-								<td style="background: #ccffcc">-</td>
-							<?php endif; ?>
-							<?php if($stempel->time_out): ?>
-								<td style="background: #ffcccc"><?php echo date('H:i', strtotime($stempel->time_out)) ?></td>			
-							<?php else: ?>
-								<td style="background: #ffcccc">-</td>
-							<?php endif; ?>
-						</tr>
-						<?php endforeach; ?>
-					</tbody>
-				</table>
-			</div>
+
+		<div class="btn">
+			<form action="<?= get_site_url() . '/wp-content/plugins/itweb-booking/templates/fahrerportal/abreiseliste-excel.php'; ?>" method="post">
+				<button type="submit" id="btnExport" value="Export to Excel" class="btn btn-success">Excel</button>
+			</form>
 		</div>
-		<?php $content = ob_get_clean(); ?>
-		<?php $_SESSION['stempelansicht'] = $content; ?>
+
+		<div class="btn">
+			<form action="<?= get_site_url() . '/wp-content/plugins/itweb-booking/templates/fahrerportal/abreiseliste-pdf.php'; ?>" method="post">
+				<button type="submit" id="btnExport" value="Export to PDF" class="btn btn-success">Abreiseliste exportieren</button>
+			</form>
+		</div>
+		<br><br>
+		<table class="table-responsive" id="returnBooking">
+			<thead>
+				<tr>
+					<th>Nr.</th>
+					<th>PCode</th>
+					<th>Buchung</th>
+					<th>Kunde</th>
+					<th>Abreisedatum</th>
+					<th>Abreisezeit</th>
+					<th>Personen</th>
+					<th>Rückflug</th>
+					<th>Parkplatz</th>
+					<th>Fahrer</th>
+					<th>Sonstiges 1</th>
+					<th>Sonstiges 2</th>
+					<th>Betrag</th>
+					<th>Service</th>
+					<th>Status</th>
+					<th>Bearbeitet</th>
+					<th>Aktion</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php  $i = 1;
+				foreach ($allorders as $order) : ?>
+				<?php
+					if ($order->Status == "wc-cancelled") {
+						$abreisezeit = date('H:i', strtotime("23:59"));
+						$color = "#ff0000";
+					} else {
+						$abreisezeit = date('H:i', strtotime($order->Uhrzeit_bis));
+						$color = $order->Color;
+					}
+
+					if ($order->Vorname == null)
+						$customor = $order->Nachname;
+					elseif ($order->Nachname == null)
+						$customor = $order->Vorname;
+					elseif (strlen($order->Nachname) < 2)
+						$customor = $order->Vorname;
+					elseif (strlen($order->Nachname) > 2)
+						$customor = $order->Nachname;
+					else
+						$customor = $order->Nachname;
+
+
+					$additionalPrice = $order->Service;
+
+					?>
+					<tr style="background-color: <?php echo $color ?> !important" export-color="<?php echo $color ?>" class="row<?php echo $i % 2; ?>">
+						<input type="hidden" class="order-nr" value="<?php echo $order->order_id ?>">
+						<td class="order-nr" export-color="<?php echo $order->Color ?>">
+							<?php echo $i ?>
+						</td>
+						<td class="order-pcode">
+							<?php echo $order->Code ?>
+						</td>
+						<td class="order-token">
+							<?php echo $order->Token ?>
+						</td>
+						<td class="order-kunde">
+							<input type="text" style="width:150px;" value="<?php echo trim(strip_tags($customor)) ?>" class="transparent-input"><span style="display: none;"><?php echo strip_tags($customor) ?></span>
+						</td>
+						<td class="order-dateto">
+							<input type="text" style="width:115px;" value="<?php echo dateFormat($order->Abreisedatum, 'de') ?>" class="transparent-input single-datepicker" readonly>
+						</td>
+						<td class="order-timeto">
+							<input type="time" style="width:100px;" value="<?php echo $abreisezeit ?>" class="transparent-input" placeholder="00:00">
+						</td>
+						<td class="order-persons">
+							<input type="text" style="width:70px;" value="<?php echo $order->Personenanzahl ?>" class="transparent-input">
+						</td>
+						<td class="order-ruckflug">
+							<input type="text" style="width:100px;" value="<?php echo $order->Ruckflugnummer ?>" class="transparent-input"><span style="display: none;"><?php echo $order->Ruckflugnummer ?></span>
+						</td>
+						<td class="order-parkplatz">
+							<input type="text" style="width:90px;" value="<?php echo $order->Parkplatz ?>" class="transparent-input"><span style="display: none;"><?php echo $order->Parkplatz ?></span>
+						</td>
+						<td class="order-fahrer">
+							<?php							
+								foreach($fahrer as $ma){
+									if (str_contains($ma->$w, '-')){										
+										$found = 1;
+										break;
+									}
+									else
+										$found = 0;
+								}								
+							?>
+							<?php if(count($fahrer) > 0 && $found == 1): ?>							
+							<select style="width:70px;" class="transparent-input">
+								<option value=""></option>
+								<?php foreach($fahrer as $ma): ?>
+									<?php if (str_contains($ma->$w, '-')): ?>
+											<option value="<?php echo get_user_meta( $ma->user_id, 'short_name', true ) ?>" <?php echo $order->FahrerAb == get_user_meta( $ma->user_id, 'short_name', true ) ? "selected" : "" ?>><?php echo get_user_meta( $ma->user_id, 'short_name', true ) ?></option>	
+									<?php endif; ?>									
+								<?php endforeach; ?>
+							</select>
+							<?php else: ?>
+							<input type="text" style="width:70px;" value="<?php echo $order->FahrerAb ?>" class="transparent-input">
+							<?php endif; ?>
+						</td>
+						<td class="order-sonstige1">
+							<input type="text" style="width:150px;" value="<?php echo $order->Sonstige_1 ?>" class="transparent-input">
+						</td>
+						<td class="order-sonstige2">
+							<input type="text" style="width:150px;" value="<?php echo $order->Sonstige_2 ?>" class="transparent-input">
+						</td>
+						<td class="order-betrag" style="position:relative;">
+							<?php if (($order->Bezahlmethode == "Barzahlung" || $order->Produkt == 6772) && $order->Preis != '0.00') : ?>
+								<input type="text" <?php echo $editOK; ?> style="width:100px; background: rgba(255, 255, 255, 0.5) !important" value="<?php echo $order->Preis ?>" class="form-control transparent-input">
+							<?php else : ?>
+								<input type="text" <?php echo $editOK; ?> style="width:100px; background: rgba(255, 255, 255, 0.5) !important" value="-" class="form-control transparent-input">
+							<?php endif; ?>
+						</td>
+						<td class="order-service">
+							<input type="text" style="width:100px;" value="<?php echo $order->Service != 0 ? number_format($order->Service, 2, '.', '') : '-'; ?>" class="transparent-input" placeholder="0.00" readonly>
+						</td>
+						<td class="order-status">
+							<select class="transparent-input">
+								<?php foreach (wc_get_order_statuses() as $key => $value) : ?>
+									<?php
+									if (
+										$key == 'wc-processing' ||
+										$key == 'wc-cancelled' ||
+										$key == 'wc-refunded' ||
+										$key == 'wc-pending'
+									) :
+									?>
+										<option value="<?php echo $key ?>" <?php echo $key == $order->Status ? 'selected' : '' ?>>
+											<?php
+											if ($key == 'wc-processing') echo "abgeschlossen";
+											elseif ($key == 'wc-cancelled') echo "storniert";
+											elseif ($key == 'wc-refunded') echo "erstattet";
+											elseif ($key == 'wc-pending') echo "nicht bezahlt";
+											?>
+										</option>
+									<?php else : continue;
+									endif; ?>
+								<?php endforeach; ?>
+							</select>
+						</td>
+						<?php if ($user->user_login == 'aras' || $user->user_login == 'cakir' || $user->user_login == 'sergej') : ?>
+							<td class="order-edit">
+								<input type="text" readonly style="width:150px;" value="<?php echo $order->editByRet ?>" class="transparent-input">
+							</td>
+						<?php else : ?>
+							<td class="order-edit">
+								<input type="text" readonly style="width:150px;" value="-" class="transparent-input">
+							</td>
+						<?php endif; ?>
+						<?php if ($order->is_for != 'hotel') : ?>
+							<td>
+								<a href="#" class="save-abreiseliste-row">
+									Speichern
+								</a>
+							</td>
+						<?php else :  ?>
+							<td>
+								<p class="">-</p>
+							</td>
+						<?php endif; ?>
+					</tr>
+				<?php $i++;
+				endforeach; ?>
+			</tbody>
+		</table>
+		<?php if (count($allorders) <= 0) : ?>
+			<p>Keine Ergebnisse gefunden!</p>
+		<?php endif; ?>
 	</div>
 </div>
-
-<script>
-function change_year(e){
-	var path = new URL(window.location.href);
-	 path.searchParams.set('year', e.value);
-	 path.searchParams.delete('cw');
-	 location.href = path.href;
-}
-function change_role(e){
-	var path = new URL(window.location.href);
-	 path.searchParams.set('role', e.value);
-	 location.href = path.href;
-}
-function change_cw(e){
-	var path = new URL(window.location.href);
-	 path.searchParams.set('cw', e.value);
-	 location.href = path.href;
-}
-</script>

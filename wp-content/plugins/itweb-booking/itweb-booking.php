@@ -146,6 +146,10 @@ function itweb_admin_menu()
         require_once plugin_dir_path(__FILE__) . '/templates/vermittler/bearbeiten.php';
     }, 110);
 	
+	add_menu_page('API', 'API', 'read', 'api', function () {
+        require_once plugin_dir_path(__FILE__) . '/templates/api/api.php';
+    });
+	
 	 // Transfer Template
     add_menu_page('Transfer', 'Transfer', 'read', 'transfer', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/transfer/index.php';
