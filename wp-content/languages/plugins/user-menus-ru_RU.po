@@ -1,0 +1,207 @@
+# Translation of Plugins - User Menus &#8211; Nav Menu Visibility - Stable (latest release) in Russian
+# This file is distributed under the same license as the Plugins - User Menus &#8211; Nav Menu Visibility - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2018-07-28 13:57:41+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n % 10 == 1 && n % 100 != 11) ? 0 : ((n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) ? 1 : 2);\n"
+"X-Generator: GlotPress/4.0.0-alpha.3\n"
+"Language: ru\n"
+"Project-Id-Version: Plugins - User Menus &#8211; Nav Menu Visibility - Stable (latest release)\n"
+
+#: includes/classes/admin/reviews.php:408
+msgid "I already did"
+msgstr "Я уже сделал(а)"
+
+#: includes/classes/admin/reviews.php:403
+msgid "Nope, maybe later"
+msgstr "Нет, возможно, позже"
+
+#: includes/classes/admin/reviews.php:398
+msgid "Ok, you deserve it"
+msgstr "Хорошо, вы этого заслуживаете"
+
+#: includes/classes/admin/reviews.php:252
+msgid "3 months"
+msgstr "3 месяца"
+
+#: includes/classes/admin/reviews.php:244
+msgid "2 weeks"
+msgstr "2 недели"
+
+#: includes/classes/admin/reviews.php:239
+msgid "Hi there! You've been using the User Menus plugin on your site for %s now - We hope it's been helpful. If you're enjoying the plugin, would you mind rating it 5-stars to help spread the word?"
+msgstr "Привет! Вы используете плагин User Menus уже %s - мы надеемся, что он оказался полезен. Если вам нравится плагин, оцените его, пожалуйста, на 5 звёзд, чтобы помочь его распространению."
+
+#: includes/classes/user/codes.php:28
+msgid "Last Name"
+msgstr "Фамилия"
+
+#: includes/classes/user/codes.php:27
+msgid "First Name"
+msgstr "Имя"
+
+#: includes/classes/user/codes.php:26
+msgid "Avatar"
+msgstr "Аватар"
+
+#: includes/classes/admin/menu-settings.php:46
+msgid "Avatar Size"
+msgstr "Размер аватара"
+
+#: includes/classes/user/codes.php:30
+msgid "Display Name"
+msgstr "Отображаемое имя"
+
+#: includes/classes/user/codes.php:29
+msgid "Username"
+msgstr "Имя пользователя"
+
+#: includes/classes/user/codes.php:32
+msgid "Email"
+msgstr "Email"
+
+#: includes/classes/user/codes.php:31
+msgid "Nickname"
+msgstr "Ник"
+
+#. Plugin URI of the plugin
+msgid "https://wordpress.org/plugins/user-menus/"
+msgstr "https://ru.wordpress.org/plugins/user-menus/"
+
+#. Plugin Name of the plugin
+msgid "User Menus"
+msgstr "User Menus"
+
+#: user-menus.php:238
+msgid "Plugin Activation Error"
+msgstr "Ошибка активации плагина"
+
+#: includes/classes/menu/items.php:51
+msgid "User Link"
+msgstr "Пользовательская ссылка"
+
+#: includes/classes/admin/menu-settings.php:65
+msgid "Current Page"
+msgstr "Текущая страница"
+
+#: includes/classes/admin/menu-settings.php:66
+msgid "Home Page"
+msgstr "Главная страница"
+
+#: includes/classes/admin/menu-editor.php:167
+msgid "Add to Menu"
+msgstr "Добавить в меню"
+
+#: includes/classes/admin/menu-importer.php:45
+msgid "WP Nav Menus"
+msgstr "WP Nav Menus"
+
+#. translators: 1: Plugin Name, 2: Flagged software (PHP or WP), 3: PHP or
+#. WordPress version
+#: user-menus.php:235
+msgid "The %4$s %1$s %5$s plugin requires %2$s version %3$s or greater."
+msgstr "Плагин %4$s %1$s %5$s требует версию %2$s %3$s или новее."
+
+#: includes/classes/importer/menu.php:294
+msgid "All done."
+msgstr "Всё сделано."
+
+#: includes/classes/importer/menu.php:226
+msgid "The file does not exist, please try again."
+msgstr "Файл не существует, повторите попытку."
+
+#: includes/classes/admin/menu-settings.php:58
+msgid "Everyone"
+msgstr "Всем"
+
+#: includes/classes/admin/menu-settings.php:60
+msgid "Logged In Users"
+msgstr "Выполнившим вход"
+
+#: includes/classes/admin/menu-settings.php:59
+msgid "Logged Out Users"
+msgstr "Не выполнившим вход"
+
+#: includes/classes/admin/menu-settings.php:147
+msgid "Choose which roles can see this link"
+msgstr "Выберите, какие роли могут видеть эту ссылку"
+
+#: includes/classes/importer/menu.php:149
+#: includes/classes/importer/menu.php:154
+#: includes/classes/importer/menu.php:164
+#: includes/classes/importer/menu.php:225
+#: includes/classes/importer/menu.php:236
+msgid "Sorry, there has been an error."
+msgstr "Извините, произошла ошибка."
+
+#: includes/classes/importer/menu.php:155
+msgid "The export file could not be found at <code>%s</code>. It is likely that this was caused by a permissions problem."
+msgstr "Файл экспорта не найден в <code>%s</code>. Вероятно, это вызвано проблемой разрешений."
+
+#: includes/classes/importer/menu.php:173
+msgid "This WXR file (version %s) may not be supported by this version of the importer. Please consider updating."
+msgstr "Этот WXR-файл (версия: %s) может не поддерживаться этой версией импортёра. Пожалуйста, подумайте про обновление."
+
+#: includes/classes/importer/menu.php:294
+msgid "Have fun!"
+msgstr "Повеселитесь!"
+
+#: includes/classes/admin/menu-settings.php:67
+msgid "Custom URL"
+msgstr "Пользовательский URL"
+
+#: includes/classes/admin/menu-editor.php:70
+msgid "User Links"
+msgstr "Ссылки для пользователей"
+
+#: includes/classes/admin/menu-editor.php:161
+msgid "Select All"
+msgstr "Выделить все"
+
+#: includes/classes/importer/menu.php:116
+msgid "Import Nav Menus"
+msgstr "Импорт Nav Menus"
+
+#: includes/classes/importer/menu.php:134
+msgid "Choose a WXR (.xml) file to upload, then click Upload file and import."
+msgstr "Выберите WXR-файл (.xml) для загрузки, а затем щёлкните Загрузить и импортировать файл."
+
+#: includes/classes/importer/menu.php:133
+msgid "Upload your WordPress export (WXR) file and import the Nav Menus and any meta for the Nav Menu items."
+msgstr "Загрузите файл экспорта WordPress (WXR) и импортируйте Nav Menus и любую мета-информацию для элементов Nav Menu."
+
+#: includes/classes/importer/menu.php:123
+msgid "A new version of this importer is available. Please update to version %s to ensure compatibility with newer export files."
+msgstr "Доступна новая версия импортёра. Обновите версию до %s, чтобы обеспечить совместимость с более новыми файлами экспорта."
+
+#: includes/classes/admin/menu-settings.php:75
+msgid "Where should users be taken afterwards?"
+msgstr "Где впоследствии должны оказаться пользователи?"
+
+#: includes/classes/admin/menu-settings.php:93
+msgid "Enter a url user should be redirected to"
+msgstr "Введите URL, на который должен быть перенаправлен пользователь"
+
+#: includes/classes/admin/menu-editor.php:203
+msgid "Insert User Menu Codes"
+msgstr "Вставить коды User Menu"
+
+#: includes/classes/admin/menu-importer.php:46
+msgid "Import nav menus and other menu item meta skipped by the default importer"
+msgstr "Импорт навигационных меню и других элементов меню, пропущенных импортёром по умолчанию"
+
+#: includes/classes/admin/menu-editor.php:92
+msgid "Logout"
+msgstr "Выйти"
+
+#: includes/classes/admin/menu-editor.php:84
+msgid "Login"
+msgstr "Войти"
+
+#: includes/classes/admin/menu-settings.php:105
+#: includes/classes/admin/menu-settings.php:129
+msgid "Who can see this link?"
+msgstr "Кому будет показана эта ссылка?"

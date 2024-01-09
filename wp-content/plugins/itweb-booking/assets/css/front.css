@@ -1,0 +1,90 @@
+
+.itweb_content {
+    float: left;
+    width: 100%;
+    margin-bottom: 20px;
+}
+.itweb_types {
+    float: left;
+    width: 100%;
+}
+.itweb_type {
+    float: left;
+    color: #fff;
+    padding: 3px;
+    margin-top: 5px;
+    margin-right: 5px;
+	text-align: center;
+	height: 60px;
+}
+.itweb_type_name {
+    font-weight: bold;
+}
+.itweb_type_price {
+    font-size: 12px;
+}
+.itweb_date {
+    float: left;
+    width: 100%;
+    margin-top: 20px;
+}
+.itweb_date_head {
+    float: left;
+    font-weight: bold;
+	width: 100%;
+}
+.itweb_date_from {
+    float: left;
+    width: 48%;
+}
+.itweb_date_to {
+    float: left;
+    width: 48%;
+    margin-left: 4%;
+}
+.itweb_map {
+    float: left;
+    width: 100%;
+    margin-top: 20px;
+	text-align: center;
+}
+.itweb_map_head {
+    float: left;
+    width: 100%;
+    font-weight: bold;
+}
+/*.itweb_map_bg {*/
+/*    display: inline-block;*/
+/*	position: relative;*/
+/*    max-width: 100%;*/
+/*}*/
+.itweb_map_slot {
+    /*position: absolute;*/
+    word-break: unset;
+    color: #fff;
+	cursor: pointer;
+    min-width: 100px !important;
+}
+.itweb_map_slot.active {
+    border: 1px solid red;
+	box-sizing: border-box;
+}
+.itweb_map_slot.seatbooked {
+    cursor: not-allowed;
+}
+.itweb_map_bg_img {
+    width: 100%;
+    height: 100% !important;
+}
+.itweb_map_bg_color {
+    width: 100%;
+    display: block;
+    height: 100%;
+    text-indent: -9999em;
+}
+
+@media (max-width: 480px){
+	.itweb_map_slot {
+		font-size: 12px;
+	}
+}

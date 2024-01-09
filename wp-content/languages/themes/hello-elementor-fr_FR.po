@@ -1,0 +1,186 @@
+# Translation of Themes - Hello Elementor in French (France)
+# This file is distributed under the same license as the Themes - Hello Elementor package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2021-07-01 14:39:06+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: GlotPress/3.0.0-alpha.2\n"
+"Language: fr\n"
+"Project-Id-Version: Themes - Hello Elementor\n"
+
+#. Description of the theme
+msgid "A plain-vanilla & lightweight theme for Elementor page builder"
+msgstr "Un thème simple et léger pour le constructeur de pages Elementor"
+
+#. Theme Name of the theme
+msgid "Hello Elementor"
+msgstr "Hello Elementor"
+
+#: includes/settings/settings-header.php:525
+msgid "Create Header"
+msgstr "Créer un en-tête"
+
+#: includes/settings/settings-header.php:523
+msgid "Create a custom header with the new Theme Builder"
+msgstr "Créez un en-tête personnalisé avec le nouveau constructeur de thème"
+
+#: includes/settings/settings-header.php:507
+msgid "Create a custom header with multiple options"
+msgstr "Créez un en-tête personnalisé avec plusieurs options."
+
+#: includes/settings/settings-header.php:458
+msgid "Toggle Color"
+msgstr "Permuter la couleur"
+
+#: includes/settings/settings-header.php:432
+msgid "None"
+msgstr "Aucun"
+
+#. translators: %d: Breakpoint number.
+#: includes/settings/settings-header.php:431
+msgid "Tablet (< %dpx)"
+msgstr "Tablette (< %dpx)"
+
+#. translators: %d: Breakpoint number.
+#: includes/settings/settings-header.php:429
+msgid "Mobile (< %dpx)"
+msgstr "Mobile (< %dpx)"
+
+#: includes/settings/settings-header.php:424
+msgid "Breakpoint"
+msgstr "Point de rupture"
+
+#: includes/settings/settings-header.php:413
+msgid "Dropdown"
+msgstr "Liste déroulante"
+
+#: includes/settings/settings-header.php:412
+msgid "Horizontal"
+msgstr "Horizontale"
+
+#: includes/settings/settings-header.php:408
+msgid "Menu Layout"
+msgstr "Mise en page du menu"
+
+#: includes/settings/settings-footer.php:508
+msgid "Create Footer"
+msgstr "Créer un pied de page"
+
+#: includes/settings/settings-footer.php:507
+#: includes/settings/settings-header.php:524
+msgid "With the new Theme Builder you can jump directly into each part of your site"
+msgstr "Grâce au nouveau constructeur de thème, vous pouvez accéder directement à chaque partie de votre site"
+
+#: includes/settings/settings-footer.php:506
+msgid "Create a custom footer with the new Theme Builder"
+msgstr "Créez un pied de page personnalisé avec le nouveau constructeur de thème"
+
+#: includes/settings/settings-footer.php:492
+#: includes/settings/settings-header.php:509
+msgid "Go Pro"
+msgstr "Passer Pro"
+
+#: includes/settings/settings-footer.php:491
+#: includes/settings/settings-header.php:508
+msgid "Upgrade to Elementor Pro and enjoy free design and many more features"
+msgstr "Mettez à niveau vers Elementor Pro et profitez d’une conception libre, ainsi que de nombreuses autres fonctionnalités."
+
+#: includes/settings/settings-footer.php:490
+msgid "Create a custom footer with multiple options"
+msgstr "Créer un pied de page personnalisé avec plusieurs options"
+
+#: includes/settings/settings-footer.php:435
+msgid "All rights reserved"
+msgstr "Tous droits réservés"
+
+#: includes/admin-functions.php:47
+msgid "Hello theme is a lightweight starter theme. We recommend you use it together with Elementor Page Builder plugin, they work perfectly together!"
+msgstr "Le thème Hello est un thème de départ léger. Nous vous recommandons de l’utiliser avec l’extension Elementor Page Builder, ils fonctionnent parfaitement ensemble !"
+
+#: includes/admin-functions.php:49 includes/customizer/elementor-upsell.php:48
+msgid "Install Elementor"
+msgstr "Installer Elementor"
+
+#: includes/admin-functions.php:140
+msgid "Thanks for installing Hello Theme!"
+msgstr "Merci d’avoir installé le thème Hello !"
+
+#: includes/admin-functions.php:40 includes/customizer/elementor-upsell.php:65
+#: includes/customizer/elementor-upsell.php:68
+msgid "Activate Elementor"
+msgstr "Activer Elementor"
+
+#: includes/admin-functions.php:142
+msgid "Learn more about Elementor"
+msgstr "En savoir plus sur Elementor"
+
+#: includes/admin-functions.php:38
+msgid "Hello theme is a lightweight starter theme designed to work perfectly with Elementor Page Builder plugin."
+msgstr "Le thème Hello est un thème de départ léger conçu pour fonctionner parfaitement avec l’extension Elementor Page Builder."
+
+#: comments.php:67
+msgid "Comments are closed."
+msgstr "Les commentaires sont fermés."
+
+#. translators: 1: number of comments
+#: comments.php:31
+msgctxt "comments title"
+msgid "%1$s Response"
+msgid_plural "%1$s Responses"
+msgstr[0] "%1$s réponse"
+msgstr[1] "%1$s réponses"
+
+#: comments.php:27
+msgctxt "comments title"
+msgid "One Response"
+msgstr "Une réponse"
+
+#. Translators: HTML arrow
+#: template-parts/archive.php:48 template-parts/search.php:46
+msgid "newer %s"
+msgstr "plus récent %s"
+
+#. Translators: HTML arrow
+#: template-parts/archive.php:46 template-parts/search.php:44
+msgid "%s older"
+msgstr "%s plus ancien"
+
+#: template-parts/search.php:32
+msgid "It seems we can't find what you're looking for."
+msgstr "Il semble que nous ne pouvons pas trouver ce que vous cherchez."
+
+#: template-parts/search.php:16
+msgid "Search results for: "
+msgstr "Résultats de recherche pour : "
+
+#: template-parts/dynamic-footer.php:33 template-parts/dynamic-header.php:36
+#: template-parts/header.php:28
+msgid "Home"
+msgstr "Accueil"
+
+#: template-parts/single.php:26
+msgid "Tagged "
+msgstr "Étiqueté "
+
+#: template-parts/404.php:19
+msgid "It looks like nothing was found at this location."
+msgstr "Il semble que rien n’a été trouvé à cet emplacement."
+
+#: template-parts/404.php:15
+msgid "The page can&rsquo;t be found."
+msgstr "La page ne peut pas être trouvée."
+
+#. Author URI of the theme
+msgid "https://elementor.com/?utm_source=wp-themes&utm_campaign=author-uri&utm_medium=wp-dash"
+msgstr "https://elementor.com/?utm_source=wp-themes&utm_campaign=author-uri&utm_medium=wp-dash"
+
+#. Theme URI of the theme
+msgid "https://elementor.com/hello-theme/?utm_source=wp-themes&utm_campaign=theme-uri&utm_medium=wp-dash"
+msgstr "https://elementor.com/hello-theme/?utm_source=wp-themes&utm_campaign=theme-uri&utm_medium=wp-dash"
+
+#. Author of the theme
+msgid "Elementor Team"
+msgstr "L’équipe d’Elementor"

@@ -1,0 +1,41 @@
+# Translation of Plugins - Disable and Remove Google Fonts - Development (trunk) in German
+# This file is distributed under the same license as the Plugins - Disable and Remove Google Fonts - Development (trunk) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2023-01-28 14:41:53+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: GlotPress/4.0.0-alpha.3\n"
+"Language: de\n"
+"Project-Id-Version: Plugins - Disable and Remove Google Fonts - Development (trunk)\n"
+
+#. translators: %s Link to DRGF welcome page.
+#: admin/class-drgf-notice.php:97
+msgid "Thank you for installing <strong>Disable & Remove Google Fonts</strong>! <a href=\"%s\">Finish the setup process</a>."
+msgstr "Vielen Dank für die Installation von <strong>Disable & Remove Google Fonts</strong>! <a href=\"%s\">Beende den Einrichtungsvorgang</a>."
+
+#: admin/class-drgf-admin.php:48 admin/class-drgf-admin.php:49
+msgid "Google Fonts"
+msgstr "Google Fonts"
+
+#. Description of the plugin
+msgid "Optimize frontend performance by disabling Google Fonts. GDPR-friendly."
+msgstr "Optimiere die Frontend-Performance durch Deaktivierung von Google Fonts. DSGVO-freundlich."
+
+#. Author URI of the plugin
+msgid "https://fontsplugin.com"
+msgstr "https://fontsplugin.com"
+
+#. Author of the plugin
+msgid "Fonts Plugin"
+msgstr "Schriftarten-Plugin"
+
+#. Plugin URI of the plugin
+msgid "https://wordpress.org/plugins/disable-remove-google-fonts/"
+msgstr "https://de.wordpress.org/plugins/disable-remove-google-fonts/"
+
+#. Plugin Name of the plugin
+msgid "Disable & Remove Google Fonts"
+msgstr "Disable & Remove Google Fonts"

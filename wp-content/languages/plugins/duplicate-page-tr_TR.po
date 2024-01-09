@@ -1,0 +1,205 @@
+# Translation of Plugins - Duplicate Page - Development (trunk) in Turkish
+# This file is distributed under the same license as the Plugins - Duplicate Page - Development (trunk) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2023-12-12 05:31:03+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: GlotPress/4.0.0-alpha.11\n"
+"Language: tr\n"
+"Project-Id-Version: Plugins - Duplicate Page - Development (trunk)\n"
+
+#: duplicatepage.php:131
+msgid "Unauthorized Access."
+msgstr "Erişme izni yok."
+
+#: inc/admin-settings.php:85
+msgid "Save Changes"
+msgstr "Değişiklikleri kaydet"
+
+#: inc/admin-settings.php:13
+msgid "<div class=\"saving-txt\"><strong>Saving Please wait...</strong></div>"
+msgstr "<div class=\"saving-txt\"><strong>Kaydediliyor, lütfen bekleyin...</strong></div>"
+
+#: duplicatepage.php:357
+msgid "Never"
+msgstr "Asla"
+
+#: duplicatepage.php:357
+msgid "Not interested"
+msgstr "İlgilenmiyorum"
+
+#: duplicatepage.php:357
+msgid "Rate Us"
+msgstr "Bizi değerlendirin"
+
+#: duplicatepage.php:357
+msgid "Rate us now"
+msgstr "Şimdi değerlendirin"
+
+#: duplicatepage.php:357
+msgid "Later"
+msgstr "Daha sonra"
+
+#: duplicatepage.php:357
+msgid "Remind me later"
+msgstr "Daha sonra hatırlat"
+
+#: duplicatepage.php:357
+msgid "We love and care about you. Our team is putting maximum efforts to provide you the best functionalities. It would be highly appreciable if you could spend a couple of seconds to give a Nice Review to the plugin to appreciate our efforts. So we can work hard to provide new features regularly :)"
+msgstr "Sizi seviyor ve önemsiyoruz. Ekibimiz size en iyi özellikleri sağlamak için çaba gösteriyor. Çabalarımızı takdir etmek için birkaç saniye ayırıp olumlu bir eklenti değerlendirmesi yaparsanız seviniriz. Böylece düzenli olarak yeni özellikler sunmak için daha çok çalışabiliriz :)"
+
+#: duplicatepage.php:357
+msgid "close"
+msgstr "kapat"
+
+#: duplicatepage.php:136
+msgid "Security check issue, Please try again."
+msgstr "Güvenlik denetimi sorunu. Lütfen yeniden deneyin."
+
+#: duplicatepage.php:244
+msgid "Error! Post creation failed, could not find original post: "
+msgstr "Hata! Yazı oluşturulamadı. Özgün yazı bulunamadı: "
+
+#: duplicatepage.php:155
+msgid "No post to duplicate has been supplied!"
+msgstr "Kopyalanacak bir yazı belirtilmemiş!"
+
+#: duplicatepage.php:78
+msgid "Donate Now"
+msgstr "Bağış yapın"
+
+#: inc/admin-settings.php:49
+msgid "All Editors"
+msgstr "Tüm düzenleyiciler"
+
+#: duplicatepage.php:261 duplicatepage.php:277 duplicatepage.php:301
+msgid "Duplicate this as "
+msgstr "Bunu şöyle kopyala "
+
+#: inc/admin-settings.php:53
+msgid "Please select which editor you are using.<strong> Default: </strong> Classic Editor"
+msgstr "Lütfen kullanmak istediğiniz düzenleyiciyi seçin.<strong> Varsayılan: </strong> Klasik Düzenleyici"
+
+#: inc/admin-settings.php:51
+msgid "Gutenberg Editor"
+msgstr "Gutenberg Düzenleyici"
+
+#: inc/admin-settings.php:50
+msgid "Classic Editor"
+msgstr "Klasik Düzenleyici"
+
+#: inc/admin-settings.php:46
+msgid "Choose Editor"
+msgstr "Düzenleyici seçin"
+
+#: duplicatepage.php:328
+msgid "Duplicate This as "
+msgstr "Bunu şöyle kopyala "
+
+#: inc/admin-settings.php:63
+msgid "Pending"
+msgstr "Bekliyor"
+
+#: inc/admin-settings.php:62
+msgid "Private"
+msgstr "Özel"
+
+#: inc/admin-settings.php:61
+msgid "Publish"
+msgstr "Yayınlanmış"
+
+#: inc/admin-settings.php:60
+msgid "Draft"
+msgstr "Taslak"
+
+#. Author URI of the plugin
+msgid "https://profiles.wordpress.org/mndpsingh287/"
+msgstr "https://profiles.wordpress.org/mndpsingh287/"
+
+#. Author of the plugin
+msgid "mndpsingh287"
+msgstr "mndpsingh287"
+
+#. Description of the plugin
+msgid "Duplicate Posts, Pages and Custom Posts using single click."
+msgstr "Yazıları, sayfaları ve özel yazıları tek tıkla kopyalar."
+
+#. Plugin URI of the plugin
+msgid "https://wordpress.org/plugins/duplicate-page/"
+msgstr "https://wordpress.org/plugins/duplicate-page/"
+
+#: duplicatepage.php:261 duplicatepage.php:277 duplicatepage.php:300
+msgid "Duplicate This"
+msgstr "Kopyala"
+
+#. Plugin Name of the plugin
+#: duplicatepage.php:91 duplicatepage.php:357
+msgid "Duplicate Page"
+msgstr "Duplicate Page"
+
+#: duplicatepage.php:78
+msgid "Donate"
+msgstr "Bağış yapın"
+
+#: duplicatepage.php:77
+msgid "Settings"
+msgstr "Ayarlar"
+
+#: inc/admin-settings.php:81
+msgid "Add a suffix for duplicate or clone post as Copy, Clone etc. It will show after title."
+msgstr "Kopyalanan yazıya Kopya, Yedek gibi bir son ek ekleyebilirsiniz. Başlıktan sonra görüntülenir."
+
+#: inc/admin-settings.php:78
+msgid "Duplicate Post Suffix"
+msgstr "Kopyalanan yazı son eki"
+
+#: inc/admin-settings.php:74
+msgid "Please select any post redirection, redirect you to selected after click on duplicate this link.<strong> Default: </strong>To All Posts List"
+msgstr "Lütfen Kopyala üzerine tıkladıktan sonra nereye yönlendirileceğinizi seçin. <strong> Varsayılan: </strong>Tüm yazılar listesi"
+
+#: inc/admin-settings.php:72
+msgid "To Duplicate Edit Screen"
+msgstr "Kopyayı düzenleme ekranına"
+
+#: inc/admin-settings.php:71
+msgid "To All Posts List"
+msgstr "Tüm yazılar listesine"
+
+#: inc/admin-settings.php:69
+msgid "Redirect to after click on <strong>Duplicate This Link</strong>"
+msgstr "<strong>Kopyala</strong> tıklandığında yönlendirme"
+
+#: inc/admin-settings.php:65
+msgid "Please select any post status you want to assign for duplicate post.<strong> Default: </strong> Draft"
+msgstr "Lütfen kopyalanan yazıya atanacak durumu seçin.<strong> Varsayılan: </strong> Taslak"
+
+#: inc/admin-settings.php:57
+msgid "Duplicate Post Status"
+msgstr "Kopyalanan yazı durumu"
+
+#: inc/admin-settings.php:34
+msgid ""
+"<div class=\"error settings-error notice is-dismissible\" id=\"setting-error-settings_updated\"> \n"
+"  <p><strong>Settings not saved.</strong></p><button class=\"notice-dismiss button-custom-dismiss\" type=\"button\"><span class=\"screen-reader-text\">Dismiss this notice</span></button></div>"
+msgstr ""
+"<div class=\"error settings-error notice is-dismissible\" id=\"setting-error-settings_updated\"> \n"
+"  <p><strong>Ayarlar kaydedilmedi.</strong></p><button class=\"notice-dismiss button-custom-dismiss\" type=\"button\"><span class=\"screen-reader-text\">Bu bildirimi yok say</span></button></div>"
+
+#: inc/admin-settings.php:31
+msgid ""
+"<div class=\"updated settings-error notice is-dismissible\" id=\"setting-error-settings_updated\"> \n"
+"    <p><strong>Settings saved.</strong></p><button class=\"notice-dismiss button-custom-dismiss\" type=\"button\"><span class=\"screen-reader-text\">Dismiss this notice</span></button></div>"
+msgstr ""
+"<div class=\"updated settings-error notice is-dismissible\" id=\"setting-error-settings_updated\"> \n"
+"    <p><strong>Ayarlar kaydedildi.</strong></p><button class=\"notice-dismiss button-custom-dismiss\" type=\"button\"><span class=\"screen-reader-text\">Bu bildirimi yok say</span></button></div>"
+
+#: inc/admin-settings.php:9
+msgid "Buy PRO"
+msgstr "PRO sürümünü satın alın"
+
+#: inc/admin-settings.php:9
+msgid "Duplicate Page Settings "
+msgstr "Duplicate Page ayarları "

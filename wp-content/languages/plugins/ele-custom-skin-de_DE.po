@@ -1,0 +1,201 @@
+# Translation of Plugins - Elementor Custom Skin - Development (trunk) in German
+# This file is distributed under the same license as the Plugins - Elementor Custom Skin - Development (trunk) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2022-12-09 14:54:40+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: GlotPress/4.0.0-alpha.3\n"
+"Language: de\n"
+"Project-Id-Version: Plugins - Elementor Custom Skin - Development (trunk)\n"
+
+#: includes/ajax-pagination.php:341
+msgid "Border Color"
+msgstr "Rahmenfarbe"
+
+#: includes/ajax-pagination.php:509
+msgid "Progress Bar"
+msgstr "Fortschrittsbalken"
+
+#: includes/ajax-pagination.php:396
+msgid "Padding"
+msgstr "Innenabstand"
+
+#: includes/ajax-pagination.php:294 includes/ajax-pagination.php:330
+msgid "Background Color"
+msgstr "Hintergrundfarbe"
+
+#: includes/ajax-pagination.php:282 includes/ajax-pagination.php:318
+msgid "Text Color"
+msgstr "Schriftfarbe"
+
+#: includes/ajax-pagination.php:275
+msgid "Normal"
+msgstr "Normal"
+
+#: includes/ajax-pagination.php:177 includes/ajax-pagination.php:178
+msgid "Loading..."
+msgstr "Wird geladen …"
+
+#: includes/ajax-pagination.php:164 includes/ajax-pagination.php:165
+msgid "Load More"
+msgstr "Weitere anzeigen"
+
+#: includes/ajax-pagination.php:162
+msgid "Text"
+msgstr "Text"
+
+#: includes/ajax-pagination.php:128
+msgid "Animation Size"
+msgstr "Animationsgröße"
+
+#: includes/ajax-pagination.php:106
+msgid "Animation Spacing"
+msgstr "Animationsabstände"
+
+#: includes/ajax-pagination.php:91
+msgid "Animation Color"
+msgstr "Animationsfarbe"
+
+#: includes/ajax-pagination.php:55 includes/ajax-pagination.php:59
+msgid "Numbers"
+msgstr "Nummern"
+
+#: includes/ajax-pagination.php:79
+msgid "Loading Animation"
+msgstr "Ladeanimation"
+
+#: includes/pro-preview.php:325
+msgid "https://your-link.com"
+msgstr "https://dein-link.de"
+
+#: includes/pro-preview.php:319
+msgid "Link"
+msgstr "Link"
+
+#: includes/pro-preview.php:30
+msgid "<b>Enable Display Conditions</b>"
+msgstr "<b>Anzeigebedingungen aktivieren</b>"
+
+#: modules/loop-item/widgets/loop-item.php:77
+msgid "Content"
+msgstr "Inhalt"
+
+#: theme-builder/documents/loop.php:63
+msgid "404"
+msgstr "404"
+
+#: skins/skin-custom.php:438
+msgid "Page"
+msgstr "Seite"
+
+#: includes/ajax-pagination.php:50 skins/skin-custom.php:461
+msgid "Pagination"
+msgstr "Seitennummerierung"
+
+#: includes/ajax-pagination.php:54 includes/pro-preview.php:242
+msgid "None"
+msgstr "Keines"
+
+#: includes/pro-preview.php:241
+msgid "Dots"
+msgstr "Punkte"
+
+#: includes/pro-preview.php:240
+msgid "Arrows"
+msgstr "Pfeile"
+
+#: includes/pro-preview.php:239
+msgid "Arrows and Dots"
+msgstr "Pfeile und Punkte"
+
+#: includes/pro-preview.php:235
+msgid "Navigation"
+msgstr "Navigation"
+
+#: includes/pro-preview.php:18 includes/pro-preview.php:53
+msgid "Show"
+msgstr "Anzeigen"
+
+#: includes/pro-preview.php:17 includes/pro-preview.php:52
+msgid "Hide"
+msgstr "Verstecken"
+
+#: includes/ajax-pagination.php:505 includes/pro-preview.php:206
+#: includes/pro-preview.php:222
+msgid "Default"
+msgstr "Standard"
+
+#: includes/pro-preview.php:134 includes/pro-preview.php:151
+#: includes/pro-preview.php:174
+msgid "On"
+msgstr "An"
+
+#: includes/pro-preview.php:133 includes/pro-preview.php:150
+#: includes/pro-preview.php:173
+msgid "Off"
+msgstr "Aus"
+
+#: includes/pro-preview.php:148
+msgid "Same Height"
+msgstr "Gleiche Höhe"
+
+#: includes/ajax-pagination.php:212 includes/ajax-pagination.php:226
+#: includes/pro-preview.php:33 includes/pro-preview.php:276
+#: includes/pro-preview.php:303 skins/skin-custom.php:92
+msgid "No"
+msgstr "Nein"
+
+#: includes/ajax-pagination.php:213 includes/ajax-pagination.php:227
+#: includes/pro-preview.php:34 includes/pro-preview.php:275
+#: includes/pro-preview.php:304 skins/skin-custom.php:93
+msgid "Yes"
+msgstr "Ja"
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+msgid "https://dudaster.com"
+msgstr "https://dudaster.com"
+
+#: includes/pro-preview.php:76
+msgid "1"
+msgstr "1"
+
+#. Author of the plugin
+msgid "Dudaster.com"
+msgstr "Dudaster.com"
+
+#: includes/pro-features.php:51 includes/pro-preview.php:340
+msgid "Go Pro"
+msgstr "Zu Pro wechseln"
+
+#: skins/skin-custom.php:80
+msgid "View"
+msgstr "Anzeigen"
+
+#: theme-builder/dynamic-tags/tags/post-summary.php:33
+msgid "Length"
+msgstr "Länge"
+
+#: theme-builder/dynamic-tags/tags/post-summary.php:18
+msgid "Post Summary"
+msgstr "Beitragszusammenfassung"
+
+#: theme-builder/conditions/loop.php:31 theme-builder/documents/loop.php:40
+#: theme-builder/init.php:63
+msgid "Loop"
+msgstr "Loop"
+
+#. Plugin Name of the plugin
+msgid "Ele Custom Skin"
+msgstr "Ele Custom Skin"
+
+#: skins/skin-custom.php:37 skins/skin-custom.php:626
+msgid "Custom"
+msgstr "Individuell"
+
+#. Description of the plugin
+msgid "Elementor Custom Skin for Posts and Archive Posts. You can create a skin as you want."
+msgstr "Individuelle Skins für die Widgets Posts und Posts Archive in Elementor Pro. Du kannst so viele Skins erstellen, wie du willst."

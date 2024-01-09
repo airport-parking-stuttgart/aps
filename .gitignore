@@ -1,0 +1,39 @@
+# Ignore configuration files that may contain sensitive information
+wp-config.php
+wp-config-sample.php
+
+# Ignore specific WordPress directories
+/wp-content/uploads/
+/wp-content/upgrade/
+/wp-content/cache/
+/wp-content/backup-db/
+/wp-content/backups/
+/wp-content/blogs.dir/
+/wp-content/upgrade/
+/wp-content/ai1wm-backups/
+/wp-content/aiowps_backups/
+
+# Ignore compiled files
+*.sass-cache*
+*.scss-cache*
+
+# Ignore node modules folder
+/node_modules/
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore Editor files
+*.sublime-project
+*.sublime-workspace
+.idea/
+.vscode/
+
+# Ignore other common files
+*.log
+*.sql
+*.sqlite
+.htaccess
+sitemap*.xml
+sitemap*.gz

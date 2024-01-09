@@ -1,0 +1,68 @@
+
+.itweb_content {
+    width: 100%;
+    display: inline-block;
+}
+.itweb_profile {
+    float: left;
+    width: 100%;
+}
+.itweb_profile_add {
+    float: left;
+    width: 100%;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.itweb_profile_choose {
+    float: left;
+}
+.itweb_profile_save {
+    float: left;
+    background: teal;
+    color: #fff;
+    width: 60px;
+    text-align: center;
+    height: 28px;
+    line-height: 28px;
+    margin-top: 1px;
+    cursor: pointer;
+}
+.itweb_content_body_booked {
+    float: left;
+    width: 100%;
+    border-top: 2px solid #ccc;
+    margin-top: 20px;
+}
+.itweb_content_body_booked_header {
+    float: left;
+    width: 100%;
+    font-weight: bold;
+}
+.itweb_content_body_booked_item {
+    float: left;
+    width: 100%;
+    margin-top: 5px;
+}
+.itweb_content_body_booked_item_orderid {
+    float: left;
+}
+.itweb_content_body_booked_item_seats {
+    float: left;
+    margin-left: 30px;
+}
+.itweb_content_body_booked_item_from {
+    float: left;
+    margin-left: 30px;
+}
+.itweb_content_body_booked_item_to {
+    float: left;
+    margin-left: 30px;
+}
+.itweb_content_body_booked_item_delete {
+    float: left;
+    margin-left: 30px;
+    background: #981212;
+    color: #fff;
+    padding: 3px;
+    cursor: pointer;
+}

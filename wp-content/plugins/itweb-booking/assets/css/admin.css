@@ -1,0 +1,556 @@
+.page-logo{
+	width: 100%;
+}
+
+.adm-logo {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 60px;
+}
+
+.toplevel_page_buchungen .wp-first-item,
+.toplevel_page_produkte .wp-first-item,
+.toplevel_page_vermittler .wp-first-item,
+.toplevel_page_fahrerportal .wp-first-item {
+    display: none;
+}
+
+.adm-form {
+    margin-top: 20px;
+}
+
+.m10 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.m20 {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.m30 {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.m60 {
+    margin-top: 60px;
+    margin-bottom: 60px;
+}
+
+.page {
+    margin-top: 30px;
+}
+
+.adm-table td,
+.adm-table th {
+    padding: 10px 10px 10px 0;
+}
+
+.adm-table tr {
+    border-bottom: 1px solid black;
+}
+
+.no-btn {
+    background: none;
+    border: none;
+}
+
+.mark_done {
+    background: #d0ffd0 !important;
+}
+
+.clients-table {
+    --margin-top: 100px;
+}
+
+.check-row {
+    cursor: pointer;
+}
+
+.d-block {
+    display: block !important;
+}
+
+.w100 {
+    width: 100%;
+}
+
+input,
+select {
+    max-width: 100% !important;
+}
+
+.restriction-item,
+.discount-item,
+.cancellation-item,
+.commission-item,
+.service-item,
+.broker-item,
+.group-item,
+.child-group-item {
+    margin: 10px 0;
+}
+
+.restriction-item:last-child .plus-icon,
+.discount-item:last-child .plus-icon,
+.cancellation-item:last-child .plus-icon,
+.commission-item:last-child .plus-icon,
+.service-item:last-child .plus-icon,
+.group-item:last-child .plus-icon,
+.child-group-item:last-child .plus-icon {
+    display: inline-block;
+}
+
+.plus-icon {
+    display: none;
+    font-size: 14px;
+}
+
+.del-table-row {
+    font-size: 14px;
+}
+
+.gallery-image img, .valet-car-image img{
+    width: 100%;
+    object-fit: cover;
+}
+
+.gallery-image .del-img, .valet-car-image .del-valet-img {
+    position: absolute;
+    top: 5px;
+    right: 21px;
+    display: inline-block;
+    padding: 0 6px;
+    background: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+.valet-car-video .del-valet-vid {
+    position: absolute;
+    top: 5px;
+    right: 21px;
+    display: inline-block;
+    padding: 0 6px;
+    background: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+.gallery-image, .valet-car-image, .valet-car-video {
+    position: relative;
+}
+
+.datepicker--cell-day.-other-month-:not(.-disabled-), .datepicker--cell-year.-other-decade-:not(.-disabled-) {
+    color: black;
+}
+
+.datepickers-container {
+    z-index: 9999;
+}
+
+/*statistics*/
+
+.chart {
+    float: left;
+    width: 100%;
+    height: 500px;
+}
+
+.if-filters-a {
+    display: block;
+    margin: 10px 0 5px 0;
+    text-decoration: none;
+}
+
+#ifSubmit {
+    padding: 5px 10px;
+    text-decoration: none;
+}
+
+.top-data .dashicons {
+    margin-top: 2px;
+}
+.top-data p {
+    font-size: 16px;
+}
+.top-data {
+    width: 50%;
+    max-width: 400px;
+    background: #0073aa;
+    padding: 10px;
+    color: white;
+    margin-top: 20px;
+}
+
+.top-data-left {
+    width: 75%;
+    float: left;
+}
+.top-data .icon {
+    width: 25%;
+    float: right;
+}
+
+.top-data .icon .dashicons {
+    font-size: 80px;
+}
+
+.itweb_adminpage_head{
+	background-color: #1e73be;
+	margin-right: 15px;
+}
+.itweb_adminpage_head h3{
+	color: white !important;
+	padding: 15px;
+}
+
+#a2020-update-wrap, #a2020-notification-wrap, #wp-admin-bar-new-content {
+  display:none !important;
+}
+
+#wp-admin-bar-apm_logo{
+	width: 80px;
+	margin-left: 100px !important;
+}
+#wp-admin-bar-apm a{
+	color: white;
+	font-size: 24px;
+}
+
+.itweb_add_head {
+    float: left;
+    width: 100%;
+    font-weight: bold;
+	font-size: 18px;
+    text-transform: uppercase;
+    padding: 15px 0;
+    color: #1e73be;
+}
+
+.add_del_buttons{
+    padding-top: 30px;
+}
+
+.add_new_locationBtn{
+	margin-top: 29px;
+	margin-left: -40px;
+}
+
+.form-control[readonly]{
+	background-color: white !important;
+}
+
+.itweb_add_head-summary {
+    float: left;
+    width: 99%;
+    font-weight: bold;
+	font-size: 18px;
+    text-transform: uppercase;
+    padding: 15px 10px;
+    background-color: #1e73be;
+	color: white;
+	cursor: pointer;
+	margin-bottom: 10px;
+}
+
+table.dataTable thead .sorting, table.dataTable thead .sorting_asc, table.dataTable thead .sorting_desc, table.dataTable thead .sorting_asc_disabled, table.dataTable thead .sorting_desc_disabled {
+    background-size: 7px 12px;
+}
+
+table.dataTable thead{
+    background: #1e73be !important;
+    color: #fff !important;
+}
+
+.dt-button{
+	text-decoration: none;
+	margin-right: 40px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.transparent-input {
+    background: rgba(255, 255, 255, 0.5) !important;
+    --border: none !important;
+    --outline: none !important;
+}
+
+.loader,
+.loader:after {
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+}
+.loader {
+    margin: auto;
+    font-size: 10px;
+    position: relative;
+    text-indent: -9999em;
+    border-top: 1.1em solid rgba(0, 0, 0, 0.2);
+    border-right: 1.1em solid rgba(0, 0, 0, 0.2);
+    border-bottom: 1.1em solid rgba(0, 0, 0, 0.2);
+    border-left: 1.1em solid #000000;
+    -webkit-transform: translateZ(0);
+    -ms-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-animation: load8 1.1s infinite linear;
+    animation: load8 1.1s infinite linear;
+}
+@-webkit-keyframes load8 {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+@keyframes load8 {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+/*
+    Contigent Page
+*/
+.parklots-data-table {
+    margin-top: 50px;
+    width: 100%;
+    overflow-x: auto;
+}
+
+.parklots-data-table .table-col-wrapper:first-child {
+    border-top: 1px solid #909090;
+}
+
+.parklots-data-table .table-col-wrapper {
+    border-left: 1px solid #909090;
+}
+
+.table-col-wrapper {
+    width: 8500px;
+}
+
+.table-col p {
+    margin: 0;
+    padding: 5px;
+    border-right: 1px solid #909090;
+    border-bottom: 1px solid #909090;
+}
+
+.table-col {
+    width: 200px;
+    float: left;
+}
+
+.tr-datum-1, .tr-total-1 {
+    background: #f4f9fb;
+}
+
+.tr-total-ph-1 {
+    background: #d7edf0;
+}
+
+.tr-total-od-1 {
+    background: #f5eefd;
+}
+
+.tr-total-br-1 {
+    background: #ebfbee;
+}
+
+.tr-total-si-1 {
+    background: #f2f2f2;
+}
+
+.tr-total-ostph-1 {
+    background: #f9fac5;
+}
+
+.tr-total-osta-1 {
+    background: #ffffe8;
+}
+
+.tr-total-paph-1 {
+    background: #b3ffe6;
+}
+
+.tr-total-papp-1 {
+    background: #ccffee;
+}
+
+.tr-lots-1 {
+    background: #fbf0ee;
+}
+
+.th {
+    background: gainsboro;
+    margin: 0;
+}
+
+.th-datum, .th-total, .tr-total {
+    background: #ddeef4;
+    margin: 0;
+}
+
+.th-total-ph {
+    background: #7ac5cd;
+}
+
+.th-total-od {
+    background: #d0a9f5;
+}
+
+.th-total-br {
+    background: #9dedaa;
+}
+
+.th-total-si {
+    background: #ffffff;
+}
+
+.th-total-ostph {
+    background: #f0f255;
+}
+
+.th-total-osta {
+    background: #fcfcb6;
+}
+
+.th-total-paph {
+    background: #66ffcc;
+}
+.th-total-papp {
+    background: #99ffdd;
+}
+
+.tr-total{
+	border-top: 2px solid #909090;
+}
+
+.th-lots {
+    background: #f2d9d3;
+    margin: 0;
+}
+
+.grid-three {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.grid-four {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.grid-five {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+}
+
+.clearfix {
+    clear: both;
+}
+
+.fc .fc-content .fc-time {
+    display: none;
+}
+
+#external-events-list .fc-event {
+    cursor: pointer;
+    margin-bottom: 5px;
+}
+
+.editBookingLog-table {
+    border-collapse: collapse;
+    margin-bottom: 10px;
+	width: 900px;
+	font-size: 14px;
+}
+.editBookingLog-table th {text-align: left;}
+.editBookingLog-table thead {
+	background-color: #1e73be;
+	color: white;
+}
+.admin2020notificationBadge, .ab-item .yoast-logo .svg{
+	display: none !important;
+}
+.yoast-logo, .uk-subnav, #activationpanel, #wp-admin-bar-comments, .notice .notice-warning, .wp-ui-notification .yoast-issue-counter,
+.yoast-issue-counter, .wp-ui-notification
+{
+	display: none !important;
+}
+
+.ui-product-tabs{
+	background: linear-gradient(0deg, rgba(75,75,75,1) 0%, rgba(118,118,119,1) 100%);
+	font-size: 17px;
+	margin: 0 0;
+	padding: 4px 0;
+}
+.ui-product-tabs-text, .ui-product-tabs-text:hover{
+	color: white;
+}
+.ui-product-tabs-text:active, .ui-product-tabs-text:focus, .ui-product-tabs-text:visited{
+	color: #fff28a !important;
+}
+.ui-product-sep{
+	border-right: double gray;
+}
+
+.ui-lotdata-block{
+	background: linear-gradient(170deg, rgba(255,255,255,1) 0%, rgba(240,246,251,1) 100%);
+	margin: 20px 65px;
+	border: 1px solid #98c6ee;
+	padding: 10px;
+	box-shadow: 3px 3px 5px #98c6ee;
+}
+.ui-lotdata-block-next{
+	margin: 50px 65px;
+}
+.ui-lotdata{
+	position: relative;
+	top: -25px;
+}
+
+.ui-lotdata-title{
+	color: white;
+	background-color: #1e73be;
+	padding: 3px 10px 7px 10px;
+	margin-bottom: 20px;
+	position: relative;
+	top: -25px;
+}
+.ui-lotdata-date{
+	width: 12.499999995%;
+	flex: 0 0 12.499%;
+	max-width: 12.499%;
+}
+
+.edit-comment-section, .rx-add-manual-review-wrapper{
+	width: 50% !important;
+}
+
+#save_manual_review{
+	padding: 0px 30px !important;
+}
+
+.rx-analytics-header-counter-wrapper, .edit-comment-author, .rx-metabox-wrapper, .rx-images, .rx-form-video-element, .rx_upload_file, .rx-comment-form-attachment,
+.edit-comment-section .rx_editreview_image:nth-child(5),
+.edit-comment-section .rx_editreview_image:nth-child(6),
+.edit-comment-section .rx_editreview_image:nth-child(7)
+{
+	display: none;
+}
+
+.editcomment > tbody tr:nth-child(3){
+	display: none !important;
+}
