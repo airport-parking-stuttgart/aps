@@ -16,6 +16,7 @@ if (!isset($_GET['edit'])) :
                     <th>Strasse / Nr</th>
                     <th>PLZ</th>
                     <th>Ort</th>
+					<th>API</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -28,6 +29,7 @@ if (!isset($_GET['edit'])) :
                         <td><?php echo $broker->street ?></td>
                         <td><?php echo $broker->zip ?></td>
                         <td><?php echo $broker->location_id ?></td>
+						<td><?php echo $broker->broker_for == null || $broker->broker_for == "" ? "-" : $broker->broker_for ?></td>
                         <td style="width: 130px;text-align: right;">
                             <a href="/wp-admin/admin.php?page=vermittler-bearbeiten&edit=<?php echo $broker->id ?>"
                                class="btn btn-secondary btn-sm">

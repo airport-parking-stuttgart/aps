@@ -7,6 +7,7 @@ $db = Database::getInstance();
 
 $order_id = $_GET["edit"];
 $order = wc_get_order($order_id);
+$web_company = Database::getInstance()->getSiteCompany();
 
 $car_images = $db->getValetCarImage($order_id);
 $car_videos = $db->getValetCarVideos($order_id);
@@ -177,8 +178,8 @@ if(isset($_POST["update_val"])){
 					<img style="max-height: 150px; width: auto" src="<?php echo get_home_url() . '/wp-content/uploads/2021/12/APS-Logo-klein.png' ?>" alt="">
 				</td>
 				<td style="width: 100px; border: none; text-align: right;">
-					<p style="">APS Airport-Parking-Stuttgart GmbH<br>
-					Raiffeisenstraße 18 – 70794 Filderstadt</p>
+					<p style=""><?php echo $web_company->name ?><br>
+					<?php echo $web_company->street ?> – <?php echo $web_company->zip ?> <?php echo $web_company->location ?></p>
 					<p>Buchung: <?php echo get_post_meta($order_id, 'token', true) ?><br>
 					Seite 1 - 2</p>
 				</td>
@@ -286,8 +287,8 @@ if(isset($_POST["update_val"])){
 					<img style="max-height: 150px; width: auto" src="<?php echo get_home_url() . '/wp-content/uploads/2021/12/APS-Logo-klein.png' ?>" alt="">
 				</td>
 				<td style="width: 100px; border: none; text-align: right;">
-					<p style="">APS Airport-Parking-Stuttgart GmbH<br>
-					Raiffeisenstraße 18 – 70794 Filderstadt</p>
+					<p style=""><?php echo $web_company->name ?><br>
+					<?php echo $web_company->street ?> – <?php echo $web_company->zip ?> <?php echo $web_company->location ?></p>
 					<p>Buchung: <?php echo get_post_meta($order_id, 'token', true) ?><br>
 					Seite 2 - 2</p>
 				</td>
@@ -368,12 +369,12 @@ if(isset($_POST["update_val"])){
 				Im Anhang erhalten Sie das Übergabeprotokoll zu Ihrer Parkplatzbuchung.<br><br>
 				Wir wünschen Ihnen eine gute Heimfahrt.<br><br>
 				Viele Grüßen und bis bald.<br>
-				Ihr <a href='www.airport-parking-stuttgart.de'>airport-parking-stuttgart.de</a><br><br>
-				Tel: +49 711 22 051 245<br>Web: <a href='www.airport-parking-stuttgart.de'>www.airport-parking-stuttgart.de</a><br><br>
+				Ihr <a href='www.".$_SERVER['HTTP_HOST']."'>".$_SERVER['HTTP_HOST']." Team</a><br><br>
+				Tel: ".$web_company->phone."<br>Web: <a href='www.".$_SERVER['HTTP_HOST']."'>www.".$_SERVER['HTTP_HOST']."</a><br><br>
 				Geschäftsanschrift:<br>
-				APS Airport-Parking-Stuttgart GmbH<br>Raiffeisenstrasse 18<br>70794 Filderstadt<br>
-				Inhaber: Erdem Aras<br>Steuernummer: 99008/07242<br>";
-		wp_mail($_POST["mail_adress"], '[APS] Übergabeprotokoll - ' . $booking['token'], $body, $headers, $filePath);
+				".$web_company->name."<br>".$web_company->street."<br>".$web_company->zip." ".$web_company->location."<br>
+				Inhaber: ".$web_company->owner."<br>Steuernummer: ".$web_company->st_nr."<br>";
+		wp_mail($_POST["mail_adress"], 'Übergabeprotokoll - ' . $booking['token'], $body, $headers, $filePath);
 	}	
 	///
 }

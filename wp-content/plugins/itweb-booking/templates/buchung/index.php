@@ -1,6 +1,6 @@
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
 	<div class="page-logo">
-		<img class="adm-logo" src="<?php echo home_url(); ?>/wp-content/uploads/2021/12/APS-Logo-klein.png" alt="" width="300" height="200">
+		<img class="adm-logo" src="<?php echo home_url(); ?>/wp-content/uploads/2021/08/AP-Management-System-klein.png" alt="" width="300" height="200">
 	</div>
 
 	<?php

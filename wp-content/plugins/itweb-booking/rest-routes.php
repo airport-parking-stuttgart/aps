@@ -48,44 +48,47 @@ function saveEvent()
 			
 			$name = str_replace(" ", "%20", $name);
 			
-			$data1 = array(
-			
-			);
-			
-			$query1 = http_build_query($data1);
-			$query2 = http_build_query($data1);
-			
-			$ch1 = curl_init();
-			$ch2 = curl_init();
-			
-			curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/curl/?request=apm_save_cal&pw=apmcal_req57159428&price_id=".(int)$_POST['price_id']."&p_name=".$name."&product_id=".$product_id."&datefrom=".$_POST['datefrom']."&dateto=".$_POST['dateto']);
-			curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch1, CURLOPT_POST, true);
-			curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
+			$base_url = $_SERVER['HTTP_HOST'];
+			if($base_url == "airport-parking-stuttgart.de"){
+				$data1 = array(
+				
+				);
+				
+				$query1 = http_build_query($data1);
+				$query2 = http_build_query($data1);
+				
+				$ch1 = curl_init();
+				$ch2 = curl_init();
+				
+				curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/curl/?request=apm_save_cal&pw=apmcal_req57159428&price_id=".(int)$_POST['price_id']."&p_name=".$name."&product_id=".$product_id."&datefrom=".$_POST['datefrom']."&dateto=".$_POST['dateto']);
+				curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch1, CURLOPT_POST, true);
+				curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
 
-			curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/?request=apm_save_cal&pw=apmcal_req57159428&price_id=".(int)$_POST['price_id']."&p_name=".$name."&product_id=".$product_id."&datefrom=".$_POST['datefrom']."&dateto=".$_POST['dateto']);
-			curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch2, CURLOPT_POST, true);
-			curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
-			
-			$mh = curl_multi_init();
-			
-			curl_multi_add_handle($mh, $ch1);
-			curl_multi_add_handle($mh, $ch2);
-			
-			do {
-				curl_multi_exec($mh, $running);
-			} while ($running > 0);
-			
-			$response1 = curl_multi_getcontent($ch1);
-			$response2 = curl_multi_getcontent($ch2);
-			
-			curl_multi_remove_handle($mh, $ch1);
-			curl_multi_remove_handle($mh, $ch2);
-			curl_multi_close($mh);
-			
-			curl_close($ch1);
-			curl_close($ch2);
+				curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/?request=apm_save_cal&pw=apmcal_req57159428&price_id=".(int)$_POST['price_id']."&p_name=".$name."&product_id=".$product_id."&datefrom=".$_POST['datefrom']."&dateto=".$_POST['dateto']);
+				curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch2, CURLOPT_POST, true);
+				curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
+				
+				$mh = curl_multi_init();
+				
+				curl_multi_add_handle($mh, $ch1);
+				curl_multi_add_handle($mh, $ch2);
+				
+				do {
+					curl_multi_exec($mh, $running);
+				} while ($running > 0);
+				
+				$response1 = curl_multi_getcontent($ch1);
+				$response2 = curl_multi_getcontent($ch2);
+				
+				curl_multi_remove_handle($mh, $ch1);
+				curl_multi_remove_handle($mh, $ch2);
+				curl_multi_close($mh);
+				
+				curl_close($ch1);
+				curl_close($ch2);
+			}
 			
             return $wpdb->get_results("select * from " . $wpdb->prefix . "itweb_events");
         }
@@ -108,44 +111,47 @@ function deleteEvent()
 			
 			$event->name = str_replace(" ", "%20", $event->name);
 			
-			$data1 = array(
-			
-			);
-			
-			$query1 = http_build_query($data1);
-			$query2 = http_build_query($data1);
-			
-			$ch1 = curl_init();
-			$ch2 = curl_init();
-			
-			curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/curl/?request=apm_del_cal&pw=apmcal_req57159428&p_name=".$event->name."&product_id=".$event->product_id."&datefrom=".$event->datefrom."&dateto=".$event->dateto);
-			curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch1, CURLOPT_POST, true);
-			curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
+			$base_url = $_SERVER['HTTP_HOST'];
+			if($base_url == "airport-parking-stuttgart.de"){
+				$data1 = array(
+				
+				);
+				
+				$query1 = http_build_query($data1);
+				$query2 = http_build_query($data1);
+				
+				$ch1 = curl_init();
+				$ch2 = curl_init();
+				
+				curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/curl/?request=apm_del_cal&pw=apmcal_req57159428&p_name=".$event->name."&product_id=".$event->product_id."&datefrom=".$event->datefrom."&dateto=".$event->dateto);
+				curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch1, CURLOPT_POST, true);
+				curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
 
-			curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/?request=apm_del_cal&pw=apmcal_req57159428&p_name=".$event->name."&product_id=".$event->product_id."&datefrom=".$event->datefrom."&dateto=".$event->dateto);
-			curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch2, CURLOPT_POST, true);
-			curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
-			
-			$mh = curl_multi_init();
-			
-			curl_multi_add_handle($mh, $ch1);
-			curl_multi_add_handle($mh, $ch2);
-			
-			do {
-				curl_multi_exec($mh, $running);
-			} while ($running > 0);
-			
-			$response1 = curl_multi_getcontent($ch1);
-			$response2 = curl_multi_getcontent($ch2);
-			
-			curl_multi_remove_handle($mh, $ch1);
-			curl_multi_remove_handle($mh, $ch2);
-			curl_multi_close($mh);
-			
-			curl_close($ch1);
-			curl_close($ch2);
+				curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/?request=apm_del_cal&pw=apmcal_req57159428&p_name=".$event->name."&product_id=".$event->product_id."&datefrom=".$event->datefrom."&dateto=".$event->dateto);
+				curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch2, CURLOPT_POST, true);
+				curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
+				
+				$mh = curl_multi_init();
+				
+				curl_multi_add_handle($mh, $ch1);
+				curl_multi_add_handle($mh, $ch2);
+				
+				do {
+					curl_multi_exec($mh, $running);
+				} while ($running > 0);
+				
+				$response1 = curl_multi_getcontent($ch1);
+				$response2 = curl_multi_getcontent($ch2);
+				
+				curl_multi_remove_handle($mh, $ch1);
+				curl_multi_remove_handle($mh, $ch2);
+				curl_multi_close($mh);
+				
+				curl_close($ch1);
+				curl_close($ch2);
+			}
 						
 			$wpdb->query("delete from " . $wpdb->prefix . "itweb_events where id = " . $id);
             return ['status' => 200];
@@ -169,15 +175,18 @@ function deleteTableRow()
 				$wpdb->query("delete from " . $wpdb->prefix . "itweb_brokers_products where broker_id = " . $id);
 			}
 			
-			if($table == "discounts"){
-				$url = "https://airport-parking-germany.de/curl/?request=apm_del_discount&pw=apmds_req57159428&discount_id=".$id;
-				$ch = curl_init();
-				curl_setopt($ch, CURLOPT_URL, $url);
-				curl_setopt($ch, CURLOPT_POST, 0);
-				// Receive server response ...
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
-				$server_output = curl_exec($ch);
-				curl_close($ch);
+			$base_url = $_SERVER['HTTP_HOST'];
+			if($base_url == "airport-parking-stuttgart.de"){
+				if($table == "discounts"){
+					$url = "https://airport-parking-germany.de/curl/?request=apm_del_discount&pw=apmds_req57159428&discount_id=".$id;
+					$ch = curl_init();
+					curl_setopt($ch, CURLOPT_URL, $url);
+					curl_setopt($ch, CURLOPT_POST, 0);
+					// Receive server response ...
+					curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+					$server_output = curl_exec($ch);
+					curl_close($ch);
+				}
 			}
 			
 			if($table == "product_groups"){
@@ -285,6 +294,9 @@ function deleteProduct()
             $db->deleteEventsByProductId($id);
             $db->deleteParklotsByProductId($id);
             $db->deleteRestrictionsByProductId($id);
+			$db->deleteClientPrudict($id);
+			$db->deleteBrokerPrudict($id);
+			$db->deleteTransferPrudict($id);
             return ['status' => 200];
         }
     ]);
@@ -470,21 +482,24 @@ function cancelOrder()
 				}
             }
 			
-			$url = "https://airport-parking-germany.de/search-result/";
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_POST, 1);
-			curl_setopt($ch, CURLOPT_POSTFIELDS,
-			http_build_query(array(
-				 'request' => 'apm_cancel',
-				 'pw' => 'apmc_req57159428',
-				 'token' => $token
-				 
-			)));
-			// Receive server response ...
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			$server_output = curl_exec($ch);
-			curl_close($ch);
+			$base_url = $_SERVER['HTTP_HOST'];
+			if($base_url == "airport-parking-stuttgart.de"){
+				$url = "https://airport-parking-germany.de/search-result/";
+				$ch = curl_init();
+				curl_setopt($ch, CURLOPT_URL, $url);
+				curl_setopt($ch, CURLOPT_POST, 1);
+				curl_setopt($ch, CURLOPT_POSTFIELDS,
+				http_build_query(array(
+					 'request' => 'apm_cancel',
+					 'pw' => 'apmc_req57159428',
+					 'token' => $token
+					 
+				)));
+				// Receive server response ...
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				$server_output = curl_exec($ch);
+				curl_close($ch);
+			}
 			
 			if($product_id == 537 || $product_id == 592 || $product_id == 619 || $product_id == 873){
 				if(get_post_meta($order_id, '_payment_method_title', true) == 'PayPal')
@@ -504,27 +519,37 @@ function cancelOrder()
 				$toPay = "";
 				$msg = "";
 			}
+			$web_company = Database::getInstance()->getSiteCompany();
             $to = $email;
             $subject = 'Ihre Buchung ' . $token . ' wurde storniert';
-            $body = "<h3>Ihr Parkplatz wurde storniert.</h3>
-						<p>Sehr geehrte Damen und Herren,</p>
-						<p>Ihre Buchung mit der Buchungsnummer <strong>".$token."</strong> wurde storniert.<br/></p>"
-                .$reason_c.
-				$toPay.
-                "<p>Sie haben noch Fragen? Schreiben Sie uns einfach eine E-Mail an
-							<a href='mailto:info@airport-parking-stuttgart.de'>info@airport-parking-stuttgart.de</a> oder rufen Sie uns
-							unter <a href='tel:+49 711 22 051 247'>+49 711 22 051 247</a> an.
-						</p>
-						<p>Montag bis Freitag von 11:00 bis 19:00 Uhr.
-					    Aus dem dt. Festnetz zum Ortstarif. Mobilfunkkosten abweichend.</p>
-						<p>Mit freundlichen Grüßen</p>
-						<p>APS-Airport-Parking-Stuttgart GmbH<br>
-						Raiffeisenstraße 18, 70794 Filderstadt, Deutschland<br></p>
-						<p><a href='www.airport-parking-stuttgart.de'>www.airport-parking-stuttgart.de</a></p>			
-					";
+            if($web_company->name && $web_company->email && $web_company->phone){
+				$body = "<h3>Ihr Parkplatz wurde storniert.</h3>
+							<p>Sehr geehrte Damen und Herren,</p>
+							<p>Ihre Buchung mit der Buchungsnummer <strong>".$token."</strong> wurde storniert.<br/></p>"
+					.$reason_c.
+					$toPay.
+					"<p>Sie haben noch Fragen? Schreiben Sie uns einfach eine E-Mail an
+								<a href='mailto:".$web_company->email."'>".$web_company->email."</a> oder rufen Sie uns
+								unter <a href='tel:".$web_company->phone."'>".$web_company->phone."</a> an.
+							</p>
+							<p>Montag bis Freitag von 11:00 bis 19:00 Uhr.
+							Aus dem dt. Festnetz zum Ortstarif. Mobilfunkkosten abweichend.</p>
+							<p>Mit freundlichen Grüßen</p>
+							<p>".$web_company->name."<br>
+							".$web_company->street.", ".$web_company->zip." ".$web_company->location.", Deutschland<br></p>
+							<p><a href='www.".$_SERVER['HTTP_HOST']."'>www.".$_SERVER['HTTP_HOST']."</a></p>			
+						";
+			}
+			else{
+				$body = "<h3>Ihr Parkplatz wurde storniert.</h3>
+							<p>Sehr geehrte Damen und Herren,</p>
+							<p>Ihre Buchung mit der Buchungsnummer <strong>".$token."</strong> wurde storniert.<br/></p>"
+					.$reason_c.
+					$toPay."<p>Mit freundlichen Grüßen</p>";
+			}
 
             $headers = array('Content-Type: text/html; charset=UTF-8');
-            wp_mail([$to, 'noreply@airport-parking-stuttgart.de'], $subject, $body, $headers);
+            wp_mail([$to, "noreply@".$_SERVER['HTTP_HOST']], $subject, $body, $headers);
             return ['message' => 'Ihre Buchung wurde so eben erfolgreich Storniert. ' . $msg];
         }
     ]);

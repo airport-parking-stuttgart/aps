@@ -24,19 +24,31 @@ else{
 	$year6 = date('Y');
 }
 
-$query = "";
-if(isset($_GET['year']))
+$query = $query2 = "";
+if(isset($_GET['year'])){
 	$query .= "&year=" . $_GET['year'];
-else
+	$query2 .= "&year=" . $_GET['year'];
+}
+	
+else{
 	$query .= "";
-if(isset($_GET['role']))
+	$query2 .= "";
+}
+	
+if(isset($_GET['role'])){
 	$query .= "&role=" . $_GET['role'];
+	$query2 .= "&role=" . $_GET['role'];
+}
+	
+else{
+	$query .= "";
+	$query2 .= "";
+}
+	
+if(isset($_GET['cw']))
+	$query .= "&cw=" . $_GET['cw'];
 else
 	$query .= "";
-//if(isset($_GET['cw']))
-//	$query = "&cw=" . $_GET['cw'];
-//else
-//	$query = "";
 
 $date = new DateTime;
 $date->setISODate($year1, 53);
@@ -671,7 +683,9 @@ tr{
 			</div>
 			<div class="col-sm-12 col-md-3" >
 				<?php if($kw1 != 1): ?>
-					<a href="<?php echo '/wp-admin/admin.php?page=einsatzplan&cw='.($kw1 - 1).$query ?>" class="btn btn-primary"><</a>
+				<?php $back = ($kw1 - 1) ?>
+				<?php $back_kw = $back > 9 ? $back : "0".$back ?>
+					<a href="<?php echo '/wp-admin/admin.php?page=einsatzplan&cw='.$back_kw.$query2 ?>" class="btn btn-primary"><</a>
 				<?php endif; ?>
 				<select name="cw" id="cw" onchange="change_cw(this)">						
 					<?php for($cw = 1; ($cw*1) <= 52; $cw++): ?>
@@ -692,7 +706,9 @@ tr{
 					<?php endfor; ?>
 				</select>
 				<?php if($kw1 != $weeks): ?>
-					<a href="<?php echo '/wp-admin/admin.php?page=einsatzplan&cw='.($kw1 + 1).$query ?>" class="btn btn-primary">></a>
+				<?php $forward = ($kw1 + 1) ?>
+				<?php $forward_kw = $forward > 9 ? $forward : "0".$forward ?>
+					<a href="<?php echo '/wp-admin/admin.php?page=einsatzplan&cw='.$forward_kw.$query2 ?>" class="btn btn-primary">></a>
 				<?php endif; ?>
 			</div>
 			<div class="col-sm-12 col-md-1" >

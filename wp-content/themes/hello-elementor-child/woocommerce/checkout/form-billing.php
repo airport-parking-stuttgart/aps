@@ -40,10 +40,6 @@ if($_SESSION['product_id'] == null)
         <?php
         $fields = $checkout->get_checkout_fields( 'billing' );
 
-        echo "<pre>";
-        //print_r($checkout);
-        echo "</pre>";
-
         foreach ( $fields as $key => $field ) {
             if($key == "billing_company"){
                 woocommerce_form_field( $key, $field, $checkout->get_value( $key ) );

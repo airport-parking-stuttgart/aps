@@ -79,7 +79,7 @@ if((isok($_GET, 'date_from') && isok($_GET, 'date_to')) || ($datefrom != "" && $
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
     <div class="page <?php echo $_GET['page'] ?>">
 		<div class="page-title itweb_adminpage_head">
-			<h3>Buchung Bearbeiten</h3>
+			<h3>Buchung Bearbeiten TEST</h3>
 		</div>
 		<br>
 		<div class="page-body">

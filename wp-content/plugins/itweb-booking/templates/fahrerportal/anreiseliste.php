@@ -14,6 +14,7 @@ $filter['filter_product'] = $_GET['product'];
 
 $_SESSION['dateFrom'] = $dateFrom;
 $_SESSION['dateTo'] = $dateTo;
+$_SESSION['service_type'] = "Shuttle";
 
 global $wpdb;
 
@@ -29,7 +30,7 @@ foreach($orders as $order){
 	$wpdb->query($sql);
 }
 
-$allorders = Database::getInstance()->get_fahrerliste("Anreise", $filter);
+$allorders = Database::getInstance()->get_fahrerliste("Anreise", "shuttle", $filter);
 
 $user = wp_get_current_user();
 

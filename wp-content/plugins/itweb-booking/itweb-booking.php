@@ -146,10 +146,6 @@ function itweb_admin_menu()
         require_once plugin_dir_path(__FILE__) . '/templates/vermittler/bearbeiten.php';
     }, 110);
 	
-	add_menu_page('API', 'API', 'read', 'api', function () {
-        require_once plugin_dir_path(__FILE__) . '/templates/api/api.php';
-    });
-	
 	 // Transfer Template
     add_menu_page('Transfer', 'Transfer', 'read', 'transfer', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/transfer/index.php';
@@ -242,6 +238,22 @@ function itweb_admin_menu()
         require_once plugin_dir_path(__FILE__) . '/templates/statistics/bewertungen.php';
     }, 110);
 	
+	// Einstellungen Template
+    add_menu_page('Einstellungen', 'Einstellungen', 'read', 'einstellungen', function () {
+        require_once plugin_dir_path(__FILE__) . '/templates/einstellungen/allgemein.php';
+    });
+	add_submenu_page('einstellungen', 'Allgemein', 'Allgemein', 'read', 'allgemein', function () {
+        require_once plugin_dir_path(__FILE__) . '/templates/einstellungen/allgemein.php';
+    }, 110);
+	add_submenu_page('einstellungen', 'Seitenbetreiber', 'Seitenbetreiber', 'read', 'seitenbetreiber', function () {
+        require_once plugin_dir_path(__FILE__) . '/templates/einstellungen/seitenbetreiber.php';
+    }, 110);
+	
+	add_submenu_page('einstellungen', 'API', 'API', 'read', 'api', function () {
+        require_once plugin_dir_path(__FILE__) . '/templates/einstellungen/api.php';
+    }, 110);
+	
+
 	// Entwickler Template
     add_menu_page('Entwicklerbereich', 'Entwicklerbereich', 'read', 'entwicklerbereich', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/dev/index.php';

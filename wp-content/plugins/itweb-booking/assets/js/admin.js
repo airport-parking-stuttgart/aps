@@ -132,7 +132,7 @@ jQuery(document).ready(function ($) {
         $modal.find('.modal-sonstiges').val($tr.find('.order-sonstiges').text().trim());
         $modal.find('.modal-status').val('wc-' + $tr.find('.order-status').text().trim());
         $modal.modal('show');
-    })
+    });
 
     $('.save-anreiseliste-row').on('click', function(e){
         e.preventDefault();
@@ -186,7 +186,56 @@ jQuery(document).ready(function ($) {
                 console.log(data);
             }
         });
-    })
+    });
+	
+	$('.save-anreiseliste-valet-row').on('click', function(e){
+        e.preventDefault();
+        var _this = $(this);
+        var txt = $(this).text();
+        $(this).html('<div class="loader"></div>');
+        $tr = $(this).closest('tr');
+        var data = {}
+        data['task'] = 'update_anreiseliste_valet';
+        data['order-nr'] = $tr.find('.order-nr').val().trim();
+        data['order-pcode'] = $tr.find('.order-pcode input').val();
+        data['order-code'] = $tr.find('.order-code').text().trim();
+        data['order-token'] = $tr.find('.order-token').text().trim();
+        data['order-lname'] = $tr.find('.order-kunde input').val();
+        data['order-timefrom'] = $tr.find('.order-timefrom input').val();
+        data['order-parkplatz'] = $tr.find('.order-parkplatz input').val();
+		data['order-kennzeichen'] = $tr.find('.order-kennzeichen input').val();
+		data['order-fahrzeug'] = $tr.find('.order-fahrzeug input').val();
+		data['order-farbe'] = $tr.find('.order-farbe input').val();
+        data['order-dateto'] = $tr.find('.order-dateto input').val();
+        data['order-datefrom'] = $tr.find('.order-datefrom input').val();
+        data['order-ruckflug'] = $tr.find('.order-ruckflug input').val();
+        data['order-landung'] = $tr.find('.order-landung input').val();
+        data['order-betrag'] = $tr.find('.order-betrag input').val();
+        
+		select_fahrer = $tr.find('.order-fahrer select').val();
+		input_fahrer = $tr.find('.order-fahrer input').val();
+		
+		if(select_fahrer != null)
+			data['order-fahrer'] = select_fahrer;
+		else
+			data['order-fahrer'] = input_fahrer;
+        
+		data['order-sonstiges'] = $tr.find('.order-sonstiges input').val();
+        
+		data['order-status'] = $tr.find('.order-status select').val();
+        data['ajax'] = true;
+		
+		
+        $.ajax({
+            method: 'POST',
+            url: helperUrl,
+            data: data,
+            success: function(data){
+                _this.html(txt);
+                console.log(data);
+            }
+        });
+    });
 
     // abreiseliste modal
     $('.abreiseliste-modal').on('click', function (e) {
@@ -226,6 +275,49 @@ jQuery(document).ready(function ($) {
         data['order-timeto'] = $tr.find('.order-timeto input').val();
         data['order-persons'] = $tr.find('.order-persons input').val();
         data['order-parkplatz'] = $tr.find('.order-parkplatz input').val();
+        data['order-ruckflug'] = $tr.find('.order-ruckflug input').val();
+        data['order-sonstige1'] = $tr.find('.order-sonstige1 input').val();
+        data['order-sonstige2'] = $tr.find('.order-sonstige2 input').val();
+        data['order-status'] = $tr.find('.order-status select').val();
+        select_fahrer = $tr.find('.order-fahrer select').val();
+		input_fahrer = $tr.find('.order-fahrer input').val();
+		
+		if(select_fahrer != null)
+			data['order-fahrer'] = select_fahrer;
+		else
+			data['order-fahrer'] = input_fahrer;
+        data['order-betrag'] = $tr.find('.order-betrag input').val();
+        data['order-dateto'] = $tr.find('.order-dateto input').val();
+        data['ajax'] = true;
+
+        $.ajax({
+            method: 'POST',
+            url: helperUrl,
+            data: data,
+            success: function(data){
+                _this.html(txt);
+                console.log(data);
+            }
+        });
+    });
+	
+	$('.save-abreiseliste-valet-row').on('click', function(e){
+        e.preventDefault();
+        var _this = $(this);
+        var txt = $(this).text();
+        $(this).html('<div class="loader"></div>');
+        $tr = $(this).closest('tr');
+        var data = {}
+        data['task'] = 'update_abreiseliste_valet';
+        data['order-nr'] = $tr.find('.order-nr').val().trim();
+        data['order-pcode'] = $tr.find('.order-pcode input').val();
+        data['order-token'] = $tr.find('.order-token').text().trim();
+        data['order-lname'] = $tr.find('.order-kunde input').val();
+        data['order-timeto'] = $tr.find('.order-timeto input').val();
+        data['order-parkplatz'] = $tr.find('.order-parkplatz input').val();
+		data['order-kennzeichen'] = $tr.find('.order-kennzeichen input').val();
+		data['order-fahrzeug'] = $tr.find('.order-fahrzeug input').val();
+		data['order-farbe'] = $tr.find('.order-farbe input').val();
         data['order-ruckflug'] = $tr.find('.order-ruckflug input').val();
         data['order-sonstige1'] = $tr.find('.order-sonstige1 input').val();
         data['order-sonstige2'] = $tr.find('.order-sonstige2 input').val();

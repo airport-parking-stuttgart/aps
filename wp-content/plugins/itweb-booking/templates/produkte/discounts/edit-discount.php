@@ -3,6 +3,7 @@
 
 $discount = Database::getInstance()->getDiscountsById($_GET['edit-discount']);
 $clients = Database::getInstance()->getAllClients();
+$base_url = $_SERVER['HTTP_HOST'];
 
 if($_POST['btn'] == 1){
 	
@@ -41,33 +42,34 @@ if($_POST['btn'] == 1){
 	$message
 	, ['id' => $_POST['discount_id']]);
 	
-	
-	$url = "https://airport-parking-germany.de/curl/?request=apm_update_discount&pw=apmprd_req57159428";
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_POSTFIELDS,
-	http_build_query(array(
-		 'discount_name' => $_POST['discount_name'],
-		 'interval_from' => $interval_from,
-		 'interval_to' => $interval_to,
-		 'discount_type' => $_POST['discount_type'],
-		 'value_ud' => $_POST['value_ud'],
-		 'value_pp' => $_POST['value_pp'],
-		 'discount_days_before' => $_POST['discount_days_before'],
-		 'discount_min_days' => $_POST['discount_min_days'],
-		 'discount_max_days' => $_POST['discount_max_days'],
-		 'discount_contigent_limit' => $_POST['discount_contigent_limit'],
-		 'discount_cancel' => $_POST['discount_cancel'],
-		 'discount_message' => $message,
-		 'methode' => $_POST['methode'],
-		 'product_id' => $_POST['product_ids'],
-		 'discount_id' => $_POST['discount_id']
-	)));
-	// Receive server response ...
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
-	$server_output = curl_exec($ch);
-	curl_close($ch);		
+	if($base_url == "airport-parking-stuttgart.de"){
+		$url = "https://airport-parking-germany.de/curl/?request=apm_update_discount&pw=apmprd_req57159428";
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS,
+		http_build_query(array(
+			 'discount_name' => $_POST['discount_name'],
+			 'interval_from' => $interval_from,
+			 'interval_to' => $interval_to,
+			 'discount_type' => $_POST['discount_type'],
+			 'value_ud' => $_POST['value_ud'],
+			 'value_pp' => $_POST['value_pp'],
+			 'discount_days_before' => $_POST['discount_days_before'],
+			 'discount_min_days' => $_POST['discount_min_days'],
+			 'discount_max_days' => $_POST['discount_max_days'],
+			 'discount_contigent_limit' => $_POST['discount_contigent_limit'],
+			 'discount_cancel' => $_POST['discount_cancel'],
+			 'discount_message' => $message,
+			 'methode' => $_POST['methode'],
+			 'product_id' => $_POST['product_ids'],
+			 'discount_id' => $_POST['discount_id']
+		)));
+		// Receive server response ...
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+		$server_output = curl_exec($ch);
+		curl_close($ch);
+	}
 
 	header('Location: /wp-admin/admin.php?page=rabatte');
 }

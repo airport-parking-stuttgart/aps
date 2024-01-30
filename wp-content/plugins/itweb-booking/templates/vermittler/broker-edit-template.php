@@ -1,7 +1,8 @@
 <?php
 $id = $_GET['edit'];
 if (isok($_POST, 'broker_company')) {
-    Database::getInstance()->updateBroker($_POST['broker_company'], $_POST['broker_title'], $_POST['broker_firstname'], $_POST['broker_lastname'], $_POST['broker_street'], $_POST['broker_zip'], $_POST['broker_location'], $_POST['broker_short'], ['id' => $id]);
+    Database::getInstance()->updateBroker($_POST['broker_company'], $_POST['broker_title'], $_POST['broker_firstname'], $_POST['broker_lastname'], $_POST['broker_street'], $_POST['broker_zip'], $_POST['broker_location'], 
+											$_POST['broker_short'], $_POST['broker_api'], ['id' => $id]);
     Database::getInstance()->updateBrokerProducts($id, $_POST['broker_products_id']);
 	
 	// update commissions
@@ -50,6 +51,16 @@ $brokerCommisions = Database::getInstance()->getBrokerCommissions($id);
 									<input type="text" name="broker_short" class="form-control"
 										   value="<?php echo $broker->short ?>">
 								</div>
+								<div class="col-12 col-sm-4 broker-item">
+									<label for="">API für</label>
+									<select name="broker_api" class="form-control">
+										<option value=""></option>
+										<option value="apg" <?php echo $broker->broker_for === 'apg' ? 'selected' : '' ?>>APG</option>
+										<option value="hex" <?php echo $broker->broker_for === 'hex' ? 'selected' : '' ?>>HEX</option>
+										<option value="parkos" <?php echo $broker->broker_for === 'parkos' ? 'selected' : '' ?>>Parkos</option>
+										<option value="fluparks" <?php echo $broker->broker_for === 'fluparks' ? 'selected' : '' ?>>FluParks</option>
+									</select>
+								</div>
 								<div class="col-12 broker-item">
 									<label for="">Tittel</label>
 									<select name="broker_title" class="form-control">
@@ -79,6 +90,39 @@ $brokerCommisions = Database::getInstance()->getBrokerCommissions($id);
 								<div class="col-12 col-sm-6 broker-item">
 									<label for="">Ort</label>
 									<input type="text" name="broker_location" class="form-control" value="<?php echo $broker->location_id ?>">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-8">
+					<div class="row ui-lotdata-block ui-lotdata-block-next commissions-wrapper">
+						<h5 class="ui-lotdata-title">API Einstellungen</h5>
+						<div class="col-sm-12 col-md-12 ui-lotdata">
+							<div class="row">								
+								<div class="col-12">
+									<div class="row">
+										<div class="col-sm-12 col-md-3">
+											<label for="">Benutzername</label>
+											<input type="text" name="username" class="form-control" value="<?php echo $broker->username ?>">
+										</div>
+										<div class="col-sm-12 col-md-3">
+											<label for="">Passwort</label>
+											<input type="text" name="password" class="form-control" value="<?php echo $broker->password ?>">
+										</div>
+										<div class="col-sm-12 col-md-2">
+											<label for="">Grant Type</label>
+											<input type="text" name="grant_type" class="form-control" value="<?php echo $broker->grant_type ?>">
+										</div>
+										<div class="col-sm-12 col-md-2">
+											<label for="">Client Id</label>
+											<input type="text" name="client_id" class="form-control" value="<?php echo $broker->client_id ?>">
+										</div>
+										<div class="col-sm-12 col-md-6">
+											<label for="">Client Secret</label>
+											<input type="text" name="client_secret" class="form-control" value="<?php echo $broker->client_secret ?>">
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -168,7 +212,7 @@ $brokerCommisions = Database::getInstance()->getBrokerCommissions($id);
 				</div>
 			</div>
             <div class="row ui-lotdata-block ui-lotdata-block-next">
-				<h5 class="ui-lotdata-title">Provision</h5>
+				<h5 class="ui-lotdata-title">Vermittelnde Produkte</h5>
                 <div class="col-sm-12 col-md-12 ui-lotdata">
                     <div class="row">
 						<div class="col-sm-12 col-md-4">

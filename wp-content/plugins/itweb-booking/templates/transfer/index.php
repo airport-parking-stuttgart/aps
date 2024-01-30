@@ -6,6 +6,9 @@ $locations = Database::getInstance()->getLocations();
 ?>
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
 	<div class="page <?php echo $_GET['page'] ?>">
+		<div class="page-logo">
+			<img class="adm-logo" src="<?php echo home_url(); ?>/wp-content/uploads/2021/08/AP-Management-System-klein.png" alt="" width="300" height="200">
+		</div>
 		<div class="page-title itweb_adminpage_head">
 			<h3>Transfer</h3>
 		</div>

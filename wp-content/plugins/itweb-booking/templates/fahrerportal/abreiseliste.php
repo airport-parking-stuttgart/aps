@@ -18,9 +18,10 @@ $filter['filter_product'] = $_GET['product'];
 
 $_SESSION['dateFrom'] = $dateFrom;
 $_SESSION['dateTo'] = $dateTo;
+$_SESSION['service_type'] = "Shuttle";
 
 
-$allorders = Database::getInstance()->get_fahrerliste("Abreise", $filter);
+$allorders = Database::getInstance()->get_fahrerliste("Abreise", "shuttle", $filter);
 
 foreach($allorders as $order){
 	$grput_sql = Database::getInstance()->getProductGroupsById($order->group_id);

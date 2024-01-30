@@ -1,8 +1,7 @@
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
 	<div class="page-logo">
-		<img class="adm-logo" src="<?php echo home_url(); ?>/wp-content/uploads/2021/05/logo-e1596314559277.png" alt="" width="300" height="200">
+		<img class="adm-logo" src="<?php echo home_url(); ?>/wp-content/uploads/2021/08/AP-Management-System-klein.png" alt="" width="300" height="200">
 	</div>
-	
 <?php
 if (!isset($_GET['edit'])) :
     $brokers = Database::getInstance()->getBrokers();
@@ -21,6 +20,7 @@ if (!isset($_GET['edit'])) :
                     <th>Strasse / Nr</th>
                     <th>PLZ</th>
                     <th>Ort</th>
+					<th>API</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -32,8 +32,9 @@ if (!isset($_GET['edit'])) :
                         <td><?php echo $broker->company ?></td>
                         <td><?php echo $broker->street ?></td>
                         <td><?php echo $broker->zip ?></td>
-                        <td><?php echo $broker->location ?></td>
-                        <!--<td style="width: 130px;text-align: right;">
+                        <td><?php echo $broker->location_id ?></td>
+                        <td><?php echo $broker->broker_for == null || $broker->broker_for == "" ? "-" : $broker->broker_for ?></td>
+						<!--<td style="width: 130px;text-align: right;">
                             <a href="/wp-admin/admin.php?page=vermittler-bearbeiten&edit=<?php echo $broker->id ?>"
                                class="btn btn-secondary btn-sm">
                                 Edit
