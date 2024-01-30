@@ -1,7 +1,8 @@
 <?php
 $products = Database::getInstance()->getBrokerLots();
 if (isok($_POST, 'broker_company')) {
-    $insertId = Database::getInstance()->saveBroker($_POST['broker_company'], $_POST['broker_title'], $_POST['broker_firstname'], $_POST['broker_lastname'], $_POST['broker_street'], $_POST['broker_zip'], $_POST['broker_location'], $_POST['broker_short']);
+    $insertId = Database::getInstance()->saveBroker($_POST['broker_company'], $_POST['broker_title'], $_POST['broker_firstname'], $_POST['broker_lastname'], $_POST['broker_street'], $_POST['broker_zip'], 
+													$_POST['broker_location'], $_POST['broker_short'], $_POST['broker_api']);
     Database::getInstance()->saveBrokerProducts($insertId, $_POST['broker_products_id']);
 	
 	if (isset($_POST['commission_date_from']) && !empty($_POST['commission_date_from'])) {
@@ -33,6 +34,16 @@ if (isok($_POST, 'broker_company')) {
 						<div class="col-2 col-sm-1">
 							<label for="">Kürzel</label>
 							<input type="text" name="broker_short" class="form-control">
+						</div>
+						<div class="col-12 col-sm-1">
+							<label for="">API für</label>
+							<select name="broker_api" class="form-control">
+								<option value=""></option>
+								<option value="apg">APG</option>
+								<option value="hex">HEX</option>
+								<option value="parkos">Parkos</option>
+								<option value="fluparks">FluParks</option>
+							</select>
 						</div>
 					</div>
 					<div class="row m10">
@@ -109,7 +120,7 @@ if (isok($_POST, 'broker_company')) {
 			</div>
 
 			<div class="row ui-lotdata-block ui-lotdata-block-next">
-				<h5 class="ui-lotdata-title">Vermittelnde Produkt</h5>
+				<h5 class="ui-lotdata-title">Vermittelnde Produkte</h5>
 				<div class="col-sm-12 col-md-12 ui-lotdata">
 					<div class="row m10">
 						<div class="col-sm-12 col-md-3">

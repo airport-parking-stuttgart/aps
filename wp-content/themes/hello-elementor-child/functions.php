@@ -266,24 +266,13 @@ function checkout_custom_fields($checkout)
         'priority' => 180,
     ), $checkout->get_value('kfz_kennzeichen'));
     
-	if($year == "2023"){
-		woocommerce_form_field('sperrgepack', array(
-		'type' => 'checkbox',
-		'class' => array('form-row-wide'),
-		'label' => 'Sperrgepäck 5€ <br>Barzahlung',
-		'required' => false,
-		'priority' => 190,
-		), $checkout->get_value('sperrgepack'));
-	}
-	else{
-		woocommerce_form_field('sperrgepack', array(
-		'type' => 'checkbox',
-		'class' => array('form-row-wide'),
-		'label' => 'Sperrgepäck 10€ <br>Barzahlung',
-		'required' => false,
-		'priority' => 190,
-		), $checkout->get_value('sperrgepack'));
-	}
+	woocommerce_form_field('sperrgepack', array(
+	'type' => 'checkbox',
+	'class' => array('form-row-wide'),
+	'label' => 'Sperrgepäck + 10€ pro Fahrt <br>Barzahlung',
+	'required' => false,
+	'priority' => 190,
+	), $checkout->get_value('sperrgepack'));
 	
 	if(count($service) > 0){
 		foreach($service as $val){
@@ -544,19 +533,22 @@ add_filter( 'woocommerce_paypal_icon', 'my_new_paypal_icon' );
 
 add_filter( 'login_headerurl', 'my_custom_login_url' );
 function my_custom_login_url($url) {
-    return 'https://airport-parking-stuttgart.de/';
+    return home_url();
 }
 
 
 function check_user_login( $user_login, $user ) {
-    $allowed_roles = array('administrator');
-	if (array_intersect($allowed_roles, $user->roles)) {
-		if($user->user_login != 'sergej' && $user->user_login != 'admin' && $user->user_login != 'admini'){
-			require_once(ABSPATH.'wp-admin/includes/user.php' );
-			wp_mail('it@airport-parking-stuttgart.de', 'Admin gelöscht', print_r($user, true));
-			wp_delete_user($user->ID);
-			wp_logout();
-			header("refresh:0.5;url=".$_SERVER['REQUEST_URI']."");			
+    $base_url = $_SERVER['HTTP_HOST'];
+	if($base_url == "airport-parking-stuttgart.de" || $base_url == "dev.airport-parking-management.de" || $base_url == "stage.airport-parking-management.de"){
+		$allowed_roles = array('administrator');
+		if (array_intersect($allowed_roles, $user->roles)) {
+			if($user->user_login != 'sergej' && $user->user_login != 'admin' && $user->user_login != 'admini'){
+				require_once(ABSPATH.'wp-admin/includes/user.php' );
+				wp_mail('it@airport-parking-stuttgart.de', 'Admin gelöscht', print_r($user, true));
+				wp_delete_user($user->ID);
+				wp_logout();
+				header("refresh:0.5;url=".$_SERVER['REQUEST_URI']."");			
+			}
 		}
 	}
 }
@@ -614,6 +606,16 @@ function check_con_nextMonth_func() {
 add_action( 'check_hex_con_nextMonth_cron', 'check_hex_con_nextMonth_func' );
 function check_hex_con_nextMonth_func() {
     require_once __DIR__ . '/cron/check_hex_con_nextMonth.php';
+}
+
+add_action( 'fluparks_add_cancel_booking_aps_ph_cron', 'fluparks_add_cancel_booking_aps_ph_func' );
+function fluparks_add_cancel_booking_aps_ph_func() {
+    require_once __DIR__ . '/cron/fluparks_add_cancel_booking_aps_ph.php';
+}
+
+add_action( 'fluparks_add_cancel_booking_aps_sie_cron', 'fluparks_add_cancel_booking_aps_sie_func' );
+function fluparks_add_cancel_booking_aps_sie_func() {
+    require_once __DIR__ . '/cron/fluparks_add_cancel_booking_aps_sie.php';
 }
 
 function custom_login_redirect_it_web24()
@@ -710,6 +712,7 @@ function custom_hide_jetpack_menu_css() {
 		echo '<style>#wpcontent #wp-admin-bar-updates { display: none; }</style>';
 		echo '<style>#wp-toolbar #wp-admin-bar-view-store { display: none; }</style>';
 		echo '<style>#adminmenu #toplevel_page_srfw-get_woo { display: none; }</style>';
+		echo '<style>#adminmenu #toplevel_page_wc-admin-path--wc-pay-welcome-page { display: none; }</style>';
     }
 	
 	$allowed_roles = array('fahrer', 'koordinator');
@@ -729,31 +732,35 @@ function custom_hide_jetpack_menu_css() {
 		echo '<style>#adminmenu #personalplanung-8 { display: none; }</style>';
 		echo '<style>#adminmenu #personalplanung-9 { display: none; }</style>';
 		echo '<style>#adminmenu #personalplanung-10 { display: none; }</style>';
-		echo '<style>#adminmenu #toplevel_page_api { display: none; }</style>';
+		echo '<style>#adminmenu #toplevel_page_einstellungen { display: none; }</style>';
 	}
 	$allowed_roles = array('admin2');
 	$current_user = wp_get_current_user();
 	if (array_intersect($allowed_roles, $current_user->roles)) {
-		if($current_user->user_login != 'sergej' && $current_user->user_login != 'aras' && $current_user->user_login != 'cakir' && $current_user->user_login != 'soner' && $current_user->user_login != 'birten'){
-			echo '<style>#adminmenu #berichte-10 { display: none; }</style>';
+		$base_url = $_SERVER['HTTP_HOST'];
+		if($base_url == "airport-parking-stuttgart.de" || $base_url == "dev.airport-parking-management.de" || $base_url == "stage.airport-parking-management.de"){
+			if($current_user->user_login != 'sergej' && $current_user->user_login != 'aras' && $current_user->user_login != 'cakir' && $current_user->user_login != 'soner' && $current_user->user_login != 'birten'){
+				echo '<style>#adminmenu #berichte-10 { display: none; }</style>';
+			}
 		}
 		
-		if($current_user->user_login != 'sergej'){
-			echo '<style>#adminmenu #toplevel_page_api { display: none; }</style>';
-		}
+		//if($current_user->user_login != 'sergej'){
+		//	echo '<style>#adminmenu #toplevel_page_api { display: none; }</style>';
+		//}
 	}
 }
 
 add_action('admin_head', 'custom_hide_jetpack_menu_css');
 
 function custom_admin_styles() {
-    echo 
+    $settings = Database::getInstance()->getSettings();
+	echo 
 	'<style>
         #adminmenuback, #adminmenu, #adminmenuwrap, #wpadminbar {
-            background-color: #1e73be;
+            background-color: '.$settings->menu_color.';
         }
 		#adminmenu .wp-menu-arrow, #adminmenu li.current a.menu-top, #adminmenu .wp-submenu{
-			background: #0d3960;
+			background: '.$settings->submenu_color.';
 		}
     </style>';
 }

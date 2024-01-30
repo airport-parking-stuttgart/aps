@@ -43,7 +43,7 @@ class Helper
 			
 			if($update_days > $orig_days){
 				$comp_days = $update_days - $orig_days;
-				$sonstige_2 = "+". $comp_days . " TAG " . ($comp_days * 10) . " €";				
+				$sonstige_2 = "+". $comp_days . " TAG " . ($comp_days * 15) . " €";				
 			}
 			else
 				$sonstige_2 = '';			
@@ -182,20 +182,6 @@ class Helper
 				'editByRet' => $user->user_login,
 				'order_status' => $_POST['order-status']
 			], ['order_id' => $_POST['order-nr']]);
-			
-			
-			
-			/*
-			$datefromO = get_post_meta($_POST['order-nr'], 'Anreisedatum', true);
-			$dateToO = get_post_meta($_POST['order-nr'], 'Abreisedatum', true);
-			$daysO = getDaysBetween2Dates(new DateTime($datefromO), new DateTime($dateToO));
-			$dateToN = date('Y-m-d', strtotime$_POST['order-dateto']));
-			$daysN = getDaysBetween2Dates(new DateTime($datefromO), new DateTime($dateToN));
-			if($daysN > $daysO){
-				$s = get_post_meta($_POST['order-nr'], 'Sonstige 1', true);
-				$s != "" ? update_post_meta($_POST['order-nr'], 'Sonstige 1', $s . " + " . ($daysn - $dayso) . "€ Extratage") : update_post_meta($_POST['order-nr'], 'Sonstige 1', "+ " . ($daysn - $dayso) . "€ Extratage");
-			}
-			*/
         }
 		update_post_meta($_POST['order-nr'], 'editByRet', $user->user_login);
         $this->db->updateList($_POST['order-nr'], $data);
@@ -207,6 +193,118 @@ class Helper
 			$order->calculate_totals();
 			$order->save();
 		}
+    }
+	
+	public function update_abreiseliste_valet()
+    {
+		$orderSQL = Orders::getOrderByOrderId($_POST['order-nr']);
+		$user = wp_get_current_user();
+		if($_POST['order-betrag'] == "-")
+			$betrag = $orderSQL->order_price;
+		else
+			$betrag = $_POST['order-betrag'];
+		
+		if(($orderSQL->Anreisedatum < date('Y-m-d')) || ($orderSQL->Anreisedatum == date('Y-m-d') && date('H:i', strtotime($orderSQL->Uhrzeit_von)) < date('H:i'))){
+			$d1 = strtotime($orderSQL->first_abreisedatum);
+			$d2 = strtotime($orderSQL->Anreisedatum);
+			$orig_days = round(($d1 - $d2) / 86400);
+			
+			$d3 = strtotime($_POST['order-dateto']);
+			$d4 = strtotime($orderSQL->Anreisedatum);				
+			$update_days = round(($d3 - $d4) / 86400);
+			
+			if($update_days > $orig_days){
+				$comp_days = $update_days - $orig_days;
+				$sonstige_2 = "+". $comp_days . " TAG " . ($comp_days * 10) . " €";				
+			}
+			else
+				$sonstige_2 = '';			
+		}
+		else
+			$sonstige_2 = '';
+		
+		if($_POST['order-ruckflug'] != ""){
+			$ruckflug = $_POST['order-ruckflug'];
+			$str1 = preg_replace('/[^A-Z]/', '', $ruckflug);
+			$str2 = preg_replace('/[^0-9]/', '', $ruckflug);
+			if($str2 != null)
+				$str2 *= 1;
+			$ruckflug = $str1 . $str2;
+			update_post_meta($_POST['order-nr'], 'Rückflugnummer', $ruckflug);
+		}
+		else
+			$ruckflug = "";
+		
+        $data = [
+            //'_billing_first_name' => $_POST['order-fname'],
+            '_billing_last_name' => $_POST['order-lname'],
+            'Uhrzeit bis' => $_POST['order-timeto'],
+            'Abreisedatum' => dateFormat($_POST['order-dateto']),
+            'RückflugnummerEdit' => $ruckflug,
+            'Parkplatz' => $_POST['order-parkplatz'],
+			'Kennzeichen' => $_POST['order-kennzeichen'],
+			'Fahrzeugmodell' => $_POST['order-fahrzeug'],
+			'Fahrzeugfarbe' => $_POST['order-farbe'],
+            'Sonstige 1' => $_POST['order-sonstige1'],
+            'Sonstige 2' => $sonstige_2,
+            'P.-Code.' => $_POST['order-pcode'],
+            'FahrerAb' => $_POST['order-fahrer'],
+            'Status' => $_POST['order-status'],
+            'Betrag' => $betrag
+        ];
+        $order = Orders::getByOrderId($_POST['order-nr']);
+        $dateTo = date('Y-m-d H:i', strtotime(date('Y-m-d', strtotime($order->date_to)) . $_POST['order-timeto']));
+			
+		if($ruckflug != ""){
+			Orders::updateOrder([
+				'return_flight_number' => $ruckflug,
+				'RuckflugnummerEdit' => $ruckflug
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		
+		if($_POST['order-parkplatz'] != ""){
+			Orders::updateOrder([
+				'Parkplatz' => $_POST['order-parkplatz']
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		
+		if($_POST['order-kennzeichen'] != ""){
+			Orders::updateOrder([
+				'Kennzeichen' => $_POST['order-kennzeichen']
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		
+		if($_POST['order-sonstige1'] != ""){
+			Orders::updateOrder([
+				'Sonstige_1' => $_POST['order-sonstige1']
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		
+		if($_POST['order-fahrer'] != ""){
+			Orders::updateOrder([
+				'FahrerAb' => $_POST['order-fahrer']
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		
+		if($_POST['order-fahrer'] != ""){
+			Orders::updateOrder([
+				'FahrerAb' => $_POST['order-fahrer']
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		
+		Orders::updateOrder([
+			'date_to' => $dateTo,
+			'Abreisedatum' => date('Y-m-d', strtotime($_POST['order-dateto'])),
+			'AbreisedatumEdit' => date('Y-m-d', strtotime($_POST['order-dateto'])),
+			'Uhrzeit_bis' => date('H:i', strtotime($_POST['order-timeto'])),
+			'Uhrzeit_bisEdit' => date('H:i', strtotime($_POST['order-timeto'])),
+			'Sonstige_2' => $sonstige_2,
+			'editByRet' => $user->user_login,
+			'order_status' => $_POST['order-status']
+		], ['order_id' => $_POST['order-nr']]);
+
+		update_post_meta($_POST['order-nr'], 'editByRet', $user->user_login);
+        $this->db->updateList($_POST['order-nr'], $data);
     }
 
     public function update_anreiseliste()
@@ -269,7 +367,6 @@ class Helper
         ];
 
         $dateTo = date('Y-m-d H:i', strtotime($_POST['order-dateto'] . ' ' . $_POST['order-landung']));
-//        Orders::updateOrder(['date_to' => $dateTo], ['order_id' => $_POST['order-nr']]);
         $dateFrom = date('Y-m-d H:i', strtotime($_POST['order-datefrom'] . ' ' . $_POST['order-timefrom']));
         if(HotelTransfers::getHotelTransferByOrderId($_POST['order-nr'])){
 			
@@ -417,6 +514,133 @@ class Helper
 			$order->save();
 		}
     }
+	
+	public function update_anreiseliste_valet()
+    {
+		$user = wp_get_current_user();
+		$orderSQL = Orders::getOrderByOrderId($_POST['order-nr']);
+		
+		if($_POST['order-betrag'] == "-")
+			$betrag = $orderSQL->order_price;
+		else
+			$betrag = $_POST['order-betrag'];
+		
+		if($_POST['order-dateto'] != ""){
+			$dateToEdit = dateFormat($_POST['order-dateto']);
+			update_post_meta($_POST['order-nr'], 'Abreisedatum', dateFormat($_POST['order-dateto']));
+		}
+		else
+			$dateToEdit = "";
+		
+		if($_POST['order-landung'] != ""){
+			$timeToEdit = $_POST['order-landung'];
+			update_post_meta($_POST['order-nr'], 'Uhrzeit bis', $_POST['order-landung']);
+		}
+		else
+			$timeToEdit = "";
+		
+		if($_POST['order-ruckflug'] != ""){
+			$ruckflug = $_POST['order-ruckflug'];
+			$str1 = preg_replace('/[^A-Z]/', '', $ruckflug);
+			$str2 = preg_replace('/[^0-9]/', '', $ruckflug);
+			if($str2 != null)
+				$str2 *= 1;
+			$ruckflug = $str1 . $str2;
+			update_post_meta($_POST['order-nr'], 'Rückflugnummer', $ruckflug);
+		}
+		else
+			$ruckflug = "";
+		
+        $data = [
+            //'_billing_first_name' => $_POST['order-fname'],
+            '_billing_last_name' => $_POST['order-lname'],
+            'AbreisedatumEdit' => $dateToEdit,
+            'Anreisedatum' => dateFormat($_POST['order-datefrom']),
+            'Uhrzeit von' => $_POST['order-timefrom'],
+            'RückflugnummerEdit' => $ruckflug,
+            'Uhrzeit bis Edit' => $timeToEdit,
+            'Parkplatz' => $_POST['order-parkplatz'],
+			'Kennzeichen' => $_POST['order-kennzeichen'],
+			'Fahrzeugmodell' => $_POST['order-fahrzeug'],
+			'Fahrzeugfarbe' => $_POST['order-farbe'],
+            'FahrerAn' => $_POST['order-fahrer'],
+            'Sonstige 1' => $_POST['order-sonstiges'],
+			'Sperrgepack' => $spgp,
+            'P.-Code.' => $_POST['order-pcode'],
+            'Status' => $_POST['order-status'],
+            'Betrag' => $betrag
+        ];
+
+        $dateTo = date('Y-m-d H:i', strtotime($_POST['order-dateto'] . ' ' . $_POST['order-landung']));
+        $dateFrom = date('Y-m-d H:i', strtotime($_POST['order-datefrom'] . ' ' . $_POST['order-timefrom']));
+
+		if($_POST['order-dateto'] != ""){
+			Orders::updateOrder([
+				'date_to' => $dateTo,
+				'Abreisedatum' => date('Y-m-d', strtotime($_POST['order-dateto']))
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		if($_POST['order-landung'] != ""){
+			Orders::updateOrder([
+				'Uhrzeit_bis' => $_POST['order-landung']
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		if($_POST['order-ruckflug'] != ""){
+			Orders::updateOrder([
+				'return_flight_number' => $ruckflug
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		if($_POST['order-parkplatz'] != ""){
+			Orders::updateOrder([
+				'Parkplatz' => $_POST['order-parkplatz']
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		if($_POST['order-kennzeichen'] != ""){
+			Orders::updateOrder([
+				'Kennzeichen' => $_POST['order-kennzeichen']
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		if($dateToEdit != ""){
+			Orders::updateOrder([
+				'AbreisedatumEdit' => $dateToEdit
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		if($ruckflug != ""){
+			Orders::updateOrder([
+				'RuckflugnummerEdit' => $ruckflug
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		if($timeToEdit != ""){
+			Orders::updateOrder([
+				'Uhrzeit_bisEdit' => $timeToEdit
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		if($_POST['order-fahrer'] != ""){
+			Orders::updateOrder([
+				'FahrerAn' => $_POST['order-fahrer']
+			], ['order_id' => $_POST['order-nr']]);
+		}
+		
+		Orders::updateOrder([
+			'Sonstige_1' => $_POST['order-sonstiges']
+		], ['order_id' => $_POST['order-nr']]);
+		
+
+		Orders::updateOrder([
+			'editByArr' => $user->user_login
+		], ['order_id' => $_POST['order-nr']]);
+		
+		Orders::updateOrder([
+			'date_from' => $dateFrom,
+			'Anreisedatum' => date('Y-m-d', strtotime($_POST['order-datefrom'])),
+			'Uhrzeit_von' => date('H:i', strtotime($_POST['order-timefrom'])),
+			'last_name' => $_POST['order-lname'],
+			'order_status' => $_POST['order-status']
+		], ['order_id' => $_POST['order-nr']]);
+        
+		update_post_meta($_POST['order-nr'], 'editByArr', $user->user_login);
+        $this->db->updateList($_POST['order-nr'], $data);
+    }
 
     public function mark_as_done_anreise_item()
     {
@@ -451,6 +675,7 @@ class Helper
 
     function update_product()
     {
+		$base_url = $_SERVER['HTTP_HOST'];
         $product = wc_get_product($_POST['product_id']);
         $product->set_name($_POST['parklot']);
 		$product->set_description($_POST['dsc']);
@@ -545,30 +770,32 @@ class Helper
                 $interval_to = date('Y-m-d', strtotime($dates[1]));
                 if (isset($_POST['discount_id'][$i]) && !empty($_POST['discount_id'][$i])) {
                     $this->db->updateDiscount($_POST['discount_name'][$i], $interval_from, $interval_to, $_POST['discount_type'][$i], $_POST['discount_value'][$i], $_POST['discount_days_before'][$i], $_POST['discount_contigent_limit'][$i], $_POST['discount_min_days'][$i], $_POST['discount_cancel'][$i], $_POST['discount_message'][$i], $product->get_id(), ['id' => $_POST['discount_id'][$i]]);
-                
-					$url = "https://airport-parking-germany.de/curl/?request=apm_update_discount&pw=apmprd_req57159428";
-					$ch = curl_init();
-					curl_setopt($ch, CURLOPT_URL, $url);
-					curl_setopt($ch, CURLOPT_POST, 1);
-					curl_setopt($ch, CURLOPT_POSTFIELDS,
-					http_build_query(array(
-						 'discount_name' => $_POST['discount_name'][$i],
-						 'interval_from' => $interval_from,
-						 'interval_to' => $interval_to,
-						 'discount_type' => $_POST['discount_type'][$i],
-						 'discount_value' => $_POST['discount_value'][$i],
-						 'discount_days_before' => $_POST['discount_days_before'][$i],
-						 'discount_min_days' => $_POST['discount_min_days'][$i],
-						 'discount_contigent_limit' => $_POST['discount_contigent_limit'][$i],
-						 'discount_cancel' => $_POST['discount_cancel'][$i],
-						 'discount_message' => $_POST['discount_message'][$i],
-						 'product_id' => $product->get_id(),
-						 'discount_id' => $_POST['discount_id'][$i],
-					)));
-					// Receive server response ...
-					curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
-					$server_output = curl_exec($ch);
-					curl_close($ch);
+					
+					if($base_url == "airport-parking-stuttgart.de"){
+						$url = "https://airport-parking-germany.de/curl/?request=apm_update_discount&pw=apmprd_req57159428";
+						$ch = curl_init();
+						curl_setopt($ch, CURLOPT_URL, $url);
+						curl_setopt($ch, CURLOPT_POST, 1);
+						curl_setopt($ch, CURLOPT_POSTFIELDS,
+						http_build_query(array(
+							 'discount_name' => $_POST['discount_name'][$i],
+							 'interval_from' => $interval_from,
+							 'interval_to' => $interval_to,
+							 'discount_type' => $_POST['discount_type'][$i],
+							 'discount_value' => $_POST['discount_value'][$i],
+							 'discount_days_before' => $_POST['discount_days_before'][$i],
+							 'discount_min_days' => $_POST['discount_min_days'][$i],
+							 'discount_contigent_limit' => $_POST['discount_contigent_limit'][$i],
+							 'discount_cancel' => $_POST['discount_cancel'][$i],
+							 'discount_message' => $_POST['discount_message'][$i],
+							 'product_id' => $product->get_id(),
+							 'discount_id' => $_POST['discount_id'][$i],
+						)));
+						// Receive server response ...
+						curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+						$server_output = curl_exec($ch);
+						curl_close($ch);
+					}
 				
 				} else {
 					$this->db->saveDiscount($_POST['discount_name'][$i], $interval_from, $interval_to, $_POST['discount_type'][$i], $_POST['discount_value'][$i], $_POST['discount_days_before'][$i], $_POST['discount_contigent_limit'][$i], $_POST['discount_min_days'][$i], $_POST['discount_cancel'][$i], $_POST['discount_message'][$i], $product->get_id());
@@ -578,29 +805,31 @@ class Helper
 					AND type = '" . $_POST['discount_type'][$i] . "' AND value = '" . $_POST['discount_value'][$i] . "' AND days_before = '" . $_POST['discount_days_before'][$i] . "' AND discount_contigent = '" . $_POST['discount_contigent_limit'][$i] . "' AND 
 					product_id = " . $product->get_id());
 					
-					$url = "https://airport-parking-germany.de/curl/?request=apm_add_discount&pw=apmprd_req57159428";
-					$ch = curl_init();
-					curl_setopt($ch, CURLOPT_URL, $url);
-					curl_setopt($ch, CURLOPT_POST, 1);
-					curl_setopt($ch, CURLOPT_POSTFIELDS,
-					http_build_query(array(
-						 'discount_name' => $_POST['discount_name'][$i],
-						 'interval_from' => $interval_from,
-						 'interval_to' => $interval_to,
-						 'discount_type' => $_POST['discount_type'][$i],
-						 'discount_value' => $_POST['discount_value'][$i],
-						 'discount_days_before' => $_POST['discount_days_before'][$i],
-						 'discount_min_days' => $_POST['discount_min_days'][$i],
-						 'discount_contigent_limit' => $_POST['discount_contigent_limit'][$i],
-						 'discount_cancel' => $_POST['discount_cancel'][$i],
-						 'discount_message' => $_POST['discount_message'][$i],
-						 'product_id' => $product->get_id(),
-						 'discount_id' => $discount_id->id
-					)));
-					// Receive server response ...
-					curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
-					$server_output = curl_exec($ch);
-					curl_close($ch);
+					if($base_url == "airport-parking-stuttgart.de"){
+						$url = "https://airport-parking-germany.de/curl/?request=apm_add_discount&pw=apmprd_req57159428";
+						$ch = curl_init();
+						curl_setopt($ch, CURLOPT_URL, $url);
+						curl_setopt($ch, CURLOPT_POST, 1);
+						curl_setopt($ch, CURLOPT_POSTFIELDS,
+						http_build_query(array(
+							 'discount_name' => $_POST['discount_name'][$i],
+							 'interval_from' => $interval_from,
+							 'interval_to' => $interval_to,
+							 'discount_type' => $_POST['discount_type'][$i],
+							 'discount_value' => $_POST['discount_value'][$i],
+							 'discount_days_before' => $_POST['discount_days_before'][$i],
+							 'discount_min_days' => $_POST['discount_min_days'][$i],
+							 'discount_contigent_limit' => $_POST['discount_contigent_limit'][$i],
+							 'discount_cancel' => $_POST['discount_cancel'][$i],
+							 'discount_message' => $_POST['discount_message'][$i],
+							 'product_id' => $product->get_id(),
+							 'discount_id' => $discount_id->id
+						)));
+						// Receive server response ...
+						curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+						$server_output = curl_exec($ch);
+						curl_close($ch);
+					}
 				}
             }
         }
@@ -751,91 +980,96 @@ class Helper
 	public function delete_price()
     {
         $id = $_POST['id'];
-		$name = $_POST['name'];
+		$name = urlencode($_POST['name']);
+		$base_url = $_SERVER['HTTP_HOST'];
 		
-		$data1 = array(
+		if($base_url == "airport-parking-stuttgart.de"){
+			$data1 = array(
+				
+			);
+			$query1 = http_build_query($data1);
+			$query2 = http_build_query($data1);
 			
-		);
-		
-		$query1 = http_build_query($data1);
-		$query2 = http_build_query($data1);
-		
-		$ch1 = curl_init();
-		$ch2 = curl_init();
-		
-		curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/search-result/?request=apm_price_del&pw=apmprd_req57159428&p_name=".$name);
-		curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch1, CURLOPT_POST, true);
-		curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
+			$ch1 = curl_init();
+			$ch2 = curl_init();
+			
+			curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/search-result/?request=apm_price_del&pw=apmprd_req57159428&p_name=".$name);
+			curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch1, CURLOPT_POST, true);
+			curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
 
-		curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/?request=apm_price_del&pw=apmprd_req57159428&p_name=".$name);
-		curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch2, CURLOPT_POST, true);
-		curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
-		
-		$mh = curl_multi_init();
-		
-		curl_multi_add_handle($mh, $ch1);
-		curl_multi_add_handle($mh, $ch2);
-		
-		do {
-			curl_multi_exec($mh, $running);
-		} while ($running > 0);
-		
-		$response1 = curl_multi_getcontent($ch1);
-		$response2 = curl_multi_getcontent($ch2);
-		
-		curl_multi_remove_handle($mh, $ch1);
-		curl_multi_remove_handle($mh, $ch2);
-		curl_multi_close($mh);
-		
-		curl_close($ch1);
-		curl_close($ch2);
+			curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/?request=apm_price_del&pw=apmprd_req57159428&p_name=".$name);
+			curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch2, CURLOPT_POST, true);
+			curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
+			
+			$mh = curl_multi_init();
+			
+			curl_multi_add_handle($mh, $ch1);
+			curl_multi_add_handle($mh, $ch2);
+			
+			do {
+				curl_multi_exec($mh, $running);
+			} while ($running > 0);
+			
+			$response1 = curl_multi_getcontent($ch1);
+			$response2 = curl_multi_getcontent($ch2);
+			
+			curl_multi_remove_handle($mh, $ch1);
+			curl_multi_remove_handle($mh, $ch2);
+			curl_multi_close($mh);
+			
+			curl_close($ch1);
+			curl_close($ch2);
+		}
 		
         return $this->db->deletePrice($id);
     }
 	
 	public function price_delete_from_calendar(){
         $lot_id = $_POST['lotid'];
+		$base_url = $_SERVER['HTTP_HOST'];
 		
-		$data1 = array(
+		if($base_url == "airport-parking-stuttgart.de"){
+			$data1 = array(
+				
+			);
 			
-		);
-		
-		$query1 = http_build_query($data1);
-		$query2 = http_build_query($data1);
-		
-		$ch1 = curl_init();
-		$ch2 = curl_init();
-		
-		curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/curl/?request=apm_delAll_cal&pw=apmcal_req57159428&product_id=".$lot_id);
-		curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch1, CURLOPT_POST, true);
-		curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
+			$query1 = http_build_query($data1);
+			$query2 = http_build_query($data1);
+			
+			$ch1 = curl_init();
+			$ch2 = curl_init();
+			
+			curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/curl/?request=apm_delAll_cal&pw=apmcal_req57159428&product_id=".$lot_id);
+			curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch1, CURLOPT_POST, true);
+			curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
 
-		curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/?request=apm_delAll_cal&pw=apmcal_req57159428&product_id=".$lot_id);
-		curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch2, CURLOPT_POST, true);
-		curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
-		
-		$mh = curl_multi_init();
-		
-		curl_multi_add_handle($mh, $ch1);
-		curl_multi_add_handle($mh, $ch2);
-		
-		do {
-			curl_multi_exec($mh, $running);
-		} while ($running > 0);
-		
-		$response1 = curl_multi_getcontent($ch1);
-		$response2 = curl_multi_getcontent($ch2);
-		
-		curl_multi_remove_handle($mh, $ch1);
-		curl_multi_remove_handle($mh, $ch2);
-		curl_multi_close($mh);
-		
-		curl_close($ch1);
-		curl_close($ch2);
+			curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/?request=apm_delAll_cal&pw=apmcal_req57159428&product_id=".$lot_id);
+			curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch2, CURLOPT_POST, true);
+			curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
+			
+			$mh = curl_multi_init();
+			
+			curl_multi_add_handle($mh, $ch1);
+			curl_multi_add_handle($mh, $ch2);
+			
+			do {
+				curl_multi_exec($mh, $running);
+			} while ($running > 0);
+			
+			$response1 = curl_multi_getcontent($ch1);
+			$response2 = curl_multi_getcontent($ch2);
+			
+			curl_multi_remove_handle($mh, $ch1);
+			curl_multi_remove_handle($mh, $ch2);
+			curl_multi_close($mh);
+			
+			curl_close($ch1);
+			curl_close($ch2);
+		}
 		
         echo $this->db->allprice_delete_from_calendar($lot_id);
     }
@@ -845,6 +1079,7 @@ class Helper
 		$product = $_POST['product'];
         $price = $_POST['price'];
 		$date = $_POST['date'];
+		$base_url = $_SERVER['HTTP_HOST'];
 		
 		if(isset($date)){
 			$date = (explode(" - ",$date));
@@ -857,45 +1092,46 @@ class Helper
 			while($date[0] <= $date[1]){
 				$this->db->addEventsFast($date[0], $product, $price);				
 				
-				$data1 = array(
+				if($base_url == "airport-parking-stuttgart.de"){
+					$data1 = array(
+						
+					);
 					
-				);
-				
-				$query1 = http_build_query($data1);
-				$query2 = http_build_query($data1);
-				
-				$ch1 = curl_init();
-				$ch2 = curl_init();
-				
-				curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/curl/?request=apm_save_cal&pw=apmcal_req57159428&p_name=".$name->name."&product_id=".$product."&datefrom=".$date[0]."&dateto=".$date[0]);
-				curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
-				curl_setopt($ch1, CURLOPT_POST, true);
-				curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
+					$query1 = http_build_query($data1);
+					$query2 = http_build_query($data1);
+					
+					$ch1 = curl_init();
+					$ch2 = curl_init();
+					
+					curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/curl/?request=apm_save_cal&pw=apmcal_req57159428&p_name=".$name->name."&product_id=".$product."&datefrom=".$date[0]."&dateto=".$date[0]);
+					curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+					curl_setopt($ch1, CURLOPT_POST, true);
+					curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
 
-				curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/?request=apm_save_cal&pw=apmcal_req57159428&p_name=".$name->name."&product_id=".$product."&datefrom=".$date[0]."&dateto=".$date[0]);
-				curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-				curl_setopt($ch2, CURLOPT_POST, true);
-				curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
-				
-				$mh = curl_multi_init();
-				
-				curl_multi_add_handle($mh, $ch1);
-				curl_multi_add_handle($mh, $ch2);
-				
-				do {
-					curl_multi_exec($mh, $running);
-				} while ($running > 0);
-				
-				$response1 = curl_multi_getcontent($ch1);
-				$response2 = curl_multi_getcontent($ch2);
-				
-				curl_multi_remove_handle($mh, $ch1);
-				curl_multi_remove_handle($mh, $ch2);
-				curl_multi_close($mh);
-				
-				curl_close($ch1);
-				curl_close($ch2);
-				
+					curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/?request=apm_save_cal&pw=apmcal_req57159428&p_name=".$name->name."&product_id=".$product."&datefrom=".$date[0]."&dateto=".$date[0]);
+					curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+					curl_setopt($ch2, CURLOPT_POST, true);
+					curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
+					
+					$mh = curl_multi_init();
+					
+					curl_multi_add_handle($mh, $ch1);
+					curl_multi_add_handle($mh, $ch2);
+					
+					do {
+						curl_multi_exec($mh, $running);
+					} while ($running > 0);
+					
+					$response1 = curl_multi_getcontent($ch1);
+					$response2 = curl_multi_getcontent($ch2);
+					
+					curl_multi_remove_handle($mh, $ch1);
+					curl_multi_remove_handle($mh, $ch2);
+					curl_multi_close($mh);
+					
+					curl_close($ch1);
+					curl_close($ch2);
+				}
 				
 				$date[0] = date('Y-m-d', strtotime($date[0]. ' + 1 days'));
 			}			
@@ -908,6 +1144,7 @@ class Helper
         global $wpdb;
 		$product = $_POST['product'];
 		$date = $_POST['date'];
+		$base_url = $_SERVER['HTTP_HOST'];
 		
 		if(isset($date)){
 			$date = (explode(" - ",$date));
@@ -920,45 +1157,46 @@ class Helper
 			while($date[0] <= $date[1]){
 				$this->db->delEventsFast($date[0], $product);				
 				
-				$data1 = array(
+				if($base_url == "airport-parking-stuttgart.de"){
+					$data1 = array(
+						
+					);
 					
-				);
-				
-				$query1 = http_build_query($data1);
-				$query2 = http_build_query($data1);
-				
-				$ch1 = curl_init();
-				$ch2 = curl_init();
-				
-				curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/curl/?request=apm_del_cal&pw=apmcal_req57159428&p_name=".$name->name."&product_id=".$product."&datefrom=".$date[0]."&dateto=".$date[0]);
-				curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
-				curl_setopt($ch1, CURLOPT_POST, true);
-				curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
+					$query1 = http_build_query($data1);
+					$query2 = http_build_query($data1);
+					
+					$ch1 = curl_init();
+					$ch2 = curl_init();
+					
+					curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/curl/?request=apm_del_cal&pw=apmcal_req57159428&p_name=".$name->name."&product_id=".$product."&datefrom=".$date[0]."&dateto=".$date[0]);
+					curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+					curl_setopt($ch1, CURLOPT_POST, true);
+					curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
 
-				curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/?request=apm_del_cal&pw=apmcal_req57159428&p_name=".$name->name."&product_id=".$product."&datefrom=".$date[0]."&dateto=".$date[0]);
-				curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-				curl_setopt($ch2, CURLOPT_POST, true);
-				curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
-				
-				$mh = curl_multi_init();
-				
-				curl_multi_add_handle($mh, $ch1);
-				curl_multi_add_handle($mh, $ch2);
-				
-				do {
-					curl_multi_exec($mh, $running);
-				} while ($running > 0);
-				
-				$response1 = curl_multi_getcontent($ch1);
-				$response2 = curl_multi_getcontent($ch2);
-				
-				curl_multi_remove_handle($mh, $ch1);
-				curl_multi_remove_handle($mh, $ch2);
-				curl_multi_close($mh);
-				
-				curl_close($ch1);
-				curl_close($ch2);
-				
+					curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/?request=apm_del_cal&pw=apmcal_req57159428&p_name=".$name->name."&product_id=".$product."&datefrom=".$date[0]."&dateto=".$date[0]);
+					curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+					curl_setopt($ch2, CURLOPT_POST, true);
+					curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
+					
+					$mh = curl_multi_init();
+					
+					curl_multi_add_handle($mh, $ch1);
+					curl_multi_add_handle($mh, $ch2);
+					
+					do {
+						curl_multi_exec($mh, $running);
+					} while ($running > 0);
+					
+					$response1 = curl_multi_getcontent($ch1);
+					$response2 = curl_multi_getcontent($ch2);
+					
+					curl_multi_remove_handle($mh, $ch1);
+					curl_multi_remove_handle($mh, $ch2);
+					curl_multi_close($mh);
+					
+					curl_close($ch1);
+					curl_close($ch2);
+				}
 				
 				$date[0] = date('Y-m-d', strtotime($date[0]. ' + 1 days'));
 			}			
@@ -1124,6 +1362,8 @@ class Helper
 	public function editBooking_cancel(){
 		$order_id = $_POST['order_id'];
 		$order = new WC_Order($order_id);
+		$base_url = $_SERVER['HTTP_HOST'];
+		$web_company = Database::getInstance()->getSiteCompany();
 		if (!empty($order)) {
 			$booking_date = date('Y-m-d', strtotime($order->get_date_created()));
 			$order->update_status( 'cancelled' );
@@ -1162,64 +1402,74 @@ class Helper
 			
 			$billing_email = $order->get_billing_email();			
 			$subject = 'Ihre Buchung ' . $bookingRef . ' wurde storniert';
-			$body = "<h3>Ihr Parkplatz wurde storniert.</h3>
-					<p>Sehr geehrte Damen und Herren,</p>
-					<p>Ihre Buchung mit der Buchungsnummer <strong>".$bookingRef."</strong> wurde storniert.<br/></p>
-					<p>Sie haben noch Fragen? Schreiben Sie uns einfach eine E-Mail an
-						<a href='mailto:info@airport-parking-stuttgart.de'>info@airport-parking-stuttgart.de</a> oder rufen Sie uns
-						unter <a href='tel:+49 711 22 051 245'>+49 711 22 051 245</a> an.
-					</p>
-					<p>Montag bis Freitag von 11:00 bis 19:00 Uhr.
-					   Aus dem dt. Festnetz zum Ortstarif. Mobilfunkkosten abweichend.</p>
-					<p>Mit freundlichen Grüßen</p>
-					<p>APS-Airport-Parking-Stuttgart GmbH<br>
-					Raiffeisenstraße 18, 70794 Filderstadt, Deutschland<br>
-					<a href='www.airport-parking-stuttgart.de'>www.airport-parking-stuttgart.de</a></p>			
-				";
+			if($web_company->name && $web_company->email && $web_company->phone){
+				$body = "<h3>Ihr Parkplatz wurde storniert.</h3>
+						<p>Sehr geehrte Damen und Herren,</p>
+						<p>Ihre Buchung mit der Buchungsnummer <strong>".$bookingRef."</strong> wurde storniert.<br/></p>
+						<p>Sie haben noch Fragen? Schreiben Sie uns einfach eine E-Mail an
+							<a href='mailto:".$web_company->email."'>".$web_company->email."</a> oder rufen Sie uns
+							unter <a href='tel:".$web_company->phone."'>".$web_company->phone."</a> an.
+						</p>
+						<p>Montag bis Freitag von 11:00 bis 19:00 Uhr.
+						   Aus dem dt. Festnetz zum Ortstarif. Mobilfunkkosten abweichend.</p>
+						<p>Mit freundlichen Grüßen</p>
+						<p>".$web_company->name."<br>
+						".$web_company->street.", ".$web_company->zip." ".$web_company->location.", Deutschland<br>
+						<a href='www.".$_SERVER['HTTP_HOST']."'>www.".$_SERVER['HTTP_HOST']."</a></p>			
+					";
+			}
+			else{
+				$body = "<h3>Ihr Parkplatz wurde storniert.</h3>
+							<p>Sehr geehrte Damen und Herren,</p>
+							<p>Ihre Buchung mit der Buchungsnummer <strong>".$bookingRef."</strong> wurde storniert.<br/></p>
+						<p>Mit freundlichen Grüßen</p>";
+			}
 			$headers = array('Content-Type: text/html; charset=UTF-8');
 			wp_mail( $billing_email, $subject, $body, $headers );
-			wp_mail( 'noreply@airport-parking-stuttgart.de', $subject, $body, $headers );
+			wp_mail("noreply@".$_SERVER['HTTP_HOST'], $subject, $body, $headers );
 			
-			$data1 = array(
-				'request' => 'apm_cancel',
-				 'pw' => 'apmc_req57159428',
-				 'token' => $bookingRef	
-			);
-			
-			$query1 = http_build_query($data1);
-			$query2 = http_build_query($data1);
-			
-			$ch1 = curl_init();
-			$ch2 = curl_init();
-			
-			curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/search-result/");
-			curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch1, CURLOPT_POST, true);
-			curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
+			if($base_url == "airport-parking-stuttgart.de"){
+				$data1 = array(
+					'request' => 'apm_cancel',
+					 'pw' => 'apmc_req57159428',
+					 'token' => $bookingRef	
+				);
+				
+				$query1 = http_build_query($data1);
+				$query2 = http_build_query($data1);
+				
+				$ch1 = curl_init();
+				$ch2 = curl_init();
+				
+				curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/search-result/");
+				curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch1, CURLOPT_POST, true);
+				curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
 
-			curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/");
-			curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch2, CURLOPT_POST, true);
-			curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
-			
-			$mh = curl_multi_init();
-			
-			curl_multi_add_handle($mh, $ch1);
-			curl_multi_add_handle($mh, $ch2);
-			
-			do {
-				curl_multi_exec($mh, $running);
-			} while ($running > 0);
-			
-			$response1 = curl_multi_getcontent($ch1);
-			$response2 = curl_multi_getcontent($ch2);
-			
-			curl_multi_remove_handle($mh, $ch1);
-			curl_multi_remove_handle($mh, $ch2);
-			curl_multi_close($mh);
-			
-			curl_close($ch1);
-			curl_close($ch2);
+				curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/");
+				curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch2, CURLOPT_POST, true);
+				curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
+				
+				$mh = curl_multi_init();
+				
+				curl_multi_add_handle($mh, $ch1);
+				curl_multi_add_handle($mh, $ch2);
+				
+				do {
+					curl_multi_exec($mh, $running);
+				} while ($running > 0);
+				
+				$response1 = curl_multi_getcontent($ch1);
+				$response2 = curl_multi_getcontent($ch2);
+				
+				curl_multi_remove_handle($mh, $ch1);
+				curl_multi_remove_handle($mh, $ch2);
+				curl_multi_close($mh);
+				
+				curl_close($ch1);
+				curl_close($ch2);
+			}
 					
 			return Database::getInstance()->addEditBookingLog($order_id, 'cancel', 1);
 		}
@@ -1255,6 +1505,10 @@ class Helper
 				$tmp_product = 24222;
 			elseif($parklot->product_id == 24228)
 				$tmp_product = 24226;
+			elseif($parklot->product_id == 82029)
+				$tmp_product = 80566;
+			elseif($parklot->product_id == 82031)
+				$tmp_product = 80567;
 			else
 				$tmp_product = $parklot->product_id;
 			

@@ -332,7 +332,9 @@ tr{
 			</div>
 			<div class="col-sm-12 col-md-3" >
 				<?php if($kw1 != 1): ?>
-					<a href="<?php echo '/wp-admin/admin.php?page=stempelansicht&cw='.($kw1 - 1).$query ?>" class="btn btn-primary"><</a>
+					<?php $back = ($kw1 - 1) ?>
+					<?php $back_kw = $back > 9 ? $back : "0".$back ?>
+					<a href="<?php echo '/wp-admin/admin.php?page=stempelansicht&cw='.$back_kw.$query ?>" class="btn btn-primary"><</a>
 				<?php endif; ?>
 				<select name="cw" id="cw" onchange="change_cw(this)">						
 					<?php for($cw = ($kws*1); $cw >= 1 ; $cw--): ?>
@@ -353,7 +355,9 @@ tr{
 					<?php endfor; ?>
 				</select>
 				<?php if($kw1 < ($kws*1)): ?>
-					<a href="<?php echo '/wp-admin/admin.php?page=stempelansicht&cw='.($kw1 + 1).$query ?>" class="btn btn-primary">></a>
+					<?php $forward = ($kw1 + 1) ?>
+					<?php $forward_kw = $forward > 9 ? $forward : "0".$forward ?>
+					<a href="<?php echo '/wp-admin/admin.php?page=stempelansicht&cw='.$forward_kw.$query ?>" class="btn btn-primary">></a>
 				<?php endif; ?>
 			</div>
 			<div class="col-sm-12 col-md-1" >

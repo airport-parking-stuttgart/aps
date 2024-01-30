@@ -16,11 +16,20 @@
 		?>
 		</td>
 		<td class="shop-info">
+			<?php $web_company = Database::getInstance()->getSiteCompany(); ?>
 			<?php do_action( 'wpo_wcpdf_before_shop_name', $this->get_type(), $this->order ); ?>
-			<div class="shop-name"><h3><?php $this->shop_name(); ?></h3></div>
+			<?php if($web_company->name):?>
+				<div class="shop-name"><h3><?php echo $web_company->name; ?></h3></div>
+			<?php else: ?>
+				<div class="shop-name"><h3><?php $this->shop_name(); ?></h3></div>
+			<?php endif; ?>
 			<?php do_action( 'wpo_wcpdf_after_shop_name', $this->get_type(), $this->order ); ?>
 			<?php do_action( 'wpo_wcpdf_before_shop_address', $this->get_type(), $this->order ); ?>
-			<div class="shop-address"><?php $this->shop_address(); ?></div>
+			<?php if($web_company->street && $web_company->zip && $web_company->location):?>
+				<div class="shop-address"><?php echo $web_company->street . "<br>" . $web_company->zip . " " . $web_company->location; ?></div>
+			<?php else: ?>
+				<div class="shop-address"><?php $this->shop_address(); ?></div>
+			<?php endif; ?>
 			<?php do_action( 'wpo_wcpdf_after_shop_address', $this->get_type(), $this->order ); ?>
 		</td>
 	</tr>
@@ -198,13 +207,68 @@
 <div class="bottom-spacer"></div>
 
 <?php do_action( 'wpo_wcpdf_after_order_details', $this->get_type(), $this->order ); ?>
-
+<?php if($web_company): ?>
+<style>
+.footer{
+	position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 10px;
+}
+.row .col-item {
+        width: 25%;
+        padding: 0 10px 0 0;
+        float: left;
+        box-sizing: border-box;
+        margin: 0px 0;
+		font-size: 9px !important;
+    }
+</style>
+<div class="footer">
+    <div class="row">
+        <div class="col-item">
+			<?php if($web_company->name): ?>
+            <?php echo $web_company->name . "<br>" ?>
+			<?php endif; ?>
+			<?php if($web_company->street): ?>
+            <?php echo $web_company->street . "<br>" ?>
+			<?php endif; ?>
+			<?php if($web_company->zip != null && $web_company->location != null): ?>
+            <?php echo $web_company->zip . " " . $web_company->location . "<br>" ?>
+			<?php endif; ?>
+			<?php if($web_company->phone): ?>
+            <?php echo "Telefon: " . $web_company->phone . "<br>" ?>
+			<?php endif; ?>
+        </div>
+        <div class="col-item">
+			<?php if($web_company->email): ?>
+            <?php echo $web_company->email . "<br>" ?>
+			<?php endif; ?>
+            <?php echo "www." . $_SERVER['HTTP_HOST'] . "<br>" ?>
+        </div>
+		<?php if($web_company->bank != null && $web_company->iban != null && $web_company->bic != null): ?>
+        <div class="col-item">
+            <?php echo $web_company->bank . "<br>" ?>
+            <?php echo "IBAN: " . $web_company->iban . "<br>" ?>
+            <?php echo "BIC/SWIFT Code: " . $web_company->bic . "<br>" ?>
+        </div>
+		<?php endif; ?>
+        <?php if($web_company->name): ?>
+		<div class="col-item">
+            <?php echo "Mit " . $web_company->name . "<br>" ?>
+            <?php echo "günstig und sicher am Flughafen <br>" ?>
+        </div>
+		<?php endif; ?>
+		<div class="clear"></div>		
+    </div>
+</div>
+<?php endif; ?>
 <?php if ( $this->get_footer() ) : ?>
-	<div id="footer">
+	<!--<div id="footer">-->
 		<!-- hook available: wpo_wcpdf_before_footer -->
-		<?php $this->footer(); ?>
+		<?php //$this->footer(); ?>
 		<!-- hook available: wpo_wcpdf_after_footer -->
-	</div><!-- #letter-footer -->
+	<!--</div>--><!-- #letter-footer -->
 <?php endif; ?>
 
 <?php do_action( 'wpo_wcpdf_after_document', $this->get_type(), $this->order ); ?>

@@ -556,6 +556,10 @@ class Database
     static function deleteClientPrudictLink($id){
         return self::$db->delete(self::$prefix . 'clients_products', ['client_id' => $id]);
     }
+	
+	static function deleteClientPrudict($id){
+        return self::$db->delete(self::$prefix . 'clients_products', ['product_id' => $id]);
+    }
 
     static function getLocations()
     {
@@ -824,6 +828,11 @@ class Database
     static function saveParklot($parkhaus, $gruppe, $parklot, $type, $datefrom, $dateto, $lead_time, $contigent, $product_id, $isFor, $isFor_id, $adress, $phone, $prefix, $color, $short, $distance, $extraPrice_perDay, $commision, $commision_ws, $confirmation_byArrival, $confirmation_byDeparture, $confirmation_note)
     {	
 		if($isFor == 'betreiber' || $isFor == 'vermittler'){
+			$product = wc_get_product($product_id);
+			$product->set_price(0);
+			$order = Orders::createWCOrder($product);
+			$order_id = $order->get_id();
+			
 			self::$db->insert(self::$prefix . 'orders', [
 				'post_date' => date('Y-m-d'),
 				'date_from' => date('Y-m-d H:i'),
@@ -835,7 +844,7 @@ class Database
 				'Uhrzeit_von' => date('H:i'),
 				'Uhrzeit_bis' => date('H:i'),
 				'product_id' => $product_id,
-				'order_id' => '0',
+				'order_id' => $order_id,
 				'token' => 'temp',
 				'first_name' => '',
 				'last_name' => '',
@@ -937,6 +946,7 @@ class Database
 
     static function updateParklot($parkhaus, $gruppe, $parklot, $type, $datefrom, $dateto, $lead_time, $contigent, $product_id, $isFor, $adress, $phone, $prefix, $color, $short, $distance, $extraPrice_perDay, $commision, $commision_ws, $confirmation_byArrival, $confirmation_byDeparture, $confirmation_note, $condition)
     {
+		$base_url = $_SERVER['HTTP_HOST'];
 		if(!empty($datefrom))
 			$datefrom = date('Y-m-d H:i', strtotime($datefrom . "00:00"));
 		else
@@ -947,41 +957,43 @@ class Database
 		else
 			$dateto = '2022-12-30 00:00';
 		
-		if($product_id == 595 || $product_id == 3080 || $product_id == 3081 || $product_id == 3082 || $product_id == 24224 || $product_id == 24228){
-			$url = "https://airport-parking-germany.de/search-result/";
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_POST, 1);
-			curl_setopt($ch, CURLOPT_POSTFIELDS,
-			http_build_query(array(
-				 'request' => 'apm_con',
-				 'pw' => 'apmc_req57159428',
-				 'plot' => $product_id,
-				 'con' => $contigent
-				 
-			)));
-			// Receive server response ...
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			$server_output = curl_exec($ch);
-			curl_close($ch);
-		}
-		if($product_id == 80566 || $product_id == 80567){
-			$url = "https://parken-zum-fliegen.de/search-result/";
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_POST, 1);
-			curl_setopt($ch, CURLOPT_POSTFIELDS,
-			http_build_query(array(
-				 'request' => 'apm_con',
-				 'pw' => 'apmc_req57159428',
-				 'plot' => $product_id,
-				 'con' => $contigent
-				 
-			)));
-			// Receive server response ...
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			$server_output = curl_exec($ch);
-			curl_close($ch);
+		if($base_url == "airport-parking-stuttgart.de"){
+			if($product_id == 595 || $product_id == 3080 || $product_id == 3081 || $product_id == 3082 || $product_id == 24224 || $product_id == 24228 || $product_id == 82029 || $product_id == 82031){
+				$url = "https://airport-parking-germany.de/search-result/";
+				$ch = curl_init();
+				curl_setopt($ch, CURLOPT_URL, $url);
+				curl_setopt($ch, CURLOPT_POST, 1);
+				curl_setopt($ch, CURLOPT_POSTFIELDS,
+				http_build_query(array(
+					 'request' => 'apm_con',
+					 'pw' => 'apmc_req57159428',
+					 'plot' => $product_id,
+					 'con' => $contigent
+					 
+				)));
+				// Receive server response ...
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				$server_output = curl_exec($ch);
+				curl_close($ch);
+			}
+			if($product_id == 80566 || $product_id == 80567){
+				$url = "https://parken-zum-fliegen.de/search-result/";
+				$ch = curl_init();
+				curl_setopt($ch, CURLOPT_URL, $url);
+				curl_setopt($ch, CURLOPT_POST, 1);
+				curl_setopt($ch, CURLOPT_POSTFIELDS,
+				http_build_query(array(
+					 'request' => 'apm_con',
+					 'pw' => 'apmc_req57159428',
+					 'plot' => $product_id,
+					 'con' => $contigent
+					 
+				)));
+				// Receive server response ...
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				$server_output = curl_exec($ch);
+				curl_close($ch);
+			}
 		}
 		
         return self::$db->update(self::$prefix . 'parklots', [
@@ -1197,7 +1209,7 @@ class Database
     }
 
     // save broker
-    static function saveBroker($company, $title, $firstname, $lastname, $street, $zip, $location, $short)
+    static function saveBroker($company, $title, $firstname, $lastname, $street, $zip, $location, $short, $api)
     {
         self::$db->insert(self::$prefix . 'brokers', [
             'company' => $company,
@@ -1207,7 +1219,8 @@ class Database
             'street' => $street,
             'zip' => $zip,
             'location_id' => $location,
-			'short' => $short
+			'short' => $short,
+			'broker_for' => $api
         ]);
 
         return self::$db->insert_id;
@@ -1223,9 +1236,13 @@ class Database
             ]);
         }
     }
+	
+	static function deleteBrokerPrudict($id){
+        return self::$db->delete(self::$prefix . 'brokers_products', ['product_id' => $id]);
+    }
 
     // update broker
-    static function updateBroker($company, $title, $firstname, $lastname, $street, $zip, $location, $short, $condition)
+    static function updateBroker($company, $title, $firstname, $lastname, $street, $zip, $location, $short, $api, $condition)
     {
         return self::$db->update(self::$prefix . 'brokers', [
             'company' => $company,
@@ -1235,7 +1252,8 @@ class Database
             'street' => $street,
             'zip' => $zip,
             'location_id' => $location,
-			'short' => $short
+			'short' => $short,
+			'broker_for' => $api
         ], $condition);
     }
 
@@ -1312,6 +1330,10 @@ class Database
 	// delete transfer product link
     static function deleteTransferPrudictLink($id){
         return self::$db->delete(self::$prefix . 'transfers_products', ['transfer_id' => $id]);
+    }
+	
+	static function deleteTransferPrudict($id){
+        return self::$db->delete(self::$prefix . 'transfers_products', ['product_id' => $id]);
     }
 
     // save transfer products
@@ -2920,7 +2942,7 @@ class Database
 		if($status == "wc-cancelled")
 			$where .= " AND p.post_status = 'wc-cancelled' ";
 		else
-			$where .= " AND p.post_status = 'wc-processing' ";
+			$where .= " AND (p.post_status = 'wc-processing' OR p.post_status = 'wc-on-hold') AND o.deleted = 0 ";
 		
 		if($other)
 			$where .= $other;
@@ -3335,7 +3357,7 @@ class Database
 		JOIN (SELECT @num := 0 FROM DUAL) AS n ON 1=1
 		JOIN " . self::$prefix_DB . "posts p ON p.ID = o.order_id
 		JOIN " . self::$prefix . "parklots pl ON pl.product_id = o.product_id " . 
-		$where . " AND (" . $produkt_query . ") AND p.post_status = 'wc-processing'";
+		$where . " AND (" . $produkt_query . ") AND p.post_status = 'wc-processing' AND o.deleted = 0";
 		
 		return self::$db->get_results($sql . $orderBy);
 	}
@@ -3466,7 +3488,7 @@ class Database
 	}
 	
 	// Buchungen Buchungstabelle
-    static function get_fahrerliste($type, $filter)
+    static function get_fahrerliste($type, $service, $filter)
 	{	
 		$where = " WHERE o.product_id != '' ";
 		$where_ot = " WHERE ot.product_id != '' ";
@@ -3546,7 +3568,7 @@ class Database
 		LEFT JOIN " . self::$prefix . "clients c ON c.id = cp.client_id
 		LEFT JOIN " . self::$prefix . "brokers_products bp ON bp.product_id = pl.product_id
 		LEFT JOIN " . self::$prefix . "brokers b ON b.id = bp.broker_id" . 
-		$where . " AND (" . $produkt_query . ") AND (p.post_status = 'wc-processing' OR p.post_status = 'wc-cancelled')" .  
+		$where . " AND (" . $produkt_query . ") AND ((p.post_status = 'wc-processing' AND o.deleted = 0) OR p.post_status = 'wc-cancelled') AND pl.type = '" . $service . "' " . 
 		
 		" UNION ALL
 		SELECT @num := @num + 1 AS position,
@@ -3975,7 +3997,7 @@ class Database
 		LEFT JOIN " . self::$prefix . "clients c ON c.id = cp.client_id
 		LEFT JOIN " . self::$prefix . "brokers_products bp ON bp.product_id = pl.product_id
 		LEFT JOIN " . self::$prefix . "brokers b ON b.id = bp.broker_id" . 
-		$where . " AND (" . $produkt_query . ") AND p.post_status == 'wc-processing'" .  
+		$where . " AND (" . $produkt_query . ") AND p.post_status = 'wc-processing' AND o.deleted = 0 " .  
 		
 		"UNION ALL
 		SELECT @num := @num + 1 AS position,
@@ -4098,7 +4120,7 @@ class Database
 		INNER JOIN " . self::$prefix . "parklots pl
 		JOIN " . self::$prefix_DB . "posts p ON p.ID = o.order_id
 		ON pl.product_id = o.product_id
-		WHERE p.post_status = 'wc-processing'
+		WHERE p.post_status = 'wc-processing' AND o.deleted = 0 
 		AND DATE(o.post_date) = '".$date."'
 		AND " . $days. $product . " 
 		GROUP BY o.order_id ORDER BY Tage DESC");
@@ -4742,6 +4764,81 @@ class Database
 			'service' => $service
         ], ['id' => $api_id]);
     }
+		
+	// get broker by api
+    static function getBrokerIdByApi($api){
+        return self::$db->get_row("SELECT id FROM " . self::$prefix . "brokers WHERE broker_for = '$api'");
+    }
+	
+	// save sitecompany infos
+    static function saveSiteCompany($data)
+    {
+        return self::$db->insert(self::$prefix . 'seitenbetreiber', [
+            'name' => $data['name'],
+			'street' => $data['street'],
+			'zip' => $data['zip'],
+			'location' => $data['location'],
+			'web' => $data['web'],
+			'email' => $data['email'],
+			'phone' => $data['phone'],
+			'bank' => $data['bank'],
+			'iban' => $data['iban'],
+			'bic' => $data['bic'],
+			'owner' => $data['owner'],
+			'ust_id' => $data['ust_id'],
+			'st_nr' => $data['st_nr']
+        ]);
+    }
+	
+	// update sitecompany infos
+    static function updateSiteCompany($data)
+    {
+        self::$db->update(self::$prefix . "seitenbetreiber", [
+            'name' => $data['name'],
+			'street' => $data['street'],
+			'zip' => $data['zip'],
+			'location' => $data['location'],
+			'web' => $data['web'],
+			'email' => $data['email'],
+			'phone' => $data['phone'],
+			'bank' => $data['bank'],
+			'iban' => $data['iban'],
+			'bic' => $data['bic'],
+			'owner' => $data['owner'],
+			'ust_id' => $data['ust_id'],
+			'st_nr' => $data['st_nr']
+        ], ['id' => $data['id']]);
+    }
+	
+	// get sitecompany infos
+    static function getSiteCompany(){
+        return self::$db->get_row("SELECT * FROM " . self::$prefix . "seitenbetreiber");
+    }
+	
+	
+	// set settings
+    static function setSettings($data){
+		$id = self::$db->get_row("SELECT id FROM " . self::$prefix . "einstellungen");
+		if($id == null){
+			self::$db->insert(self::$prefix . 'einstellungen', [
+				'offered_service' => $data['offered_service'],
+				'menu_color' => $data['menu_color'],
+				'submenu_color' => $data['submenu_color']
+			]);
+		}
+		else{
+			self::$db->update(self::$prefix . "einstellungen", [
+				'offered_service' => $data['offered_service'],
+				'menu_color' => $data['menu_color'],
+				'submenu_color' => $data['submenu_color']
+			], ['id' => $id->id]);
+		}
+	}
+	
+	// get settings
+    static function getSettings(){
+		return self::$db->get_row("SELECT * FROM " . self::$prefix . "einstellungen");
+	}
 	
 	
 	
@@ -4759,97 +4856,29 @@ class Database
 			return false;
 		}
 		
-		if($data['internalADPrefix'] == 'STR4' || $data['internalADPrefix'] == 'STR8' || $data['internalADPrefix'] == 'STR2' || $data['internalADPrefix'] == 'STB2' || $data['internalADPrefix'] == 'STB1'){
-			$data['product'] = 621;
-			$productSQL = self::getParklotByProductId($data['product']);
-			if($data['internalADPrefix'] == 'STR4' || $data['internalADPrefix'] == 'STR8' || $data['internalADPrefix'] == 'STB2' || $data['internalADPrefix'] == 'STB1'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-			}
-			if($data['internalADPrefix'] == 'STR2'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-			}
-		}
-		elseif($data['internalADPrefix'] == 'STRH'){
-			$data['product'] = 683;
-			$productSQL = self::getParklotByProductId($data['product']);
-			$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-			$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-		}
-		elseif($data['internalADPrefix'] == 'STR6' || $data['internalADPrefix'] == 'STR7' || $data['internalADPrefix'] == 'STRD' || $data['internalADPrefix'] == 'STR0'){
-			$data['product'] = 624;
-			$productSQL = self::getParklotByProductId($data['product']);
-			if($data['internalADPrefix'] == 'STR6' || $data['internalADPrefix'] == 'STR7' || $data['internalADPrefix'] == 'STRD'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-			}
-			if($data['internalADPrefix'] == 'STR0'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
+		$broker_id = self::getBrokerIdByApi('hex');
+		$id = $broker_id->id;
+		$api_codes = self::getAPICodesById($id);
+		$found = 0;
+
+		foreach($api_codes as $code){
+			if($data['internalADPrefix'] == $code->code){
+				$found = 1;
+				$data['product'] = $code->product_id;
+				$productSQL = self::getParklotByProductId($data['product']);
+				
+				if($code->ws == 0){
+					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
+					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
+				}
+				else{
+					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
+					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
+				}
 			}
 		}
-		elseif($data['internalADPrefix'] == 'STR1' || $data['internalADPrefix'] == 'STR9' || $data['internalADPrefix'] == 'STRW'){
-			$data['product'] = 901;
-			$productSQL = self::getParklotByProductId($data['product']);
-			if($data['internalADPrefix'] == 'STR1' || $data['internalADPrefix'] == 'STR9'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-			}
-			if($data['internalADPrefix'] == 'STRW'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-			}
-		}
-		elseif($data['internalADPrefix'] == 'ST10' || $data['internalADPrefix'] == 'ST11' || $data['internalADPrefix'] == 'ST12'){
-			$data['product'] = 24261;
-			$productSQL = self::getParklotByProductId($data['product']);
-			if($data['internalADPrefix'] == 'ST10' || $data['internalADPrefix'] == 'ST11'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-			}
-			if($data['internalADPrefix'] == 'ST12'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-			}
-		}
-		elseif($data['internalADPrefix'] == 'ST13' || $data['internalADPrefix'] == 'ST14' || $data['internalADPrefix'] == 'ST15'){
-			$data['product'] = 24263;
-			$productSQL = self::getParklotByProductId($data['product']);
-			if($data['internalADPrefix'] == 'ST13' || $data['internalADPrefix'] == 'ST14'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-			}
-			if($data['internalADPrefix'] == 'ST15'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-			}
-		}
-		elseif($data['internalADPrefix'] == 'ST16'){
-			$data['product'] = 24609;
-			$productSQL = self::getParklotByProductId($data['product']);
-			$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-			$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-		}
-		elseif($data['internalADPrefix'] == 'STRI'){
-			$data['product'] = 28878;
-			$productSQL = self::getParklotByProductId($data['product']);
-			$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-			$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;				
-		}
-		elseif($data['internalADPrefix'] == 'ST17' || $data['internalADPrefix'] == 'ST18' || $data['internalADPrefix'] == 'ST19'){
-			$data['product'] = 82130;
-			$productSQL = self::getParklotByProductId($data['product']);
-			if($data['internalADPrefix'] == 'ST17' || $data['internalADPrefix'] == 'ST18'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-			}
-			if($data['internalADPrefix'] == 'ST19'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-			}
-		}
-		else{
+		
+		if($found == 0){
 			wp_mail('it@airport-parking-stuttgart.de', 'HEX Fehler Produktzuordnung', print_r($data, true), $headers);
 			return false;
 		}
@@ -4993,30 +5022,6 @@ class Database
 			'code' => $code,
 			'order_status' => 'wc-processing'
         ]);
-		
-		
-		// Save commission to booking metaphone
-		self::saveBookingMeta($order_id, 'provision', $commission);
-
-
-		/*
-		$provision = self::getBrokerCommissionForBooking($data['product'], date('Y-m-d', strtotime($data["arrivalDate"])));
-		if($provision->commission_type != "" || $provision->commission_type != null){
-			if($provision->commission_type == 'netto'){
-				$netto = number_format((float)($data['totalParkingCosts'] / 119 * 100), 2, '.', '');
-				$amount = number_format((float)($netto / 100 * $provision->commission_value), 2, '.', '');
-				self::saveBookingMeta($order_id, 'provision', $amount);
-			}
-			elseif($provision->commission_type == 'brutto'){
-				$brutto = number_format((float)$data['totalParkingCosts'], 2, '.', '');
-				$amount = number_format((float)($brutto / 100 * $provision->commission_value), 2, '.', '');
-				self::saveBookingMeta($order_id, 'provision', $amount);
-			}
-		}
-		else{
-			self::saveBookingMeta($order_id, 'provision', '0.00');
-		}
-		*/
 		self::checkBookingDate($order_id);
     }
 	
@@ -5026,95 +5031,31 @@ class Database
 		$order_id = self::$db->get_row("SELECT post_id FROM " . self::$prefix_DB . "postmeta WHERE meta_key = 'token' and meta_value = '" . $data['bookingCode'] . "'");
 		$product = self::$db->get_row("SELECT product_id FROM " . self::$prefix . "orders WHERE order_id = '" . $order_id->post_id . "'");
 		
-		if($data['internalADPrefix'] == 'STR4' || $data['internalADPrefix'] == 'STR8' || $data['internalADPrefix'] == 'STR2' || $data['internalADPrefix'] == 'STB2' || $data['internalADPrefix'] == 'STB1'){
-			$data['product'] = 621;
-			$productSQL = self::getParklotByProductId($data['product']);
-			if($data['internalADPrefix'] == 'STR4' || $data['internalADPrefix'] == 'STR8' || $data['internalADPrefix'] == 'STB2' || $data['internalADPrefix'] == 'STB1'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-			}
-			if($data['internalADPrefix'] == 'STR2'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-			}
-		}
-		elseif($data['internalADPrefix'] == 'STRH'){
-			$data['product'] = 683;
-			$productSQL = self::getParklotByProductId($data['product']);
-			$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-			$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-		}
-		elseif($data['internalADPrefix'] == 'STR6' || $data['internalADPrefix'] == 'STR7' || $data['internalADPrefix'] == 'STRD' || $data['internalADPrefix'] == 'STR0'){
-			$data['product'] = 624;
-			$productSQL = self::getParklotByProductId($data['product']);
-			if($data['internalADPrefix'] == 'STR6' || $data['internalADPrefix'] == 'STR7' || $data['internalADPrefix'] == 'STRD'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-			}
-			if($data['internalADPrefix'] == 'STR0'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
+		$broker_id = self::getBrokerIdByApi('hex');
+		$id = $broker_id->id;
+		$api_codes = self::getAPICodesById($id);
+		$found = 0;
+
+		foreach($api_codes as $code){
+			if($data['internalADPrefix'] == $code->code){
+				$found = 1;
+				$data['product'] = $code->product_id;
+				$productSQL = self::getParklotByProductId($data['product']);
+				
+				if($code->ws == 0){
+					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
+					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
+				}
+				else{
+					$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
+					$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
+				}
 			}
 		}
-		elseif($data['internalADPrefix'] == 'STR1' || $data['internalADPrefix'] == 'STR9' || $data['internalADPrefix'] == 'STRW'){
-			$data['product'] = 901;
-			$productSQL = self::getParklotByProductId($data['product']);
-			if($data['internalADPrefix'] == 'STR1' || $data['internalADPrefix'] == 'STR9'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-			}
-			if($data['internalADPrefix'] == 'STRW'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-			}
-		}
-		elseif($data['internalADPrefix'] == 'ST10' || $data['internalADPrefix'] == 'ST11' || $data['internalADPrefix'] == 'ST12'){
-			$data['product'] = 24261;
-			$productSQL = self::getParklotByProductId($data['product']);
-			if($data['internalADPrefix'] == 'ST10' || $data['internalADPrefix'] == 'ST11'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-			}
-			if($data['internalADPrefix'] == 'ST12'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-			}
-		}
-		elseif($data['internalADPrefix'] == 'ST13' || $data['internalADPrefix'] == 'ST14' || $data['internalADPrefix'] == 'ST15'){
-			$data['product'] = 24263;
-			$productSQL = self::getParklotByProductId($data['product']);
-			if($data['internalADPrefix'] == 'ST13' || $data['internalADPrefix'] == 'ST14'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-			}
-			if($data['internalADPrefix'] == 'ST15'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-			}
-		}
-		elseif($data['internalADPrefix'] == 'ST16'){
-			$data['product'] = 24609;
-			$productSQL = self::getParklotByProductId($data['product']);
-			$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-			$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-		}
-		elseif($data['internalADPrefix'] == 'STRI'){
-			$data['product'] = 28878;
-			$productSQL = self::getParklotByProductId($data['product']);
-			$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-			$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-		}
-		elseif($data['internalADPrefix'] == 'ST17' || $data['internalADPrefix'] == 'ST18' || $data['internalADPrefix'] == 'ST19'){
-			$data['product'] = 82130;
-			$productSQL = self::getParklotByProductId($data['product']);
-			if($data['internalADPrefix'] == 'ST17' || $data['internalADPrefix'] == 'ST18'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision;
-			}
-			if($data['internalADPrefix'] == 'ST19'){
-				$data['totalParkingCosts'] = $data['totalParkingCosts'] / (100 - $productSQL->commision_ws) * 100;
-				$commission = ($data['totalParkingCosts'] / 119 * 100) / 100 * $productSQL->commision_ws;
-			}
+		
+		if($found == 0){
+			wp_mail('it@airport-parking-stuttgart.de', 'HEX Fehler Produktzuordnung', print_r($data, true), $headers);
+			return false;
 		}
 		
 		if($order_id->post_id == "" || $order_id->post_id == null)
@@ -5203,47 +5144,36 @@ class Database
 			'order_price' => number_format($data['totalParkingCosts'], 2, ".", "."),
 			'provision' => $commission,
             'nr_people' => $data['countTravellers'],
-			'code' => $data['internalADPrefix']
+			'code' => $data['internalADPrefix'],
+			'order_status' => 'wc-processing',
+			'deleted' => 0
         ], ['order_id' => $order_id->post_id]);
 		
 		$woo_order = wc_get_order($order_id->post_id);
 		$woo_order->calculate_taxes();
 		$woo_order->calculate_totals();
 		$woo_order->save();
-				
-		// Save commission to booking metaphone		
-		self::updateBookingMeta($order_id->post_id, 'provision', $commission);
 		self::checkBookingDate($order_id->post_id);
     }
 	
     static function saveOrderFomAPG($data, $lot)
     {
-		if($data['product_id'] == 812)
-			$data['product'] = 595;
-		elseif($data['product_id'] == 1054)
-			$data['product'] = 3080;
-		elseif($data['product_id'] == 1645)
-			$data['product'] = 3081;
-		elseif($data['product_id'] == 1740)
-			$data['product'] = 24224;
-		elseif($data['product_id'] == 2199)
-			$data['product'] = 3082;			
-		elseif($data['product_id'] == 4655)
-			$data['product'] = 24228;
+		$broker_id = self::getBrokerIdByApi('apg');
+		$id = $broker_id->id;
+		$api_codes = self::getAPICodesById($id);
+		$found = 0;
 
-		elseif($data['product_id'] == 7050)
-			$data['product'] = 82029;
-		elseif($data['product_id'] == 7053)
-			$data['product'] = 82031;
-			
-		// Parkten zum Fliegen
-		elseif($data['product_id'] == 9463)
-			$data['product'] = 80566;
-		elseif($data['product_id'] == 9465)
-			$data['product'] = 80567;
-			
-		else
+		foreach($api_codes as $code){
+			if($data['product_id'] == $code->code){
+				$data['product'] = $code->product_id;
+				$found = 1;
+			}
+		}
+
+		if($found == 0){
+			wp_mail('it@airport-parking-stuttgart.de', 'HEX Fehler Produktzuordnung', print_r($data, true), $headers);
 			return false;
+		}
 	
         $parklot = new Parklot($data['product']);
 
@@ -5500,6 +5430,22 @@ class Database
 				$barzahlung = 0;
 			}
 			
+			// Save commission to booking metaphone
+			$provision = self::getBrokerCommissionForBooking($product->product_id, date('Y-m-d', strtotime($data["start-date"])));
+			if($provision->commission_type != "" || $provision->commission_type != null){
+				if($provision->commission_type == 'netto'){
+					$netto = number_format((float)($data['parking_update'] / 119 * 100), 2, '.', '');
+					$amount = number_format((float)($netto / 100 * $provision->commission_value), 2, '.', '');
+				}
+				elseif($provision->commission_type == 'brutto'){
+					$brutto = number_format((float)$data['parking_update'], 2, '.', '');
+					$amount = number_format((float)($brutto / 100 * $provision->commission_value), 2, '.', '');
+				}
+			}
+			else{
+				$amount = '0.00';
+			}
+			
 			self::$db->update(self::$prefix . 'orders', [
 				'date_from' => date('Y-m-d H:i', strtotime($data["start-date"] . ' ' . $data["ar_time"])),
 				'date_to' => date('Y-m-d H:i', strtotime($data["end-date"] . ' ' . $data["de_time"])),
@@ -5518,27 +5464,10 @@ class Database
 				'b_total' => $barzahlung,
 				'm_v_total' => $mv,
 				'order_price' => number_format($data['parking_update'], 2, ".", "."),
+				'provision' => $amount,
 				'service_price' => 0,
 				'nr_people' => $data['count_person']
-			], ['order_id' => $order_id->post_id]);
-			
-			// Save commission to booking metaphone
-			$provision = self::getBrokerCommissionForBooking($product->product_id, date('Y-m-d', strtotime($data["start-date"])));
-			if($provision->commission_type != "" || $provision->commission_type != null){
-				if($provision->commission_type == 'netto'){
-					$netto = number_format((float)($data['parking_update'] / 119 * 100), 2, '.', '');
-					$amount = number_format((float)($netto / 100 * $provision->commission_value), 2, '.', '');
-					self::updateBookingMeta($order_id->post_id, 'provision', $amount);
-				}
-				elseif($provision->commission_type == 'brutto'){
-					$brutto = number_format((float)$data['parking_update'], 2, '.', '');
-					$amount = number_format((float)($brutto / 100 * $provision->commission_value), 2, '.', '');
-					self::updateBookingMeta($order_id->post_id, 'provision', $amount);
-				}
-			}
-			else{
-				self::updateBookingMeta($order_id->post_id, 'provision', '0.00');
-			}
+			], ['order_id' => $order_id->post_id]);			
 		}
 		
 		$woo_order = wc_get_order($order_id->post_id);
@@ -5591,6 +5520,17 @@ class Database
 			$data['product'] = 80566;
 		elseif($data['product_id'] == 80567)
 			$data['product'] = 80567;
+			
+		elseif($data['product_id'] == 84584)
+			$data['product'] = 537;
+		elseif($data['product_id'] == 84585)
+			$data['product'] = 592;
+		elseif($data['product_id'] == 84586)
+			$data['product'] = 873;
+		elseif($data['product_id'] == 84587)
+			$data['product'] = 24222;
+		elseif($data['product_id'] == 84588)
+			$data['product'] = 24226;
 			
 		else
 			return false;
@@ -5727,6 +5667,17 @@ class Database
 		elseif($data['product_id'] == 80567)
 			$data['product'] = 80567;
 			
+		elseif($data['product_id'] == 84584)
+			$data['product'] = 537;
+		elseif($data['product_id'] == 84585)
+			$data['product'] = 592;
+		elseif($data['product_id'] == 84586)
+			$data['product'] = 873;
+		elseif($data['product_id'] == 84587)
+			$data['product'] = 24222;
+		elseif($data['product_id'] == 84588)
+			$data['product'] = 24226;
+			
 		else
 			return false;
 			
@@ -5859,142 +5810,113 @@ class Database
 		if($parkos->order_id != null)
 			return false;
 		
-		if($dataC->merchant_id == 569){
-			if($dataC->location_type == 'indoor')
-				$data['product'] = 41402;
-			else
-				$data['product'] = 41403;
+		if($dataC->c_product){
+
+			$productSQL = self::getParklotByProductId($dataC->c_product);
+			$commission = number_format(($dataC->total_price / 119 * 100) / 100 * $productSQL->commision, 2, ".", ".");
+			
+			$parklot = new Parklot($dataC->c_product);
+			$data['price'] = number_format($dataC->total_price, 2, ".", ".");
+			$nameTemp = explode(" ",$dataC->name);
+			$firstName = $nameTemp[0];
+			$lastName = $nameTemp[1];
+			$product = wc_get_product($dataC->c_product);
+			// set new product price
+			$product->set_price($data['price']);
+
+
+			$order = Orders::createWCOrder($product);
+			$order_id = $order->get_id();
+			
+			$payment_method = 'MasterCard';
+			$transaction_id = 'm';
+			$barzahlung = 0;
+			$mv = $data['price'];		
+
+			// add a bunch of meta data
+			add_post_meta($order_id, '_transaction_id', $transaction_id, true);
+			add_post_meta($order_id, '_payment_method_title', $payment_method, true);
+			add_post_meta($order_id, '_order_total', '', true);
+			add_post_meta($order_id, '_customer_user', 6, true);
+			add_post_meta($order_id, '_completed_date', '', true);
+			add_post_meta($order_id, '_order_currency', '', true);
+			add_post_meta($order_id, '_paid_date', '', true);
+
+			add_post_meta($order_id, '_billing_address_1', '', true);
+			add_post_meta($order_id, '_billing_city', '', true);
+			add_post_meta($order_id, '_billing_state', '', true);
+			add_post_meta($order_id, '_billing_postcode', '', true);
+			add_post_meta($order_id, '_billing_company', '', true);
+			add_post_meta($order_id, '_billing_country', '', true);
+			add_post_meta($order_id, '_billing_email', '', true);
+			add_post_meta($order_id, '_billing_first_name', $firstName, true);
+			add_post_meta($order_id, '_billing_last_name', $lastName, true);
+			add_post_meta($order_id, '_billing_phone', $dataC->phone, true);
+
+			add_post_meta($order_id, 'Anreisedatum', dateFormat($dataC->arrival_date), true);
+			add_post_meta($order_id, 'first_anreisedatum', dateFormat($dataC->arrival_date), true);
+			add_post_meta($order_id, 'Abreisedatum', dateFormat($dataC->departure_date), true);
+			add_post_meta($order_id, 'first_abreisedatum', dateFormat($dataC->departure_date), true);
+			add_post_meta($order_id, 'Uhrzeit von', $dataC->arrival_time, true);
+			add_post_meta($order_id, 'Uhrzeit bis', $dataC->departure_time, true);
+			add_post_meta($order_id, 'Hinflugnummer', $dataC->flight_departure_nr, true);
+			add_post_meta($order_id, 'Rückflugnummer', $dataC->flight_return_nr, true);
+			add_post_meta($order_id, 'Personenanzahl', $dataC->persons, true);
+			add_post_meta($order_id, 'Fahrzeughersteller', '', true);
+			add_post_meta($order_id, 'Fahrzeugmodell', $dataC->car_brand_model, true);
+			add_post_meta($order_id, 'Fahrzeugfarbe', '', true);
+			add_post_meta($order_id, 'Kennzeichen', $dataC->car_license_plate, true);
+
+			update_post_meta($order_id, 'token', $dataC->code);
+			
+			if($dataC->flight_departure_nr == null)
+				$dataC->flight_departure_nr = "";
+			if($dataC->flight_return_nr == null)
+				$dataC->flight_return_nr = "";
+			
+			$commission = number_format($commission, 2, ".", ".");
+			
+			self::$db->insert(self::$prefix . 'orders', [
+				'post_date' => date('Y-m-d'),
+				'date_from' => date('Y-m-d H:i', strtotime($dataC->arrival_date . ' ' .  $dataC->arrival_time)),
+				'date_to' => date('Y-m-d H:i', strtotime($dataC->departure_date . ' ' . $dataC->departure_time)),
+				'Anreisedatum' => date('Y-m-d', strtotime($dataC->arrival_date)),
+				'first_anreisedatum' => date('Y-m-d', strtotime($dataC->arrival_date)),
+				'Abreisedatum' => date('Y-m-d', strtotime($dataC->departure_date)),
+				'first_abreisedatum' => date('Y-m-d', strtotime($dataC->departure_date)),
+				'Uhrzeit_von' => date('H:i', strtotime($dataC->arrival_time)),
+				'Uhrzeit_bis' => date('H:i', strtotime($dataC->departure_time)),
+				'product_id' => $dataC->c_product,
+				'order_id' => $order_id,
+				'token' => $dataC->code,
+				'company' => '',
+				'first_name' => $firstName != null ? $firstName : '',
+				'last_name' => $lastName != null ? $lastName : '',
+				'address' => '',
+				'city' => '',
+				'postcode' => '',
+				'country' => '',
+				'email' => '',
+				'phone' => $dataC->phone != null ? $dataC->phone : '',
+				'Sonstige_1' => '',
+				'Sonstige_2' => '',
+				'Parkplatz' => '',
+				'Kennzeichen' => $dataC->car_license_plate != null ? $dataC->car_license_plate : '',
+				'Sperrgepack' => "0",
+				'b_total' => $barzahlung,
+				'm_v_total' => $mv,
+				'order_price' => number_format($data['price'], 2, ".", "."),
+				'Bezahlmethode' => $payment_method,
+				'service_price' => 0,
+				'provision' => $commission,
+				'out_flight_number' => $dataC->flight_departure_nr,
+				'return_flight_number' => $dataC->flight_return_nr,
+				'nr_people' => $dataC->persons,
+				'code' => $dataC->code,
+				'order_status' => 'wc-processing'
+			]);		
+			self::checkBookingDate($order_id);
 		}
-		elseif($dataC->merchant_id == 1741){
-			$data['product'] = 45856;
-		}
-		else
-			return false;
-		$productSQL = self::getParklotByProductId($data['product']);
-		$commission = number_format(($dataC->total_price / 119 * 100) / 100 * $productSQL->commision, 2, ".", ".");
-		
-        $parklot = new Parklot($data['product']);
-		$data['price'] = number_format($dataC->total_price, 2, ".", ".");
-		$nameTemp = explode(" ",$dataC->name);
-		$firstName = $nameTemp[0];
-		$lastName = $nameTemp[1];
-        $product = wc_get_product($data['product']);
-        // set new product price
-        $product->set_price($data['price']);
-
-
-        $order = Orders::createWCOrder($product);
-        $order_id = $order->get_id();
-		
-		$payment_method = 'MasterCard';
-		$transaction_id = 'm';
-		$barzahlung = 0;
-		$mv = $data['price'];		
-
-        // add a bunch of meta data
-		add_post_meta($order_id, '_transaction_id', $transaction_id, true);
-        add_post_meta($order_id, '_payment_method_title', $payment_method, true);
-        add_post_meta($order_id, '_order_total', '', true);
-        add_post_meta($order_id, '_customer_user', 6, true);
-        add_post_meta($order_id, '_completed_date', '', true);
-        add_post_meta($order_id, '_order_currency', '', true);
-        add_post_meta($order_id, '_paid_date', '', true);
-
-        add_post_meta($order_id, '_billing_address_1', '', true);
-        add_post_meta($order_id, '_billing_city', '', true);
-        add_post_meta($order_id, '_billing_state', '', true);
-        add_post_meta($order_id, '_billing_postcode', '', true);
-        add_post_meta($order_id, '_billing_company', '', true);
-        add_post_meta($order_id, '_billing_country', '', true);
-        add_post_meta($order_id, '_billing_email', '', true);
-        add_post_meta($order_id, '_billing_first_name', $firstName, true);
-        add_post_meta($order_id, '_billing_last_name', $lastName, true);
-        add_post_meta($order_id, '_billing_phone', $dataC->phone, true);
-
-        add_post_meta($order_id, 'Anreisedatum', dateFormat($dataC->arrival_date), true);
-        add_post_meta($order_id, 'first_anreisedatum', dateFormat($dataC->arrival_date), true);
-        add_post_meta($order_id, 'Abreisedatum', dateFormat($dataC->departure_date), true);
-        add_post_meta($order_id, 'first_abreisedatum', dateFormat($dataC->departure_date), true);
-        add_post_meta($order_id, 'Uhrzeit von', $dataC->arrival_time, true);
-        add_post_meta($order_id, 'Uhrzeit bis', $dataC->departure_time, true);
-        add_post_meta($order_id, 'Hinflugnummer', $dataC->flight_departure_nr, true);
-        add_post_meta($order_id, 'Rückflugnummer', $dataC->flight_return_nr, true);
-        add_post_meta($order_id, 'Personenanzahl', $dataC->persons, true);
-        add_post_meta($order_id, 'Fahrzeughersteller', '', true);
-        add_post_meta($order_id, 'Fahrzeugmodell', $dataC->car_brand_model, true);
-        add_post_meta($order_id, 'Fahrzeugfarbe', '', true);
-        add_post_meta($order_id, 'Kennzeichen', $dataC->car_license_plate, true);
-
-        update_post_meta($order_id, 'token', $dataC->code);
-		
-		if($dataC->flight_departure_nr == null)
-			$dataC->flight_departure_nr = "";
-		if($dataC->flight_return_nr == null)
-			$dataC->flight_return_nr = "";
-		
-		$commission = number_format($commission, 2, ".", ".");
-		
-        self::$db->insert(self::$prefix . 'orders', [
-            'post_date' => date('Y-m-d'),
-			'date_from' => date('Y-m-d H:i', strtotime($dataC->arrival_date . ' ' .  $dataC->arrival_time)),
-            'date_to' => date('Y-m-d H:i', strtotime($dataC->departure_date . ' ' . $dataC->departure_time)),
-            'Anreisedatum' => date('Y-m-d', strtotime($dataC->arrival_date)),
-			'first_anreisedatum' => date('Y-m-d', strtotime($dataC->arrival_date)),
-			'Abreisedatum' => date('Y-m-d', strtotime($dataC->departure_date)),
-			'first_abreisedatum' => date('Y-m-d', strtotime($dataC->departure_date)),
-			'Uhrzeit_von' => date('H:i', strtotime($dataC->arrival_time)),
-			'Uhrzeit_bis' => date('H:i', strtotime($dataC->departure_time)),
-			'product_id' => $data['product'],
-            'order_id' => $order_id,
-			'token' => $dataC->code,
-			'company' => '',
-			'first_name' => $firstName != null ? $firstName : '',
-			'last_name' => $lastName != null ? $lastName : '',
-			'address' => '',
-			'city' => '',
-			'postcode' => '',
-			'country' => '',
-			'email' => '',
-			'phone' => $dataC->phone != null ? $dataC->phone : '',
-			'Sonstige_1' => '',
-			'Sonstige_2' => '',
-			'Parkplatz' => '',
-			'Kennzeichen' => $dataC->car_license_plate != null ? $dataC->car_license_plate : '',
-			'Sperrgepack' => "0",
-			'b_total' => $barzahlung,
-			'm_v_total' => $mv,
-			'order_price' => number_format($data['price'], 2, ".", "."),
-			'Bezahlmethode' => $payment_method,
-			'service_price' => 0,
-			'provision' => $commission,
-            'out_flight_number' => $dataC->flight_departure_nr,
-            'return_flight_number' => $dataC->flight_return_nr,
-            'nr_people' => $dataC->persons,
-			'code' => $dataC->code,
-			'order_status' => 'wc-processing'
-        ]);
-		self::saveBookingMeta($order_id, 'provision', $commission);
-		
-		/*
-		// Save commission to booking metaphone
-		$provision = self::getBrokerCommissionForBooking($data['product'], date('Y-m-d', strtotime($data["startDateOnly"])));
-		if($provision->commission_type != "" || $provision->commission_type != null){
-			if($provision->commission_type == 'netto'){
-				$netto = number_format((float)($data['price'] / 119 * 100), 2, '.', '');
-				$amount = number_format((float)($netto / 100 * $provision->commission_value), 2, '.', '');
-				self::saveBookingMeta($order_id, 'provision', $amount);
-			}
-			elseif($provision->commission_type == 'brutto'){
-				$brutto = number_format((float)$data['price'], 2, '.', '');
-				$amount = number_format((float)($brutto / 100 * $provision->commission_value), 2, '.', '');
-				self::saveBookingMeta($order_id, 'provision', $amount);
-			}
-		}
-		else{
-			self::saveBookingMeta($order_id, 'provision', '0.00');
-		}
-		*/
-		self::checkBookingDate($order_id);
     }
 	
 	static function updateOrderFomParkos($dataC)
@@ -6004,125 +5926,328 @@ class Database
 		if($order_id->order_id == null)
 			return false;
 		
-		if($dataC->merchant_id == 569){
-			if($dataC->location_type == 'indoor')
-				$product = 41402;
-			else
-				$product = 41403;
-		}
-		elseif($dataC->merchant_id == 1741){
-			$product = 45856;
-		}
-		else
-			return false;
+		if($dataC->c_product){
 		
-		$productSQL = self::getParklotByProductId($data['product']);
-		$commission = number_format($dataC->total_price / 100 * $productSQL->commision, 2, ".", ".");
-		
-		$woo_order = wc_get_order($order_id->order_id);
-		$order_items = $woo_order->get_items();
+			$productSQL = self::getParklotByProductId($dataC->c_product);
+			$commission = number_format($dataC->total_price_brutto / 100 * $productSQL->commision, 2, ".", ".");
+			
+			$woo_order = wc_get_order($order_id->order_id);
+			$order_items = $woo_order->get_items();
 
-		foreach ( $order_items as $order_item_id => $order_item) {
-			wc_delete_order_item($order_item_id);
-		}
-		
-		$woo_order->calculate_taxes();
-		$woo_order->calculate_totals();
-		$woo_order->save();
-		
-		$data['parking_update'] = number_format($dataC->total_price, 2, ".", ".");
-		$price = number_format((float)$data['parking_update'],4, '.', '');
-		
-		$woo_order = wc_get_order($order_id->order_id);
-		$woo_order->add_product( wc_get_product($product), 1, [
-				//'subtotal'     => $price, // e.g. 32.95
-				'total'        => $price, // e.g. 32.95
-			] );
-		
-		$woo_order->calculate_taxes();
-		$woo_order->calculate_totals();
-		$woo_order->save();
-		
-		$barzahlung = 0;
-		$mv = $data['parking_update'];		
-		
-		self::$db->update(self::$prefix_DB . 'wc_order_product_lookup', [
-			'product_net_revenue' => (float)$data['parking_update'] / 119 * 100,
-			'product_gross_revenue' => (float)$data['parking_update'],
-			'tax_amount' => (float)$data['parking_update'] / 119 * 19
-		], ['order_id' => $order_id->order_id]);
-		
-		$nameTemp = explode(" ",$dataC->name);
-		$firstName = $nameTemp[0];
-		$lastName = $nameTemp[1];
-
-        // add a bunch of meta data
-		update_post_meta($order_id->order_id, '_billing_first_name', $firstName);
-        update_post_meta($order_id->order_id, '_billing_last_name', $lastName);
-		update_post_meta($order_id->order_id, '_billing_phone', $dataC->phone);
-        update_post_meta($order_id->order_id, 'Anreisedatum', dateFormat($dataC->arrival_date));
-        update_post_meta($order_id->order_id, 'first_anreisedatum', dateFormat($dataC->arrival_date));
-        update_post_meta($order_id->order_id, 'Abreisedatum', dateFormat($dataC->departure_date));
-        update_post_meta($order_id->order_id, 'first_abreisedatum', dateFormat($dataC->departure_date));
-        update_post_meta($order_id->order_id, 'Uhrzeit von', $dataC->arrival_time);
-        update_post_meta($order_id->order_id, 'Uhrzeit bis', $dataC->departure_time);
-        update_post_meta($order_id->order_id, 'Hinflugnummer', $dataC->flight_departure_nr);
-        update_post_meta($order_id->order_id, 'Rückflugnummer', $dataC->flight_return_nr);
-        update_post_meta($order_id->order_id, 'Personenanzahl', $dataC->persons);
-        update_post_meta($order_id->order_id, 'Kennzeichen', $dataC->car_license_plate);		
-        update_post_meta($order_id->order_id, 'Fahrzeugmodell', $dataC->car_brand_model);
-
-
-		if($dataC->flight_departure_nr == null)
-			$dataC->flight_departure_nr = "";
-		if($dataC->flight_return_nr == null)
-			$dataC->flight_return_nr = "";
-				
-        self::$db->update(self::$prefix . 'orders', [
-            'date_from' => date('Y-m-d H:i', strtotime($dataC->arrival_date . ' ' . $dataC->arrival_time)),
-            'date_to' => date('Y-m-d H:i', strtotime($dataC->departure_date . ' ' . $dataC->departure_time)),
-            'Anreisedatum' => date('Y-m-d', strtotime($dataC->arrival_date)),
-			'Abreisedatum' => date('Y-m-d', strtotime($dataC->departure_date)),
-			'Uhrzeit_von' => date('H:i', strtotime($dataC->arrival_time)),
-			'Uhrzeit_bis' => date('H:i', strtotime($dataC->departure_time)),
-			'product_id' => $product,
-			'first_name' => $firstName != null ? $firstName : '',
-			'last_name' => $lastName != null ? $lastName : '',
-			'phone' => $dataC->phone != null ? $dataC->phone : '',
-			'Kennzeichen' => $dataC->car_license_plate != null ? $dataC->car_license_plate : '',
-			'out_flight_number' => $dataC->flight_departure_nr,
-            'return_flight_number' => $dataC->flight_return_nr,
-			'b_total' => $barzahlung,
-			'm_v_total' => $mv,
-			'order_price' => number_format($data['parking_update'], 2, ".", "."),
-			'provision' => $commission,
-            'nr_people' => $dataC->persons
-        ], ['order_id' => $order_id->order_id]);
-		
-		self::updateBookingMeta($order_id->order_id, 'provision', $commission);
-		/*
-		// Save commission to booking metaphone
-		$provision = self::getBrokerCommissionForBooking($product->product_id, date('Y-m-d', strtotime($data["start-date"])));
-		if($provision->commission_type != "" || $provision->commission_type != null){
-			if($provision->commission_type == 'netto'){
-				$netto = number_format((float)($data['parking_update'] / 119 * 100), 2, '.', '');
-				$amount = number_format((float)($netto / 100 * $provision->commission_value), 2, '.', '');
-				self::updateBookingMeta($order_id->order_id, 'provision', $amount);
+			foreach ( $order_items as $order_item_id => $order_item) {
+				wc_delete_order_item($order_item_id);
 			}
-			elseif($provision->commission_type == 'brutto'){
-				$brutto = number_format((float)$data['parking_update'], 2, '.', '');
-				$amount = number_format((float)($brutto / 100 * $provision->commission_value), 2, '.', '');
-				self::updateBookingMeta($order_id->order_id, 'provision', $amount);
-			}
+			
+			$woo_order->calculate_taxes();
+			$woo_order->calculate_totals();
+			$woo_order->save();
+			
+			$data['parking_update'] = number_format($dataC->total_price, 2, ".", ".");
+			$price = number_format((float)$data['parking_update'],4, '.', '');
+			
+			$woo_order = wc_get_order($order_id->order_id);
+			$woo_order->add_product( wc_get_product($dataC->c_product), 1, [
+					//'subtotal'     => $price, // e.g. 32.95
+					'total'        => $price, // e.g. 32.95
+				] );
+			
+			$woo_order->calculate_taxes();
+			$woo_order->calculate_totals();
+			$woo_order->save();
+			
+			$barzahlung = 0;
+			$mv = number_format($dataC->total_price_brutto, 2, ".", ".");		
+			
+			self::$db->update(self::$prefix_DB . 'wc_order_product_lookup', [
+				'product_net_revenue' => (float)$data['parking_update'] / 119 * 100,
+				'product_gross_revenue' => (float)$data['parking_update'],
+				'tax_amount' => (float)$data['parking_update'] / 119 * 19
+			], ['order_id' => $order_id->order_id]);
+			
+			$nameTemp = explode(" ",$dataC->name);
+			$firstName = $nameTemp[0];
+			$lastName = $nameTemp[1];
+
+			// add a bunch of meta data
+			update_post_meta($order_id->order_id, '_billing_first_name', $firstName);
+			update_post_meta($order_id->order_id, '_billing_last_name', $lastName);
+			update_post_meta($order_id->order_id, '_billing_phone', $dataC->phone);
+			update_post_meta($order_id->order_id, 'Anreisedatum', dateFormat($dataC->arrival_date));
+			update_post_meta($order_id->order_id, 'first_anreisedatum', dateFormat($dataC->arrival_date));
+			update_post_meta($order_id->order_id, 'Abreisedatum', dateFormat($dataC->departure_date));
+			update_post_meta($order_id->order_id, 'first_abreisedatum', dateFormat($dataC->departure_date));
+			update_post_meta($order_id->order_id, 'Uhrzeit von', $dataC->arrival_time);
+			update_post_meta($order_id->order_id, 'Uhrzeit bis', $dataC->departure_time);
+			update_post_meta($order_id->order_id, 'Hinflugnummer', $dataC->flight_departure_nr);
+			update_post_meta($order_id->order_id, 'Rückflugnummer', $dataC->flight_return_nr);
+			update_post_meta($order_id->order_id, 'Personenanzahl', $dataC->persons);
+			update_post_meta($order_id->order_id, 'Kennzeichen', $dataC->car_license_plate);		
+			update_post_meta($order_id->order_id, 'Fahrzeugmodell', $dataC->car_brand_model);
+
+
+			if($dataC->flight_departure_nr == null)
+				$dataC->flight_departure_nr = "";
+			if($dataC->flight_return_nr == null)
+				$dataC->flight_return_nr = "";
+					
+			self::$db->update(self::$prefix . 'orders', [
+				'date_from' => date('Y-m-d H:i', strtotime($dataC->arrival_date . ' ' . $dataC->arrival_time)),
+				'date_to' => date('Y-m-d H:i', strtotime($dataC->departure_date . ' ' . $dataC->departure_time)),
+				'Anreisedatum' => date('Y-m-d', strtotime($dataC->arrival_date)),
+				'Abreisedatum' => date('Y-m-d', strtotime($dataC->departure_date)),
+				'Uhrzeit_von' => date('H:i', strtotime($dataC->arrival_time)),
+				'Uhrzeit_bis' => date('H:i', strtotime($dataC->departure_time)),
+				'product_id' => $dataC->c_product,
+				'first_name' => $firstName != null ? $firstName : '',
+				'last_name' => $lastName != null ? $lastName : '',
+				'phone' => $dataC->phone != null ? $dataC->phone : '',
+				'Kennzeichen' => $dataC->car_license_plate != null ? $dataC->car_license_plate : '',
+				'out_flight_number' => $dataC->flight_departure_nr,
+				'return_flight_number' => $dataC->flight_return_nr,
+				'b_total' => $barzahlung,
+				'm_v_total' => $mv,
+				'order_price' => number_format($dataC->total_price_brutto, 2, ".", "."),
+				'provision' => $commission,
+				'nr_people' => $dataC->persons
+			], ['order_id' => $order_id->order_id]);
+			self::checkBookingDate($order_id->order_id);
 		}
-		else{
-			self::updateBookingMeta($order_id->order_id, 'provision', '0.00');
-		}
-		*/
-		self::checkBookingDate($order_id->order_id);
     }
 	
 	static function cancelOrderFomParkos($dataC)
+    {
+		$order_id = self::$db->get_row("SELECT order_id FROM " . self::$prefix . "orders WHERE code = '" . $dataC->code . "'");
+		
+		if($order_id->order_id == null)
+			return false;
+		
+		$order = new WC_Order($order_id->order_id);
+		if (!empty($order)) {
+			$order->update_status( 'cancelled' );
+			update_post_meta($order_id->order_id, 'Uhrzeit von', '23:59');
+			update_post_meta($order_id->order_id, 'Uhrzeit bis', '23:59');
+			
+			self::$db->update(self::$prefix . 'orders', [
+				'date_from' => date('Y-m-d H:i', strtotime($dataC->arrival_date . ' 23:59')),
+				'date_to' => date('Y-m-d H:i', strtotime($dataC->departure_date . ' 23:59')),
+				'order_status' => 'wc-cancelled'
+			], ['order_id' => $order_id->order_id]);
+		}
+	}
+	
+	static function saveOrderFomFluparks($dataC)
+    {	
+		$parkos = self::$db->get_row("SELECT order_id FROM " . self::$prefix . "orders WHERE code = '" . $dataC->code . "'");
+		
+		if($parkos->order_id != null)
+			return false;
+		
+		if($dataC->product != null){
+		
+			$productSQL = self::getParklotByProductId($dataC->product);
+			$commission = number_format(($dataC->total_price / 119 * 100) / 100 * $productSQL->commision, 2, ".", ".");
+			
+			$parklot = new Parklot($dataC->product);
+			$firstName = $dataC->vorname;
+			$lastName = $dataC->nachname;
+			$product = wc_get_product($dataC->product);
+			// set new product price
+			$product->set_price($dataC->total_price);
+
+
+			$order = Orders::createWCOrder($product);
+			$order_id = $order->get_id();
+			
+			$payment_method = 'MasterCard';
+			$transaction_id = 'm';
+			$barzahlung = 0;
+			$mv = $dataC->total_price;		
+
+			// add a bunch of meta data
+			add_post_meta($order_id, '_transaction_id', $transaction_id, true);
+			add_post_meta($order_id, '_payment_method_title', $payment_method, true);
+			add_post_meta($order_id, '_order_total', '', true);
+			add_post_meta($order_id, '_customer_user', 6, true);
+			add_post_meta($order_id, '_completed_date', '', true);
+			add_post_meta($order_id, '_order_currency', '', true);
+			add_post_meta($order_id, '_paid_date', '', true);
+
+			add_post_meta($order_id, '_billing_address_1', '', true);
+			add_post_meta($order_id, '_billing_city', '', true);
+			add_post_meta($order_id, '_billing_state', '', true);
+			add_post_meta($order_id, '_billing_postcode', '', true);
+			add_post_meta($order_id, '_billing_company', '', true);
+			add_post_meta($order_id, '_billing_country', '', true);
+			add_post_meta($order_id, '_billing_email', $dataC->email, true);
+			add_post_meta($order_id, '_billing_first_name', $firstName, true);
+			add_post_meta($order_id, '_billing_last_name', $lastName, true);
+			add_post_meta($order_id, '_billing_phone', $dataC->phone, true);
+
+			add_post_meta($order_id, 'Anreisedatum', dateFormat($dataC->arrival_date), true);
+			add_post_meta($order_id, 'first_anreisedatum', dateFormat($dataC->arrival_date), true);
+			add_post_meta($order_id, 'Abreisedatum', dateFormat($dataC->departure_date), true);
+			add_post_meta($order_id, 'first_abreisedatum', dateFormat($dataC->departure_date), true);
+			add_post_meta($order_id, 'Uhrzeit von', $dataC->arrival_time, true);
+			add_post_meta($order_id, 'Uhrzeit bis', $dataC->departure_time, true);
+			add_post_meta($order_id, 'Hinflugnummer', $dataC->flight_departure_nr, true);
+			add_post_meta($order_id, 'Rückflugnummer', $dataC->flight_return_nr, true);
+			add_post_meta($order_id, 'Personenanzahl', $dataC->persons, true);
+			add_post_meta($order_id, 'Fahrzeughersteller', '', true);
+			add_post_meta($order_id, 'Fahrzeugmodell', $dataC->car_brand_model, true);
+			add_post_meta($order_id, 'Fahrzeugfarbe', $dataC->car_color, true);
+			add_post_meta($order_id, 'Kennzeichen', $dataC->car_license_plate, true);
+
+			update_post_meta($order_id, 'token', $dataC->code);
+			
+			if($dataC->flight_departure_nr == null)
+				$dataC->flight_departure_nr = "";
+			if($dataC->flight_return_nr == null)
+				$dataC->flight_return_nr = "";
+			
+			$commission = number_format($commission, 2, ".", ".");
+			
+			self::$db->insert(self::$prefix . 'orders', [
+				'post_date' => $dataC->booking_date,
+				'date_from' => date('Y-m-d H:i', strtotime($dataC->arrival_date . ' ' .  $dataC->arrival_time)),
+				'date_to' => date('Y-m-d H:i', strtotime($dataC->departure_date . ' ' . $dataC->departure_time)),
+				'Anreisedatum' => date('Y-m-d', strtotime($dataC->arrival_date)),
+				'first_anreisedatum' => date('Y-m-d', strtotime($dataC->arrival_date)),
+				'Abreisedatum' => date('Y-m-d', strtotime($dataC->departure_date)),
+				'first_abreisedatum' => date('Y-m-d', strtotime($dataC->departure_date)),
+				'Uhrzeit_von' => date('H:i', strtotime($dataC->arrival_time)),
+				'Uhrzeit_bis' => date('H:i', strtotime($dataC->departure_time)),
+				'product_id' => $dataC->product,
+				'order_id' => $order_id,
+				'token' => $dataC->code,
+				'company' => '',
+				'first_name' => $firstName != null ? $firstName : '',
+				'last_name' => $lastName != null ? $lastName : '',
+				'address' => '',
+				'city' => '',
+				'postcode' => '',
+				'country' => '',
+				'email' => '',
+				'phone' => $dataC->phone != null ? $dataC->phone : '',
+				'Sonstige_1' => '',
+				'Sonstige_2' => '',
+				'Parkplatz' => '',
+				'Kennzeichen' => $dataC->car_license_plate != null ? $dataC->car_license_plate : '',
+				'Sperrgepack' => "0",
+				'b_total' => $barzahlung,
+				'm_v_total' => $mv,
+				'order_price' => $dataC->total_price,
+				'Bezahlmethode' => $payment_method,
+				'service_price' => 0,
+				'provision' => $commission,
+				'out_flight_number' => $dataC->flight_departure_nr,
+				'return_flight_number' => $dataC->flight_return_nr,
+				'nr_people' => $dataC->persons,
+				'code' => $dataC->code,
+				'order_status' => 'wc-processing'
+			]);
+			
+			self::$db->update(self::$prefix_DB . 'posts', [
+				'post_date' => $dataC->booking_date,
+				'post_date_gmt' => $dataC->booking_date
+			], ['ID' => $order_id]);
+			
+			self::checkBookingDate($order_id);
+		}
+    }
+	
+	static function updateOrderFomFluparks($dataC)
+    {
+		$order_id = self::$db->get_row("SELECT order_id FROM " . self::$prefix . "orders WHERE code = '" . $dataC->code . "'");
+		
+		if($order_id->order_id == null)
+			return false;
+		
+		if($dataC->product){
+			$productSQL = self::getParklotByProductId($dataC->product);
+			$commission = number_format($dataC->total_price_brutto / 100 * $productSQL->commision, 2, ".", ".");
+			
+			$woo_order = wc_get_order($order_id->order_id);
+			$order_items = $woo_order->get_items();
+
+			foreach ( $order_items as $order_item_id => $order_item) {
+				wc_delete_order_item($order_item_id);
+			}
+			
+			$woo_order->calculate_taxes();
+			$woo_order->calculate_totals();
+			$woo_order->save();
+			
+			$data['parking_update'] = number_format($dataC->total_price, 2, ".", ".");
+			$price = number_format((float)$data['parking_update'],4, '.', '');
+			
+			$woo_order = wc_get_order($order_id->order_id);
+			$woo_order->add_product( wc_get_product($dataC->product), 1, [
+					//'subtotal'     => $price, // e.g. 32.95
+					'total'        => $price, // e.g. 32.95
+				] );
+			
+			$woo_order->calculate_taxes();
+			$woo_order->calculate_totals();
+			$woo_order->save();
+			$barzahlung = 0;
+			$mv = number_format($dataC->total_price_brutto, 2, ".", ".");		
+			
+			self::$db->update(self::$prefix_DB . 'wc_order_product_lookup', [
+				'product_net_revenue' => (float)$data['parking_update'] / 119 * 100,
+				'product_gross_revenue' => (float)$data['parking_update'],
+				'tax_amount' => (float)$data['parking_update'] / 119 * 19
+			], ['order_id' => $order_id->order_id]);
+			
+			$firstName = $dataC->vorname;
+			$lastName = $dataC->nachname;
+
+			// add a bunch of meta data
+			update_post_meta($order_id->order_id, '_billing_first_name', $firstName);
+			update_post_meta($order_id->order_id, '_billing_last_name', $lastName);
+			update_post_meta($order_id->order_id, '_billing_phone', $dataC->phone);
+			update_post_meta($order_id->order_id, 'Anreisedatum', dateFormat($dataC->arrival_date));
+			update_post_meta($order_id->order_id, 'first_anreisedatum', dateFormat($dataC->arrival_date));
+			update_post_meta($order_id->order_id, 'Abreisedatum', dateFormat($dataC->departure_date));
+			update_post_meta($order_id->order_id, 'first_abreisedatum', dateFormat($dataC->departure_date));
+			update_post_meta($order_id->order_id, 'Uhrzeit von', $dataC->arrival_time);
+			update_post_meta($order_id->order_id, 'Uhrzeit bis', $dataC->departure_time);
+			update_post_meta($order_id->order_id, 'Hinflugnummer', $dataC->flight_departure_nr);
+			update_post_meta($order_id->order_id, 'Rückflugnummer', $dataC->flight_return_nr);
+			update_post_meta($order_id->order_id, 'Personenanzahl', $dataC->persons);
+			update_post_meta($order_id->order_id, 'Kennzeichen', $dataC->car_license_plate);		
+			update_post_meta($order_id->order_id, 'Fahrzeugmodell', $dataC->car_brand_model);
+			update_post_meta($order_id->order_id, 'Fahrzeugfarbe', $dataC->car_color);
+
+
+			if($dataC->flight_departure_nr == null)
+				$dataC->flight_departure_nr = "";
+			if($dataC->flight_return_nr == null)
+				$dataC->flight_return_nr = "";		
+			self::$db->update(self::$prefix . 'orders', [
+				'date_from' => date('Y-m-d H:i', strtotime($dataC->arrival_date . ' ' . $dataC->arrival_time)),
+				'date_to' => date('Y-m-d H:i', strtotime($dataC->departure_date . ' ' . $dataC->departure_time)),
+				'Anreisedatum' => date('Y-m-d', strtotime($dataC->arrival_date)),
+				'Abreisedatum' => date('Y-m-d', strtotime($dataC->departure_date)),
+				'Uhrzeit_von' => date('H:i', strtotime($dataC->arrival_time)),
+				'Uhrzeit_bis' => date('H:i', strtotime($dataC->departure_time)),
+				'product_id' => $dataC->product,
+				'first_name' => $firstName != null ? $firstName : '',
+				'last_name' => $lastName != null ? $lastName : '',
+				'phone' => $dataC->phone != null ? $dataC->phone : '',
+				'Kennzeichen' => $dataC->car_license_plate != null ? $dataC->car_license_plate : '',
+				'out_flight_number' => $dataC->flight_departure_nr,
+				'return_flight_number' => $dataC->flight_return_nr,
+				'b_total' => $barzahlung,
+				'm_v_total' => $mv,
+				'order_price' => number_format($dataC->total_price_brutto, 2, ".", "."),
+				'provision' => $commission,
+				'nr_people' => $dataC->persons
+			], ['order_id' => $order_id->order_id]);
+			self::checkBookingDate($order_id->order_id);
+		}
+    }
+	
+	static function cancelOrderFomFluparks($dataC)
     {
 		$order_id = self::$db->get_row("SELECT order_id FROM " . self::$prefix . "orders WHERE code = '" . $dataC->code . "'");
 		
@@ -6211,7 +6336,23 @@ class Database
 			$data['outboundFlightNumber'] = "";
 		if($data['returnFlightNumber'] == null)
 			$data['returnFlightNumber'] = "";
-				
+		
+		// Save commission to booking metaphone
+		$provision = self::getBrokerCommissionForBooking($product->product_id, date('Y-m-d', strtotime($data["arrivalDate"])));
+		if($provision->commission_type != "" || $provision->commission_type != null){
+			if($provision->commission_type == 'netto'){
+				$netto = number_format((float)($data['totalParkingCosts'] / 119 * 100), 2, '.', '');
+				$amount = number_format((float)($netto / 100 * $provision->commission_value), 2, '.', '');
+			}
+			elseif($provision->commission_type == 'brutto'){
+				$brutto = number_format((float)$data['totalParkingCosts'], 2, '.', '');
+				$amount = number_format((float)($brutto / 100 * $provision->commission_value), 2, '.', '');
+			}
+		}
+		else{
+			$amount = '0.00';
+		}
+		
         self::$db->update(self::$prefix . 'orders', [
             'date_from' => date('Y-m-d H:i', strtotime($data["arrivalDate"] . ' ' . $data["arrivalTime"])),
             'date_to' => date('Y-m-d H:i', strtotime($data["departureDate"] . ' ' . $data["departureTime"])),			
@@ -6237,35 +6378,10 @@ class Database
 			'b_total' => $barzahlung,
 			'm_v_total' => $mv,
 			'order_price' => number_format($data['totalParkingCosts'], 2, ".", "."),
+			'provision' => $amount,
             'nr_people' => $data['countTravellers']
         ], ['order_id' => $order_id->post_id]);
-		
-		
-		// Save commission to booking metaphone
-		$provision = self::getBrokerCommissionForBooking($product->product_id, date('Y-m-d', strtotime($data["arrivalDate"])));
-		if($provision->commission_type != "" || $provision->commission_type != null){
-			if($provision->commission_type == 'netto'){
-				$netto = number_format((float)($data['totalParkingCosts'] / 119 * 100), 2, '.', '');
-				$amount = number_format((float)($netto / 100 * $provision->commission_value), 2, '.', '');
-				self::updateBookingMeta($order_id->post_id, 'provision', $amount);
-			}
-			elseif($provision->commission_type == 'brutto'){
-				$brutto = number_format((float)$data['totalParkingCosts'], 2, '.', '');
-				$amount = number_format((float)($brutto / 100 * $provision->commission_value), 2, '.', '');
-				self::updateBookingMeta($order_id->post_id, 'provision', $amount);
-			}
-		}
-		else{
-			self::updateBookingMeta($order_id->post_id, 'provision', '0.00');
-		}
-		
-		/*if($data["bookingState"] == "CANCEL"){
-			self::updateBookingMeta($order_id->post_id, 'provision', '0.00');
-			$order = new WC_Order($order_id->post_id);
-			if (!empty($order)) {
-				$order->update_status( 'cancelled' );
-			}
-		}*/
+
 		self::checkBookingDate($order_id->post_id);
     }
 	
@@ -6493,23 +6609,7 @@ class Database
 		
     static function importOrder($data)
     {
-		if($data['internalADPrefix'] == NULL){
-			if($data['parkinglot_parkinglots_id'] == 2)
-				$data['product'] = 537;
-			elseif($data['parkinglot_parkinglots_id'] == 24)
-				$data['product'] = 592;
-			elseif($data['parkinglot_parkinglots_id'] == 25)
-				$data['product'] = 619;
-			/*elseif($data['id'] == 12)
-				$data['product'] = 621;
-			elseif($data['id'] == 11)
-				$data['product'] = 624;*/
-			elseif($data['parkinglot_parkinglots_id'] == 1)
-				$data['product'] = 873;
-			else
-				return false;
-		}
-		elseif($data['internalADPrefix'] != NULL){
+		if($data['internalADPrefix'] != NULL){
 			if($data['internalADPrefix'] == 'STR4' || $data['internalADPrefix'] == 'STR8' || $data['internalADPrefix'] == 'STR2' || $data['internalADPrefix'] == 'STB2' || $data['internalADPrefix'] == 'STB1'){
 				$data['product'] = 621;
 				$data['totalParkingCosts'] = $data['totalParkingCosts'];

@@ -6,14 +6,18 @@ $user = wp_get_current_user();
 $filter_arr['list'] = 1;
 $filter_arr['datum_von'] = date('Y-m-d');
 $filter_arr['datum_bis'] = date('Y-m-d');
-$arrival = Database::getInstance()->get_fahrerliste("Anreise", $filter_arr);
+$arrival_shuttle = Database::getInstance()->get_fahrerliste("Anreise", "shuttle", $filter_arr);
+$arrival_valet = Database::getInstance()->get_fahrerliste("Anreise", "valet", $filter_arr);
+$arrival = array_merge($arrival_shuttle, $arrival_valet);
 
 // Abreisen
 $filter_de['list'] = 1;
-$filter_de['datum_von_Ad'] = date('Y-m-d');
-$filter_de['datum_bis_Ad'] = date('Y-m-d');
+$filter_de['datum_von'] = date('Y-m-d');
+$filter_de['datum_bis'] = date('Y-m-d');
 $filter['type'] = "shuttle";
-$departure = Database::getInstance()->get_fahrerliste("Abreise", $filter_de);
+$departure_shuttle = Database::getInstance()->get_fahrerliste("Abreise", "shuttle", $filter_de);
+$departure_valet = Database::getInstance()->get_fahrerliste("Abreise", "valet", $filter_de);
+$departure = array_merge($departure_shuttle, $departure_valet);
 
 // today
 $filter_today['buchung_von'] = date('Y-m-d');
@@ -24,23 +28,8 @@ $today = Database::getInstance()->get_bookinglistV2("wc-processing", $filter_tod
 // Stornos
 $filte['token'] == null;
 $rerund = Database::getInstance()->get_bookinglistV2("wc-cancelled", $filte, " AND o.Bezahlmethode = 'PayPal / Kreditkarte' ");
-/*
 
-$data = array(
-    'status'      => 'cancelled',
-    'type'        => 'shop_order',
-    'email'       => '',
-    'limit'       => -1,
-	'meta_key' => '_payment_method_title',
-	'meta_value' => 'PayPal / Kreditkarte',
-	'meta_compare'  => '=',
-    'return'      => 'ids',
-);
-
-$rerund = wc_get_orders($data);
-*/
-
-//echo "<pre>"; print_r($today); echo "</pre>";
+//echo "<pre>"; print_r($departure_shuttle); echo "</pre>";
 ?>
 
 

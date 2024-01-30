@@ -3,6 +3,7 @@ require_once get_template_directory() . '/lib/dompdf/autoload.inc.php';
 use Dompdf\Dompdf;
 use Dompdf\Options;
 ob_start();
+$web_company = Database::getInstance()->getSiteCompany();
 ?>
 
 <style>
@@ -54,14 +55,14 @@ ob_start();
 	<tr>
 		<td class="address billing-address">
 			<div class="site-logo">
-				<a href="https://airport-parking-stuttgart.de/">
-					<img src="https://airport-parking-stuttgart.de/wp-content/uploads/2021/12/APS-Logo.png">
+				<a href="https://<?php echo $_SERVER['HTTP_HOST'] ?>/">
+					<?php echo get_custom_logo(); ?>
 				</a>
 			</div>
 		</td>
 	</tr>
 </table>
-<h3>SHUTTLE-SERVICE-HOTLINE<br>+49 176 10 031 148</h3>
+<h3>SHUTTLE-SERVICE-HOTLINE<br><?php echo $web_company->phone ?></h3>
 <br><br><br>
 <table class="order-data-addresses">
 	<tr>
@@ -86,7 +87,7 @@ ob_start();
 <div class="top-table-info">
 	<h3>Buchungsbestätigung</h3>
 	<p>Sehr geehrte Damen und Herren,</p>
-	<p>vielen Dank für Ihre Buchung über APS.</p>
+	<p>vielen Dank für Ihre Buchung über <?php echo $web_company->name ?>.</p>
 </div>
 <table border="1" class="orders-info">
 	<thead>
@@ -107,42 +108,41 @@ ob_start();
 		
 	</tbody>
 </table>
-<p>Die Parkflächen befinden sich in der Raiffeisenstraße 18, 70794 Filderstadt. Sobals Sie abholbereit sind, rufen Sie bitte die Shuttle-Hotline an.</p>
+<p>Sobals Sie abholbereit sind, rufen Sie bitte die Shuttle-Hotline an.</p>
 <p>Sie haben noch Fragen? Schreiben Sie uns einfach eine E-Mail an
-<a href='mailto:info@airport-parking-stuttgart.de'>info@airport-parking-stuttgart.de</a> oder rufen Sie uns unter <a href='tel:+49 711 22 051 245'>+49 711 22 051 245</a> an. <br>
+<a href='mailto:<?php echo $web_company->email ?>'><?php echo $web_company->email ?></a> oder rufen Sie uns unter <a href='tel:<?php echo $web_company->phone ?>'><?php echo $web_company->phone ?></a> an. <br>
 Montag bis Freitag von 07:00 bis 20:00 Uhr. Aus dem dt. Festnetz zum Ortstarif. Mobilfunkkosten abweichend.</p>
 <p>Mit freundlichen Grüßen</p>
-<p>APS-Airport-Parking-Stuttgart GmbH</p>
+<p><?php echo $web_company->name ?></p>
 <br>
 <table class="footer">
 	<tbody>
 		<tr>
 			<td>
-			APS-Airport-Parking-Stuttgart GmbH<br>
-			Geschäftsführer: Erdem Aras <br>
-			Sitz des Unternehmens: Filderstadt <br>
-			Registergericht: Amtsgericht Stuttgart
+			<?php echo $web_company->name ?><br>
+			Geschäftsführer: <?php echo $web_company->owner ?> <br>
+			Sitz des Unternehmens: <?php echo $web_company->location ?> <br>
 			</td>
 			<td>
-				Mail: info@airport-parking-stuttgart.de <br>
-				Telefon: +49 (0) 711 22 051 245 <br>
-				Raiffeisenstraße 18 <br>
-				70794 Filderstadt <br>
-				USt-IdNr.: DE313061031 
+				Mail: <?php echo $web_company->email ?> <br>
+				Telefon: <?php echo $web_company->phone ?> <br>
+				<?php echo $web_company->street ?> <br>
+				<?php echo $web_company->zip ?> <?php echo $web_company->location ?> <br>
+				USt-IdNr.: <?php echo $web_company->ust_id ?> 
 			</td>
 			<td>
-				Sparkasse Esslingen <br>
-				IBAN: DE08 6115 0020 0102 8060 23 <br>
-				BIC/SWIFT Code: ESSLDE66XXX <br>
+				<?php echo $web_company->bank ?> <br>
+				IBAN: <?php echo $web_company->iban ?> <br>
+				BIC/SWIFT Code: <?php echo $web_company->bic ?> <br>
 				Kontoinhaber: <br>
-				APS-Airport-Parking-Stuttgart GmbH
+				<?php echo $web_company->name ?>
 			</td>
 		</tr>
 	</tbody>
 </table>
 <?php
 $content = ob_get_clean();
-if($user_id == 26 && $email != null){
+if($email != null){
 	// instantiate and use the dompdf class
 	$options = new Options();
 	$options->set('isRemoteEnabled', true);
@@ -166,6 +166,6 @@ if($user_id == 26 && $email != null){
 	fclose($pdf);			
 
 	$headers = array('Content-Type: text/html; charset=UTF-8');
-	wp_mail( $email, '[APS] Ihre Transferbuchung', $content, $headers, $filePath );
+	wp_mail( $email, 'Ihre Transferbuchung', $content, $headers, $filePath );
 }
 ?>

@@ -78,6 +78,11 @@ class Orders
         global $wpdb;
         return $wpdb->get_row("select * from {$wpdb->prefix}itweb_orders where order_id = $id");
     }
+	
+	static function getOrderByToken($token){
+        global $wpdb;
+        return $wpdb->get_row("select * from {$wpdb->prefix}itweb_orders where token = '$token'");
+    }
 
     static function deleteWCOrders($ids){
         foreach($ids as $id){

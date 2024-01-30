@@ -1,6 +1,7 @@
 <?php
 require_once 'icalendar.php';
 global $wpdb;
+$base_url = $_SERVER['HTTP_HOST'];
 
 if (isset($_GET['month']) && $_GET['month'] < 10)
     $zero = '0';
@@ -67,44 +68,46 @@ if(isset($_GET['ps'])){
 			
 			Database::getInstance()->addEventsFast($date[0], $product_id, $price);				 
 			
-			$data1 = array(
+			if($base_url == "airport-parking-stuttgart.de"){
+				$data1 = array(
+					
+				);
 				
-			);
-			
-			$query1 = http_build_query($data1);
-			$query2 = http_build_query($data1);
-			
-			$ch1 = curl_init();
-			$ch2 = curl_init();
-			
-			curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/curl/?request=apm_save_cal&pw=apmcal_req57159428&p_name=".$name->name."&product_id=".$product_id."&datefrom=".$date[0]."&dateto=".$date[0]);
-			curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch1, CURLOPT_POST, true);
-			curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
+				$query1 = http_build_query($data1);
+				$query2 = http_build_query($data1);
+				
+				$ch1 = curl_init();
+				$ch2 = curl_init();
+				
+				curl_setopt($ch1, CURLOPT_URL, "https://airport-parking-germany.de/curl/?request=apm_save_cal&pw=apmcal_req57159428&p_name=".$name->name."&product_id=".$product_id."&datefrom=".$date[0]."&dateto=".$date[0]);
+				curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch1, CURLOPT_POST, true);
+				curl_setopt($ch1, CURLOPT_POSTFIELDS, $query1);
 
-			curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/?request=apm_save_cal&pw=apmcal_req57159428&p_name=".$name->name."&product_id=".$product_id."&datefrom=".$date[0]."&dateto=".$date[0]);
-			curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch2, CURLOPT_POST, true);
-			curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
-			
-			$mh = curl_multi_init();
-			
-			curl_multi_add_handle($mh, $ch1);
-			curl_multi_add_handle($mh, $ch2);
-			
-			do {
-				curl_multi_exec($mh, $running);
-			} while ($running > 0);
-			
-			$response1 = curl_multi_getcontent($ch1);
-			$response2 = curl_multi_getcontent($ch2);
-			
-			curl_multi_remove_handle($mh, $ch1);
-			curl_multi_remove_handle($mh, $ch2);
-			curl_multi_close($mh);
-			
-			curl_close($ch1);
-			curl_close($ch2);
+				curl_setopt($ch2, CURLOPT_URL, "https://parken-zum-fliegen.de/curl/?request=apm_save_cal&pw=apmcal_req57159428&p_name=".$name->name."&product_id=".$product_id."&datefrom=".$date[0]."&dateto=".$date[0]);
+				curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch2, CURLOPT_POST, true);
+				curl_setopt($ch2, CURLOPT_POSTFIELDS, $query2);
+				
+				$mh = curl_multi_init();
+				
+				curl_multi_add_handle($mh, $ch1);
+				curl_multi_add_handle($mh, $ch2);
+				
+				do {
+					curl_multi_exec($mh, $running);
+				} while ($running > 0);
+				
+				$response1 = curl_multi_getcontent($ch1);
+				$response2 = curl_multi_getcontent($ch2);
+				
+				curl_multi_remove_handle($mh, $ch1);
+				curl_multi_remove_handle($mh, $ch2);
+				curl_multi_close($mh);
+				
+				curl_close($ch1);
+				curl_close($ch2);
+			}
 			
 			$date[0] = date('Y-m-d', strtotime($date[0]. ' + 1 days'));
 		}			

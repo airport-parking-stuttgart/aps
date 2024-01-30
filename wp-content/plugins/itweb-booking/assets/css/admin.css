@@ -6,13 +6,17 @@
 	display: block;
 	margin-left: auto;
 	margin-right: auto;
-	margin-bottom: 60px;
+	--margin-bottom: 60px;
 }
 
 .toplevel_page_buchungen .wp-first-item,
 .toplevel_page_produkte .wp-first-item,
 .toplevel_page_vermittler .wp-first-item,
-.toplevel_page_fahrerportal .wp-first-item {
+.toplevel_page_fahrerportal .wp-first-item,
+.toplevel_page_personalplanung .wp-first-item,
+.toplevel_page_berichte .wp-first-item,
+.toplevel_page_statistics .wp-first-item,
+.toplevel_page_einstellungen .wp-first-item {
     display: none;
 }
 

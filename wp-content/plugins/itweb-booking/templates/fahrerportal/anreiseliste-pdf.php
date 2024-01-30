@@ -23,7 +23,8 @@ $zeile = 1;
 $umbruch = 0;
 $seite = 1;
 $total_rows = $_SESSION['total_rows'];
-
+$seiten_bis = ceil($total_rows / 28);
+$seiten_bis = $seiten_bis == 0 ? 1 : $seiten_bis;
 
 $html .= "<style>@page {
 			 margin-left, margin-right: 30px;
@@ -32,7 +33,7 @@ $html .= "<style>@page {
 foreach ($result as $r) {
 
 	if($zeile - ($umbruch + 1) == 0){
-		$html .= "<h4 style='text-align:center'>Anreiseliste Shuttle | " . $date . " | Seite " . $seite . " von " . ceil($total_rows / 28) . "</h4>";
+		$html .= "<h4 style='text-align:center'>Anreiseliste ".$_SESSION['service_type']." | " . $date . " | Seite " . $seite . " von " . $seiten_bis . "</h4>";
 
 		$html .= "<table style=' font-size: 12px; border-collapse:collapse; width: 100%'>
 			<tr>

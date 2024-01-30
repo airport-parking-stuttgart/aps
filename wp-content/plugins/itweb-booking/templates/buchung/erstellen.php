@@ -39,7 +39,7 @@ if($_GET['step'] == 2){
 			LEFT JOIN {$wpdb->prefix}itweb_orders orders ON parklots.product_id = orders.product_id 
 			LEFT JOIN {$wpdb->prefix}posts po ON po.ID = orders.order_id 
 			WHERE ('$startDateOnly' BETWEEN parklots.datefrom AND parklots.dateto) AND ('$endDateOnly' BETWEEN parklots.datefrom AND parklots.dateto) 
-			AND parklots.is_for = 'betreiber' AND parklots.type = 'shuttle' AND parklots.deleted = 0 and po.post_status = 'wc-processing'
+			AND parklots.is_for = 'betreiber' AND parklots.deleted = 0 and po.post_status = 'wc-processing'
 			GROUP BY parklots.id ORDER BY parklots.order_lot";
 
 	$results = $wpdb->get_results($sql);
@@ -56,7 +56,7 @@ if($_GET['step'] == 2){
 			LEFT JOIN {$wpdb->prefix}itweb_orders orders ON parklots.product_id = orders.product_id 
 			LEFT JOIN {$wpdb->prefix}posts po ON po.ID = orders.order_id 
 			WHERE ('$startDateOnly' BETWEEN parklots.datefrom AND parklots.dateto) AND ('$endDateOnly' BETWEEN parklots.datefrom AND parklots.dateto) 
-			AND parklots.is_for = 'vermittler' AND parklots.type = 'shuttle' AND parklots.deleted = 0 and po.post_status = 'wc-processing'
+			AND parklots.is_for = 'vermittler' AND parklots.deleted = 0 and po.post_status = 'wc-processing'
 			GROUP BY parklots.id ORDER BY parklots.order_lot";
 
 	$results_apg = $wpdb->get_results($sql);

@@ -106,7 +106,7 @@ $methode = get_post_meta($order_id, '_payment_method_title', true);
 		border-right: none;
     }
 
-	.logo{
+	.header img{
 		width: 200px !important;
 		height: auto;
 	}
@@ -118,9 +118,8 @@ $methode = get_post_meta($order_id, '_payment_method_title', true);
 
 <!--<img src="https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=http%3A%2F%2Fwww.google.com%2F&choe=UTF-8" title="Link to Google.com" />-->
 <div class="header">
-	<a href="https://airport-parking-stuttgart.de/">
-            <img class="logo" src="https://airport-parking-stuttgart.de/wp-content/uploads/2021/12/cropped-APS-Logo-1.png"
-                 alt="https://airport-parking-stuttgart.de">
+	<a href="https://<?php echo $_SERVER['HTTP_HOST'] ?>/">
+            <?php echo get_custom_logo(); ?>
     </a>
 
 	<div class="hcol-right">
@@ -136,7 +135,11 @@ $methode = get_post_meta($order_id, '_payment_method_title', true);
 		<img src="<?php echo url() . '/wp-content/uploads/qrcodes/' . basename($filenameQR) ?>" alt="">
     </div>
 	<div class="p_infos">
-		<h2>Parkplatzticket - Airport Parking Stuttgart</h2>
+		<?php if($web_company->name): ?>
+		<h2>Parkplatzticket - <?php echo $web_company->name ?></h2>
+	    <?php else: ?>
+		<h2>Parkplatzticket</h2>
+		<?php endif; ?>
 	    <?php if(($parklot->parkhaus == "Parkhaus überdacht" || $parklot->parkhaus == "Parkplatz überdacht") && $lotType == 'shuttle')
 			echo "<p>überdacht - Shuttle Service inkl.</p>";
         else if(($parklot->parkhaus == "Parkhaus nicht überdacht" || $parklot->parkhaus == "Parkplatz nicht überdacht") && $lotType == 'shuttle')
@@ -255,11 +258,7 @@ $methode = get_post_meta($order_id, '_payment_method_title', true);
 		if($additionalPrice != '0.00')
 			$service += $additionalPrice;
 		if(get_post_meta($order_id, 'Sperrgepack', true) == "1"){
-			$year = date('Y', strtotime(get_post_meta($order_id, 'Anreisedatum', true)));
-			if($year == "2023")
-				$service += 5;
-			else
-				$service += 10;
+			$service += 20;
 		}
 	?>
 	<div class="col-item">
@@ -292,29 +291,19 @@ $methode = get_post_meta($order_id, '_payment_method_title', true);
 		</p>
 	<?php endif; ?>
 	<?php if($parklot->confirmation_note != ""): ?>
-		<?php
-		if(date_format(date_create(get_post_meta($order_id, 'Anreisedatum', true)), 'Y-m-d') < '2023-12-31')
-			$hinweis = "Ab der 5. Person wird ein Aufschlag in Höhe von 5,00 Euro pro Fahrt und Person erhoben.
-						Bei einer verspäteten Abreise werden 10,00 EUR für jeden zusätzlichen Tag berechnet.
-						Bei Sperrgepäck entsteht ein Aufpreis von 5,00 Euro pro Fahrt.";
-		elseif(date_format(date_create(get_post_meta($order_id, 'Anreisedatum', true)), 'Y-m-d') > '2024-01-01')
-			$hinweis = "Ab der 5. Person wird ein Aufschlag in Höhe von 10,00 Euro pro Fahrt und Person erhoben.
-						Bei einer verspäteten Abreise werden 15,00 EUR für jeden zusätzlichen Tag berechnet.
-						Bei Sperrgepäck entsteht ein Aufpreis von 10,00 Euro pro Fahrt.";
-		else
-			$hinweis = "";
-		?>
 		<h4>Hinweis</h4>
 		<p>
-		<?php echo $hinweis . " " . $parklot->confirmation_note; ?>
+		<?php echo $parklot->confirmation_note; ?>
 		</p>
 	<?php endif; ?>
-
-    <h4>Airport Parking Stuttgart</h4>
+	
+	<?php if($web_company->name != null && $web_company->email != null && $web_company->phone != null): ?>
+    <h4><?php echo $web_company->name ?></h4>
     <p>
         Falls Sie Fragen haben bezüglich Ihrer Parkplatzbuchung, zögern Sie bitte nicht, uns per E-Mail unter
-        info@airport-parking-stuttgart.de oder telefonisch von Montag bis Freitag von 11:00 bis 19:00 Uhr unter +49(0) 711 22 051 245 zu kontaktieren.
+        <?php echo $web_company->email ?> oder telefonisch von Montag bis Freitag von 11:00 bis 19:00 Uhr unter <?php echo $web_company->phone ?> zu kontaktieren.
     </p>
+	<?php endif; ?>
 </div>
 <div class="clear"></div>
 <?php if($lotType == 'shuttle'): ?>
@@ -325,25 +314,36 @@ $methode = get_post_meta($order_id, '_payment_method_title', true);
 <div class="footer">
     <div class="row">
         <div class="col-item">
-            <p class="footer-p">Raiffeisenstraße 18</p>
-            <p class="footer-p">70794 Filderstadt</p>
-            <p class="footer-p">Telefon: +49 711 22 051 245</p>
+			<?php if($web_company->street): ?>
+            <p class="footer-p"><?php echo $web_company->street ?></p>
+			<?php endif; ?>
+			<?php if($web_company->zip != null && $web_company->location != null): ?>
+            <p class="footer-p"><?php echo $web_company->zip . " " . $web_company->location ?></p>
+			<?php endif; ?>
+			<?php if($web_company->phone): ?>
+            <p class="footer-p">Telefon: <?php echo $web_company->phone ?></p>
+			<?php endif; ?>
         </div>
         <div class="col-item">
-            <p class="footer-p">info@airport-parking-stuttgart.de</p>
-            <p class="footer-p">www.airport-parking-stuttgart.de</p>
+			<?php if($web_company->email): ?>
+            <p class="footer-p"><?php echo $web_company->email ?></p>
+			<?php endif; ?>
+            <p class="footer-p">www.<?php echo $_SERVER['HTTP_HOST'] ?></p>
 			<p></p>
         </div>
+		<?php if($web_company->bank != null && $web_company->iban != null && $web_company->bic != null): ?>
         <div class="col-item">
-            <p class="footer-p">Sparkasse Esslingen</p>
-            <p class="footer-p">IBAN: DE08 6115 0020 0102 8060 23</p>
-            <p class="footer-p">BIC/SWIFT Code: ESSLDE66XXX</p>
+            <p class="footer-p"><?php echo $web_company->bank ?></p>
+            <p class="footer-p">IBAN: <?php echo $web_company->iban ?></p>
+            <p class="footer-p">BIC/SWIFT Code: <?php echo $web_company->bic ?></p>
         </div>
-        <div class="col-item">
-            <p class="footer-p">Mit Airport Parking Stuttgart</p>
+		<?php endif; ?>
+        <?php if($web_company->name): ?>
+		<div class="col-item">
+            <p class="footer-p">Mit <?php echo $web_company->name ?></p>
             <p class="footer-p">günstig und sicher am Flughafen</p>
         </div>
-		<div class="clear"></div>
-		
+		<?php endif; ?>
+		<div class="clear"></div>		
     </div>
 </div>

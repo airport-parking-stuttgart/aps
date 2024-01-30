@@ -26,6 +26,7 @@ use Dompdf\Options;
 global $wpdb;
 $db = Database::getInstance();
 $order_id = $order->get_id();
+$web_company = Database::getInstance()->getSiteCompany();
 $items = $order->get_items();
 foreach ( $items as $item ) {
     $product_id = $item['product_id'];
@@ -171,10 +172,7 @@ ob_start();
 	
 	<div class="container">
 		<div class="content">
-			<h1>
-                Buchungsbestätigung! Ihr Parkplatz wurde für
-                Sie reserviert!
-            </h1>
+			<h1>Buchungsbestätigung! Ihr Parkplatz wurde für Sie reserviert!</h1>
 			<hr>
             <p>
 				<?php if(get_post_meta($order_id, 'Anrede', true) == "Herr"): ?>
@@ -184,7 +182,11 @@ ob_start();
 				<?php else: ?>
 				Sehr geehrte Damen und Herren,<br/>
 				<?php endif;?>
-                vielen Dank, dass Sie sich für Airport Parking Stuttgart entschieden haben.
+				<?php if($web_company->name != null): ?>
+                vielen Dank, dass Sie sich für <?php echo $web_company->name ?> entschieden haben.
+				<?php else: ?>
+				vielen Dank für Ihre Buchung.
+				<?php endif; ?>
             </p>
             <p><strong>Ihre Buchungsnummer lautet: 
 					<?php echo get_post_meta($order_id, 'token', true); ?> 
@@ -229,28 +231,30 @@ ob_start();
                 <div class="clear"></div>
 			</div>			
 		</div>
+		<?php if($web_company->email != null && $web_company->phone != null): ?>
 		<div class="content wir-sind">
             <h1>Wir sind für Sie da!</h1>
             <hr>
             <p>
                 Sie haben noch Fragen? Schreiben Sie uns einfach eine E-Mail an
-                <a href="mailto:info@airport-parking-stuttgart.de">info@airport-parking-stuttgart.de</a> oder rufen Sie uns
-                unter <a href="tel:+49 711 22 051 245">+49 711 22 051 245</a> an.
+                <a href="mailto:<?php echo $web_company->email ?>"><?php echo $web_company->email ?></a> oder rufen Sie uns
+                unter <a href="tel:<?php echo $web_company->phone ?>"><?php echo $web_company->phone ?></a> an.
             </p>
             <p>
                 Montag bis Freitag von 11:00 bis 19:00 Uhr.
                 Aus dem dt. Festnetz zum Ortstarif. Mobilfunkkosten abweichend.
             </p>
         </div>
+		<?php endif; ?>
 		<div class="footer">
 			<div class="content">
 				<div class="col">
 					<div class="left">
-						© 2020 Airport Parking Stuttgart<br/>
+						© 2020 Airport Parking Management<br/>
 						Raiffeisenstraße 18, 70794 Filderstadt
 					</div>
 					<div class="right">
-						<a href="https://airport-parking-stuttgart.de/impressum/">Impressum</a> | <a href="https://airport-parking-stuttgart.de">www.airport-parking-stuttgart.de</a>
+						<a href="https://<?php echo $_SERVER['HTTP_HOST'] ?>/impressum/">Impressum</a> | <a href="https://<?php echo $_SERVER['HTTP_HOST'] ?>">www.<?php echo $_SERVER['HTTP_HOST'] ?></a>
 					</div>
 					<div class="clear"></div>
 				</div>

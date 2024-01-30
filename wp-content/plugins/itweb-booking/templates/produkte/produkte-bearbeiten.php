@@ -107,49 +107,51 @@ if (!isset($_GET['edit'])) :
 		</table>
 	<?php endforeach; ?>
 	
-	<h4><?php echo "Transfer" ?></h4>
-	<table class="table table-sm">
-		<thead>
-			<tr>
-				<th>Title</th>
-				<th>Abkürzung</th>
-				<th>Prefix</th>
-				<th>Erstellt</th>
-				<th>Aktiv</th>
-				<th>Typ</th>
-				<th>Kontingent</th>
-				<th>Vorlaufszeit</th>
-				<th></th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody>
-			<?php foreach($transfer as $product): ?>
-				<?php $parklot = Database::getInstance()->getParklotByProductId($product->product_id); ?>			
-				<?php if($parklot->deleted != 0) continue; ?>
-				<?php $product = wc_get_product($parklot->product_id); ?>
+	<?php if(count($transfer) > 0): ?>
+		<h4><?php echo "Transfer" ?></h4>
+		<table class="table table-sm">
+			<thead>
 				<tr>
-					<td class="parklot"><?php echo $parklot->parklot ?></td>
-					<td style="background-color: <?php echo $parklot->color ?>"><?php echo $parklot->parklot_short  ?></td>
-					<td><?php echo $parklot->prefix  ?></td>
-					<td>
-						<?php echo date('d.m.Y H:i', strtotime($product->get_date_created())) ?>
-					</td>
-					<td><?php echo dateFormat($parklot->datefrom, 'de') . ' - ' . dateFormat($parklot->dateto, 'de') ?></td>
-					<td><?php echo $parklot->type ?></td>
-					<td><?php echo $parklot->contigent ?></td>
-					<td><?php echo $parklot->booking_lead_time ?></td>
-					<td style="width: 100px;text-align: right;">
-						<a href="/wp-admin/admin.php?page=produkte-bearbeiten&edit=<?php echo $parklot->product_id ?>"
-						   class="btn btn-sm btn-secondary">Bearbeiten</a>
-					</td>
-					<td style="width: 100px;text-align: right;">
-						<a class="btn btn-sm btn-danger del-product" data-id="<?php echo $parklot->product_id ?>" href="#">Löschen</a>
-					</td>
-				</tr>			
-			<?php endforeach; ?>
-		</tbody>
-	</table>
+					<th>Title</th>
+					<th>Abkürzung</th>
+					<th>Prefix</th>
+					<th>Erstellt</th>
+					<th>Aktiv</th>
+					<th>Typ</th>
+					<th>Kontingent</th>
+					<th>Vorlaufszeit</th>
+					<th></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach($transfer as $product): ?>
+					<?php $parklot = Database::getInstance()->getParklotByProductId($product->product_id); ?>			
+					<?php if($parklot->deleted != 0) continue; ?>
+					<?php $product = wc_get_product($parklot->product_id); ?>
+					<tr>
+						<td class="parklot"><?php echo $parklot->parklot ?></td>
+						<td style="background-color: <?php echo $parklot->color ?>"><?php echo $parklot->parklot_short  ?></td>
+						<td><?php echo $parklot->prefix  ?></td>
+						<td>
+							<?php echo date('d.m.Y H:i', strtotime($product->get_date_created())) ?>
+						</td>
+						<td><?php echo dateFormat($parklot->datefrom, 'de') . ' - ' . dateFormat($parklot->dateto, 'de') ?></td>
+						<td><?php echo $parklot->type ?></td>
+						<td><?php echo $parklot->contigent ?></td>
+						<td><?php echo $parklot->booking_lead_time ?></td>
+						<td style="width: 100px;text-align: right;">
+							<a href="/wp-admin/admin.php?page=produkte-bearbeiten&edit=<?php echo $parklot->product_id ?>"
+							   class="btn btn-sm btn-secondary">Bearbeiten</a>
+						</td>
+						<td style="width: 100px;text-align: right;">
+							<a class="btn btn-sm btn-danger del-product" data-id="<?php echo $parklot->product_id ?>" href="#">Löschen</a>
+						</td>
+					</tr>			
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+	<?php endif; ?>
 </div>
 <?php else: ?>
     <?php
