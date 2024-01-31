@@ -93,16 +93,19 @@ $fahrer = $db->getEinsatzplanOfDay($kw, $year, $w);
 						</div>
 					</div><br>
 					<div class="row">
+						<?php if($settings->offered_service == "shuttle" || $settings->offered_service == "shuttle_valet" || $settings->offered_service == null): ?>
 						<div class="col-sm-12 col-md-3 col-lg-2">
 							<a href="<?php echo '/wp-admin/admin.php?page=anreiseliste' ?>" class="btn btn-primary d-block w-100">Anreiseliste Shuttle</a>
 						</div>
 						<div class="col-sm-12 col-md-3 col-lg-2">
 							<a href="<?php echo '/wp-admin/admin.php?page=abreiseliste' ?>" class="btn btn-primary d-block w-100">Abreiseliste Shuttle</a>
 						</div>
+						<?php endif; ?>
+						<?php if($settings->offered_service == "valet" || $settings->offered_service == "shuttle_valet" || $settings->offered_service == null): ?>
 						<div class="col-sm-12 col-md-3 col-lg-2">                    
 							<a href="<?php echo '/wp-admin/admin.php?page=abreiseliste-valet' ?>" class="btn btn-primary d-block w-100" >Abreiseliste Valet</a>
 						</div>
-						
+						<?php endif; ?>
 					</div>
 				</div>
 			</div>
