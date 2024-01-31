@@ -1281,7 +1281,7 @@ class Database
     {
         return self::$db->get_results("SELECT * FROM " . self::$prefix . "parklots pl 
 			LEFT JOIN " . self::$prefix . "brokers_products bp ON bp.product_id = pl.product_id
-			WHERE bp.broker_id = $brokerId and deleted = 0");
+			WHERE bp.broker_id = $brokerId and deleted = 0 ORDER BY pl.order_lot");
     }
 
     // get broker by id
@@ -2923,7 +2923,11 @@ class Database
 		elseif ($filter['datum_von'] != null && $filter['datum_bis'] != null){
 			$where .= " AND (DATE(o.Anreisedatum) BETWEEN '" . $filter['datum_von'] . "' AND '" . $filter['datum_bis'] . "') ";
 			$where_ot .= " AND (DATE(ot.datefrom) BETWEEN '" . $filter['datum_von'] . "' AND '" . $filter['datum_bis'] . "') ";
-		}			
+		}
+		elseif ($filter['datum_von_ab'] != null && $filter['datum_bis_ab'] != null){
+			$where .= " AND (DATE(o.Abreisedatum) BETWEEN '" . $filter['datum_von_ab'] . "' AND '" . $filter['datum_bis_ab'] . "') ";
+			$where_ot .= " AND (DATE(ot.dateto) BETWEEN '" . $filter['datum_von_ab'] . "' AND '" . $filter['datum_bis_ab'] . "') ";
+		}
 		if ($filter['product'] != null){
 			$where .= " AND o.product_id = '" . $filter['product'] . "' ";
 			$where_ot .= " AND ot.product_id = '" . $filter['product'] . "' ";
@@ -2949,6 +2953,8 @@ class Database
 		
 		if ($filter['orderBy'] == "Anreisedatum" && $filter['list'] == null)
 			$orderBy = " ORDER BY Anreisedatum DESC";
+		elseif ($filter['orderBy'] == "Abreisedatum" && $filter['list'] == null)
+			$orderBy = " ORDER BY Abreisedatum DESC";
 		elseif ($filter['orderBy'] == "Buchungsdatum")
 			$orderBy = " ORDER BY Buchungsdatum DESC ";
 		else
@@ -2967,6 +2973,8 @@ class Database
 			o.Uhrzeit_bis AS Uhrzeit_bis,
 			o.nr_people AS Personenanzahl,
 			o.email AS Email,
+			o.phone AS Telefon,
+			o.Kennzeichen AS Kennzeichen,
 			o.Bezahlmethode AS Bezahlmethode,
 			o.order_price AS Preis,
 			o.service_price AS Service,
@@ -2999,6 +3007,8 @@ class Database
 			ot.ankunftszeit_ruckflug AS Uhrzeit_bis,
 			ot.nr_people AS Personenanzahl,
 			ot.email AS Email,
+			'' AS Telefon,
+			'' AS Kennzeichen,
 			'' AS Bezahlmethode,
 			ot.order_price AS Preis,
 			'' AS Service,
@@ -4815,7 +4825,6 @@ class Database
         return self::$db->get_row("SELECT * FROM " . self::$prefix . "seitenbetreiber");
     }
 	
-	
 	// set settings
     static function setSettings($data){
 		$id = self::$db->get_row("SELECT id FROM " . self::$prefix . "einstellungen");
@@ -4838,9 +4847,7 @@ class Database
 	// get settings
     static function getSettings(){
 		return self::$db->get_row("SELECT * FROM " . self::$prefix . "einstellungen");
-	}
-	
-	
+	}	
 	
 	static function saveOrderFomAPS($data, $lot)
     {
@@ -6126,7 +6133,7 @@ class Database
 				'city' => '',
 				'postcode' => '',
 				'country' => '',
-				'email' => '',
+				'email' => $dataC->email != null ? $dataC->email : '',
 				'phone' => $dataC->phone != null ? $dataC->phone : '',
 				'Sonstige_1' => '',
 				'Sonstige_2' => '',
@@ -6190,7 +6197,7 @@ class Database
 			$woo_order->calculate_totals();
 			$woo_order->save();
 			$barzahlung = 0;
-			$mv = number_format($dataC->total_price_brutto, 2, ".", ".");		
+			$mv = number_format($dataC->total_price_brutto, 2, ".", ".");	
 			
 			self::$db->update(self::$prefix_DB . 'wc_order_product_lookup', [
 				'product_net_revenue' => (float)$data['parking_update'] / 119 * 100,
@@ -6205,6 +6212,7 @@ class Database
 			update_post_meta($order_id->order_id, '_billing_first_name', $firstName);
 			update_post_meta($order_id->order_id, '_billing_last_name', $lastName);
 			update_post_meta($order_id->order_id, '_billing_phone', $dataC->phone);
+			update_post_meta($order_id->order_id, '_billing_email', $dataC->email);
 			update_post_meta($order_id->order_id, 'Anreisedatum', dateFormat($dataC->arrival_date));
 			update_post_meta($order_id->order_id, 'first_anreisedatum', dateFormat($dataC->arrival_date));
 			update_post_meta($order_id->order_id, 'Abreisedatum', dateFormat($dataC->departure_date));
@@ -6233,6 +6241,7 @@ class Database
 				'product_id' => $dataC->product,
 				'first_name' => $firstName != null ? $firstName : '',
 				'last_name' => $lastName != null ? $lastName : '',
+				'email' => $dataC->email != null ? $dataC->email : '',
 				'phone' => $dataC->phone != null ? $dataC->phone : '',
 				'Kennzeichen' => $dataC->car_license_plate != null ? $dataC->car_license_plate : '',
 				'out_flight_number' => $dataC->flight_departure_nr,
@@ -6498,9 +6507,125 @@ class Database
 				WHERE DATE(e.datefrom) = '" . $date . "' AND e.product_id = " . $id);
     }
 	
+	static function devAddBooking($data){
+		
+        $parklot = new Parklot($data['product']);
+		
+		$data['parkingCosts'] = $data['totalParkingCosts'];
 
-    static function importOrderExtern($data)
-    {
+        $product = wc_get_product($data['product']);
+        // set new product price
+        $product->set_price($data['parkingCosts']);
+
+        $order = Orders::createWCOrder($product);
+        $order_id = $order->get_id();
+		
+		if($data['payment_method_title'] == 'Barzahlung'){
+			add_post_meta($order_id, '_transaction_id', 'barzahlung', true);
+			add_post_meta($order_id, '_payment_method_title', 'Barzahlung', true);
+			$barzahlung = $data['parkingCosts'];
+			$mv = 0;
+		}
+		else{
+			add_post_meta($order_id, '_transaction_id', 'm', true);
+			add_post_meta($order_id, '_payment_method_title', $data['payment_method_title'], true);
+			$barzahlung = 0;
+			$mv = $data['parkingCosts'];
+		}
+		
+
+        add_post_meta($order_id, '_order_total', '', true);
+        add_post_meta($order_id, '_customer_user', 6, true);
+        add_post_meta($order_id, '_completed_date', '', true);
+        add_post_meta($order_id, '_order_currency', '', true);
+        add_post_meta($order_id, '_paid_date', '', true);
+
+        add_post_meta($order_id, '_billing_address_1', $data['adress'], true);
+        add_post_meta($order_id, '_billing_city', $data['city'], true);
+        add_post_meta($order_id, '_billing_state', '', true);
+        add_post_meta($order_id, '_billing_postcode', $data['zip'], true);
+        add_post_meta($order_id, '_billing_company', '', true);
+        add_post_meta($order_id, '_billing_country', '', true);
+        add_post_meta($order_id, '_billing_email', $data["eMail"], true);
+        add_post_meta($order_id, '_billing_first_name', $data["firstName"], true);
+        add_post_meta($order_id, '_billing_last_name', $data["lastName"], true);
+        add_post_meta($order_id, '_billing_phone', $data["mobileNumber"], true);
+
+        add_post_meta($order_id, 'Anreisedatum', dateFormat($data["arrivalDate"]), true);
+        add_post_meta($order_id, 'first_anreisedatum', dateFormat($data["arrivalDate"]), true);
+        add_post_meta($order_id, 'Abreisedatum', dateFormat($data["departureDate"]), true);
+        add_post_meta($order_id, 'first_abreisedatum', dateFormat($data["departureDate"]), true);
+        add_post_meta($order_id, 'Uhrzeit von', $data["arrivalTime"], true);
+        add_post_meta($order_id, 'Uhrzeit bis', $data["departureTime"], true);
+        add_post_meta($order_id, 'Hinflugnummer', $data["outboundFlightNumber"], true);
+        add_post_meta($order_id, 'Rückflugnummer', $data["returnFlightNumber"], true);
+        add_post_meta($order_id, 'Personenanzahl', $data["countTravellers"], true);
+        add_post_meta($order_id, 'Kennzeichen', $data["license_plate"], true);
+		add_post_meta($order_id, 'Anrede', $data["anrede"], true);
+
+
+        update_post_meta($order_id, 'token', $data["bookingCode"]);
+
+		if($data['outboundFlightNumber'] == null)
+			$data['outboundFlightNumber'] = "";
+		if($data['returnFlightNumber'] == null)
+			$data['returnFlightNumber'] = "";
+				
+        self::$db->insert(self::$prefix . 'orders', [
+            'post_date' => $data['creationDate'],
+			'date_from' => date('Y-m-d H:i', strtotime($data["arrivalDate"] . ' ' . $data["arrivalTime"])),
+            'date_to' => date('Y-m-d H:i', strtotime($data["departureDate"] . ' ' . $data["departureTime"])),
+            'Anreisedatum' => date('Y-m-d', strtotime($data["arrivalDate"])),
+			'first_anreisedatum' => date('Y-m-d', strtotime($data["arrivalDate"])),
+			'Abreisedatum' => date('Y-m-d', strtotime($data["departureDate"])),
+			'first_abreisedatum' => date('Y-m-d', strtotime($data["departureDate"])),
+			'Uhrzeit_von' => date('H:i', strtotime($data["arrivalTime"])),
+			'Uhrzeit_bis' => date('H:i', strtotime($data["departureTime"])),
+			'product_id' => $data['product'],
+            'order_id' => $order_id,
+			'token' => $data["bookingCode"],
+			'first_name' => $data["firstName"] != null ? $data["firstName"] : '',
+			'last_name' => $data["lastName"] != null ? $data["lastName"] : '',
+			'address' => $data["adress"] != null ? $data["adress"] : '',
+			'city' => $data["city"] != null ? $data["city"] : '',
+			'postcode' => $data["zip"] != null ? $data["zip"] : '',
+			'country' => '',
+			'email' => $data["eMail"] != null ? $data["eMail"] : '',
+			'phone' => $data["mobileNumber"] != null ? $data["mobileNumber"] : '',
+			'Sonstige_1' => '',
+			'Sonstige_2' => '',
+			'Parkplatz' => '',
+			'Kennzeichen' => $data["license_plate"] != null ? $data["license_plate"] : '',
+			'Sperrgepack' => "0",	
+			'b_total' => $barzahlung,
+			'm_v_total' => $mv,
+			'order_price' => number_format($data['parkingCosts'], 2, ".", "."),
+            'Bezahlmethode' => $data['payment_method_title'],
+			'out_flight_number' => $data['outboundFlightNumber'],
+            'return_flight_number' => $data['returnFlightNumber'],
+            'nr_people' => $data['countTravellers'],
+			'order_status' => 'wc-processing'
+        ]);
+		
+		self::$db->update(self::$prefix_DB . 'posts', [                               
+				'post_date' => $data['creationDate'],
+				'post_date_gmt' => $data['creationDate']				
+		], ['id' => $order_id]);
+		/*
+		self::$db->update(self::$prefix_DB . 'wc_order_product_lookup', [                               
+			'date_created' => $data['creationDate'],				
+		], ['order_id' => $order_id]);
+		
+		self::$db->update(self::$prefix_DB . 'wc_order_stats', [                               
+			'date_created' => $data['creationDate'],
+			'date_created_gmt' => $data['creationDate']				
+		], ['order_id' => $order_id]);
+		*/
+		
+    }
+	
+
+    static function importOrderExtern($data){
 		
         $parklot = new Parklot($data['product']);
 		

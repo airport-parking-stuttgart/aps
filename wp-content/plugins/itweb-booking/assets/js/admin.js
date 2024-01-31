@@ -89,6 +89,17 @@ jQuery(document).ready(function ($) {
 		$('#arrivaldateTo').val(dateString);
 	});
 	
+	$('#departuredateFrom').on('change', function () {
+		var dateString = $('#departuredateFrom').val();
+		dateSplit = dateString.split(".");
+		arrDate = dateSplit[2] + "-" + dateSplit[1] + "-" + dateSplit[0];
+		$('#departuredateTo').datepicker({			
+			minDate: new Date(arrDate)
+		});
+		
+		$('#departuredateTo').val(dateString);
+	});
+	
 	
 	$('.anListeDateTo').on('click', function(e){
 		
