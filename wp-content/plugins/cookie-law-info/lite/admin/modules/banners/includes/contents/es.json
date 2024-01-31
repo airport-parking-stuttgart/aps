@@ -103,7 +103,7 @@
         "notice": {
             "elements": {
                 "title": "Valoramos tu privacidad",
-                "description": "Este sitio web o sus herramientas de terceros procesan datos personales. Puede optar por no participar en la venta de su información personal haciendo clic en el enlace \"No vendan ni compartan mi información personal\".",
+                "description": "<p>Este sitio web o sus herramientas de terceros procesan datos personales. Puede optar por no participar en la venta de su información personal haciendo clic en el enlace \"No vendan ni compartan mi información personal\".</p>",
                 "privacyLink": "",
                 "buttons": {
                     "elements": {

@@ -9,6 +9,8 @@ use WPML_Media_Attachments_Duplication_Factory;
 
 class Translatable implements IMedia {
 
+	const META_KEY_THUMBNAIL_ID = '_thumbnail_id';
+
 	/** @var woocommerce_wpml */
 	private $woocommerce_wpml;
 	/** @var \SitePress */
@@ -35,7 +37,7 @@ class Translatable implements IMedia {
 		$product_images_ids = [];
 
 		// thumbnail image.
-		$tmb = get_post_meta( $product_id, '_thumbnail_id', true );
+		$tmb = get_post_meta( $product_id, self::META_KEY_THUMBNAIL_ID, true );
 		if ( $tmb ) {
 			$product_images_ids[] = $tmb;
 		}
@@ -60,7 +62,7 @@ class Translatable implements IMedia {
 				$this->wpdb->prepare(
 					"SELECT pm.meta_value FROM {$this->wpdb->posts} AS p
                                                 LEFT JOIN {$this->wpdb->postmeta} AS pm ON p.ID = pm.post_id
-                                                WHERE pm.meta_key='_thumbnail_id'
+                                                WHERE pm.meta_key='" . self::META_KEY_THUMBNAIL_ID . "'
                                                   AND p.post_status IN ('publish','private')
                                                   AND p.post_type = 'product_variation'
                                                   AND p.post_parent = %d
@@ -89,7 +91,7 @@ class Translatable implements IMedia {
 		if ( $this->is_thumbnail_image_duplication_enabled( $original_product_id ) ) {
 			$translated_thumbnail_id = $this->get_translated_thumbnail_id( $original_product_id, $language );
 			if ( $translated_thumbnail_id ) {
-				update_post_meta( $translated_product_id, '_thumbnail_id', $translated_thumbnail_id );
+				update_post_meta( $translated_product_id, self::META_KEY_THUMBNAIL_ID, $translated_thumbnail_id );
 			}
 		}
 	}
@@ -98,8 +100,9 @@ class Translatable implements IMedia {
 
 		if ( $this->is_thumbnail_image_duplication_enabled( wp_get_post_parent_id( $variation_id ) ) ) {
 			$translated_thumbnail_id = $this->get_translated_thumbnail_id( $variation_id, $language );
-			if ( $translated_thumbnail_id ) {
-				update_post_meta( $translated_variation_id, '_thumbnail_id', $translated_thumbnail_id );
+
+			if ( $translated_thumbnail_id && ( (int) $translated_thumbnail_id !== (int) get_post_meta( $translated_variation_id, self::META_KEY_THUMBNAIL_ID, true ) ) ) {
+				update_post_meta( $translated_variation_id, self::META_KEY_THUMBNAIL_ID, $translated_thumbnail_id );
 				update_post_meta( $variation_id, '_wpml_media_duplicate', 1 );
 				update_post_meta( $variation_id, '_wpml_media_featured', 1 );
 			}
@@ -113,7 +116,7 @@ class Translatable implements IMedia {
 	 * @return int|null
 	 */
 	private function get_translated_thumbnail_id( $post_id, $language ) {
-		$thumbnail_id            = get_post_meta( $post_id, '_thumbnail_id', true );
+		$thumbnail_id            = get_post_meta( $post_id, self::META_KEY_THUMBNAIL_ID, true );
 		$translated_thumbnail_id = $this->sitepress->get_object_id( $thumbnail_id, 'attachment', false, $language );
 
 		if ( is_null( $translated_thumbnail_id ) && $thumbnail_id ) {
@@ -190,19 +193,18 @@ class Translatable implements IMedia {
 	}
 
 	private function is_thumbnail_image_duplication_enabled( $product_id ) {
-		return $this->is_duplication_enabled( $product_id, 'WPML_Admin_Post_Actions::DUPLICATE_FEATURED_META_KEY', 'WPML_Admin_Post_Actions::DUPLICATE_FEATURED_GLOBAL_KEY' );
+		return $this->is_duplication_enabled( $product_id, 'WPML\Media\Option::DUPLICATE_FEATURED_KEY', 'WPML_Admin_Post_Actions::DUPLICATE_FEATURED_GLOBAL_KEY' );
 	}
 
 	private function is_media_duplication_enabled( $product_id ) {
-		return $this->is_duplication_enabled( $product_id, 'WPML_Admin_Post_Actions::DUPLICATE_MEDIA_META_KEY', 'WPML_Admin_Post_Actions::DUPLICATE_MEDIA_GLOBAL_KEY' );
+		return $this->is_duplication_enabled( $product_id, 'WPML\Media\Option::DUPLICATE_MEDIA_KEY', 'WPML_Admin_Post_Actions::DUPLICATE_MEDIA_GLOBAL_KEY' );
 	}
 
 	private function is_duplication_enabled( $product_id, $meta_key, $global_key ) {
 
 		$setting_value = get_post_meta(
 			$product_id,
-			$this->sitepress->get_wp_api()
-														->constant( $meta_key ),
+			$this->sitepress->get_wp_api()->constant( $meta_key ),
 			true
 		);
 

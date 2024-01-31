@@ -4,7 +4,7 @@ Donate link: http://ljapps.com/
 Tags: Review Slider for WooCommerce, WooCommerce Review Slider, Review Slider for WooCommerce, WooCommerce Reviews
 Requires at least: 3.0.1
 Tested up to: 6.4
-Stable tag: 1.4
+Stable tag: 1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,8 @@ We are always looking for features to add. Just post on the support forum or con
 5. Create as many templates as you like.
 
 == Changelog ==
+= 1.5 =
+* PHP 8.2 warning notice fixed.
 = 1.4 =
 * updated color picker js
 = 1.3 =

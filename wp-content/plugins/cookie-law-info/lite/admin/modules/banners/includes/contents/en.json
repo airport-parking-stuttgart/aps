@@ -103,7 +103,7 @@
         "notice": {
             "elements": {
                 "title": "We value your privacy",
-                "description": "This website or its third-party tools process personal data. You can opt out of the sale of your personal information by clicking on the \"Do Not Sell or Share My Personal Information\" link.",
+                "description": "<p>This website or its third-party tools process personal data. You can opt out of the sale of your personal information by clicking on the \"Do Not Sell or Share My Personal Information\" link.</p>",
                 "privacyLink": "",
                 "buttons": {
                     "elements": {

@@ -30,6 +30,7 @@ class SRFW_Summary_Reviews_Public {
 	 * @var      string    $plugintoken    The ID of this plugin.
 	 */
 	private $plugintoken;
+	private $_token;
 
 	/**
 	 * The version of this plugin.

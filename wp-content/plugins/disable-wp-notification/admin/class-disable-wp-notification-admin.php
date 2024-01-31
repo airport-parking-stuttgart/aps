@@ -1,19 +1,11 @@
 <?php
-
-/**
-*
-* @link       https://sourabhagrawal.com/
-* @since      1.0.0
-*
-* @package    Disable_Wp_Notification
-* @subpackage Disable_Wp_Notification/admin
-*/
-
 /**
 *
 * Defines the plugin name, version, and two hooks to
 * enqueue the admin-specific stylesheet and JavaScript.
 *
+* @link       https://sourabhagrawal.com/
+* @since      1.0.0
 * @package    Disable_Wp_Notification
 * @subpackage Disable_Wp_Notification/admin
 * @author     Sourabh Agrawal <sourabh.asct@gmail.com>
@@ -56,7 +48,6 @@ class Disable_Wp_Notification_Admin {
 	* @since    1.0.0
 	*/
 	public function admin_menu() {
-		
 		/**
 		* An instance of this class should be passed to the run() function
 		* defined in Disable_Wp_Notification_Loader as all of the hooks are defined
@@ -80,13 +71,12 @@ class Disable_Wp_Notification_Admin {
 				
 			}
 		}
-		
 	}
 	
 	/**
 	* Options page callback
 	*
-	* @since    3.0
+	* @since    3.2
 	*/
 	public function disable_notification()
 	{
@@ -163,7 +153,7 @@ class Disable_Wp_Notification_Admin {
 		<div class="element-wrapper show">
 		<div class="event-handler" aria-controls="area-2"> <?php echo __('Notifications', 'disable-wp-notification');?> </div>
 		<div id="display-notifications" class="handled-section" id="area-2">
-		<h1>All The Notifications</h1>
+		<h1><?php echo __('All The Notifications', 'disable-wp-notification');?></h1>
 		</div>
 		</div>
 		<div class="element-wrapper show">
@@ -171,9 +161,9 @@ class Disable_Wp_Notification_Admin {
 		<div class="handled-section" id="area-2">
 		<div class="description">
 		<ul>
-		<li>Disable All the Notifications.</li>
-		<li>Disable Plugin Update Notification.</li>
-		<li>Disable Theme Update Notification.</li>
+		<li><?php echo __('Disable All the Notifications.', 'disable-wp-notification');?></li>
+		<li><?php echo __('Disable Plugin Update Notification.', 'disable-wp-notification');?></li>
+		<li><?php echo __('Disable Theme Update Notification.', 'disable-wp-notification');?></li>
 		</ul>
 		</div>
 		</div>
@@ -183,7 +173,7 @@ class Disable_Wp_Notification_Admin {
 		<div class="event-handler" aria-controls="area-3"> <?php echo __('Buy a coffee for developer', 'disable-wp-notification');?> </div>
 		<div class="handled-section" id="area-2">
 		<div class="description">
-			<p>If you find this plugin valuable and would like to support its further development, you can show your appreciation by buying us a coffee through a voluntary monetary contribution. Your support will help us continue improving and growing the plugin. Additionally, we would greatly appreciate it if you could take a moment to leave a review or rating for the plugin, as it helps us reach more users and gather feedback for further enhancements. However, please note that both the contribution and review/rating are completely optional and not mandatory.</p> <p><b>Thank you for considering it!</b></p>
+			<p><?php echo __('If you find this plugin valuable and would like to support its further development, you can show your appreciation by buying us a coffee through a voluntary monetary contribution. Your support will help us continue improving and growing the plugin. Additionally, we would greatly appreciate it if you could take a moment to leave a review or rating for the plugin, as it helps us reach more users and gather feedback for further enhancements. However, please note that both the contribution and review/rating are completely optional and not mandatory.', 'disable-wp-notification');?></p> <p><b><?php echo __('Thank you for considering it!', 'disable-wp-notification');?></b></p>
 			
 			<div class="rating-review">
 				<h6>Write us a review</h6>
@@ -330,7 +320,7 @@ class Disable_Wp_Notification_Admin {
 	/**
 	* Register the stylesheets for the admin area.
 	*
-	* @since    1.0.3
+	* @since    3.2
 	*/
 	public function enqueue_styles() {
 		
@@ -364,12 +354,13 @@ class Disable_Wp_Notification_Admin {
 					) {
 						?> 
 						<style type="text/css">
-						body.wp-admin:not(.theme-editor-php) .notice:not(.updated),
+						body.wp-admin:not(.theme-editor-php) .notice:not(.updated):not(.new-application-password-notice),
 						body.wp-admin .update-nag,
 						body.wp-admin #adminmenu .awaiting-mod, 
 						#adminmenu .update-plugins,
 						#message.woocommerce-message,
 						body.wp-admin .plugin-update.colspanchange,
+						body.wp-admin .fs-notice.fs-type-plugin,
 						.notice.elementor-message.elementor-message-dismissed
 						{display: none !important;}
 						
@@ -432,6 +423,5 @@ class Disable_Wp_Notification_Admin {
 				array_push( $links, $settings_link );
 				return $links;
 			}
-			
 		}
 		

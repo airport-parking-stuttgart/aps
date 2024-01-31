@@ -1,16 +1,16 @@
 <?php
+
 /**
  * Plugin Name: IP2Location Country Blocker
  * Plugin URI: https://ip2location.com/resources/wordpress-ip2location-country-blocker
  * Description: Block visitors from accessing your website or admin area by their country.
- * Version: 2.33.5
+ * Version: 2.34.2
  * Author: IP2Location
  * Author URI: https://www.ip2location.com
  * Text Domain: ip2location-country-blocker.
  */
-$upload_dir = wp_upload_dir();
 defined('FS_METHOD') || define('FS_METHOD', 'direct');
-defined('IP2LOCATION_DIR') || define('IP2LOCATION_DIR', str_replace(['/', '\\'], \DIRECTORY_SEPARATOR, $upload_dir['basedir']) . \DIRECTORY_SEPARATOR . 'ip2location' . \DIRECTORY_SEPARATOR);
+defined('IP2LOCATION_DIR') || define('IP2LOCATION_DIR', str_replace(['/', '\\'], \DIRECTORY_SEPARATOR, wp_upload_dir()['basedir']) . \DIRECTORY_SEPARATOR . 'ip2location' . \DIRECTORY_SEPARATOR);
 define('IPLCB_ROOT', __DIR__ . \DIRECTORY_SEPARATOR);
 
 // For development usage.
@@ -31,6 +31,7 @@ add_action('admin_notices', [$ip2location_country_blocker, 'show_notice']);
 add_action('wp_ajax_ip2location_country_blocker_update_ip2location_database', [$ip2location_country_blocker, 'update_ip2location_database']);
 add_action('wp_ajax_ip2location_country_blocker_update_ip2proxy_database', [$ip2location_country_blocker, 'update_ip2proxy_database']);
 add_action('wp_ajax_ip2location_country_blocker_validate_token', [$ip2location_country_blocker, 'validate_token']);
+add_action('wp_ajax_ip2location_country_blocker_validate_api_key', [$ip2location_country_blocker, 'validate_api_key']);
 add_action('wp_footer', [$ip2location_country_blocker, 'footer']);
 add_action('wp_ajax_ip2location_country_blocker_submit_feedback', [$ip2location_country_blocker, 'submit_feedback']);
 add_action('admin_footer_text', [$ip2location_country_blocker, 'admin_footer_text']);
@@ -1315,13 +1316,7 @@ class IP2LocationCountryBlocker
 						<p>' . sprintf(__('%1$sERROR:%2$s Invalid IP2Location API key.', 'ip2location-country-blocker'), '<strong>', '</strong>') . '</p>
 					</div>';
 				} else {
-					if (!class_exists('WP_Http')) {
-						include_once ABSPATH . WPINC . '/class-http.php';
-					}
-
-					$request = new WP_Http();
-
-					$response = $request->request('https://api.ip2location.io/?' . http_build_query([
+					$response = wp_remote_get('https://api.ip2location.io/?' . http_build_query([
 						'key' => $api_key,
 						'src' => 'wordpress-wzdicb',
 					]), ['timeout' => 3]);
@@ -1329,7 +1324,7 @@ class IP2LocationCountryBlocker
 					$json = json_decode($response['body']);
 
 					if (isset($json->error)) {
-						$response = $request->request('https://api.ip2location.com/v2/?' . http_build_query([
+						$response = wp_remote_get('https://api.ip2location.com/v2/?' . http_build_query([
 							'key'   => $api_key,
 							'check' => 1,
 						]), ['timeout' => 3]);
@@ -1371,13 +1366,7 @@ class IP2LocationCountryBlocker
 						' . sprintf(__('%1$sERROR:%2$s Invalid IP2Proxy API key.', 'ip2location-country-blocker'), '<strong>', '</strong>') . '</p>
 					</div>';
 				} else {
-					if (!class_exists('WP_Http')) {
-						include_once ABSPATH . WPINC . '/class-http.php';
-					}
-
-					$request = new WP_Http();
-
-					$response = $request->request('https://api.ip2location.io/?' . http_build_query([
+					$response = wp_remote_get('https://api.ip2location.io/?' . http_build_query([
 						'key' => $px_api_key,
 						'src' => 'wordpress-wzdicb',
 					]), ['timeout' => 3]);
@@ -1385,7 +1374,7 @@ class IP2LocationCountryBlocker
 					$json = json_decode($response['body']);
 
 					if (isset($json->error)) {
-						$response = $request->request('https://api.ip2proxy.com/?' . http_build_query([
+						$response = wp_remote_get('https://api.ip2proxy.com/?' . http_build_query([
 							'key'   => $px_api_key,
 							'check' => 1,
 						]), ['timeout' => 3]);
@@ -1427,7 +1416,7 @@ class IP2LocationCountryBlocker
 
 				if (!$enable_debug_log) {
 					if (file_exists(IPLCB_ROOT . $this->debug_log)) {
-						@unlink(IPLCB_ROOT . $this->debug_log);
+						wp_delete_file(IPLCB_ROOT . $this->debug_log);
 					}
 				} else {
 					if (!get_option('ip2location_country_blocker_private_key')) {
@@ -1542,31 +1531,17 @@ class IP2LocationCountryBlocker
 									<table class="form-table">';
 
 		$legacyApiIpl = false;
-		if (!empty($api_key)) {
-			if (!class_exists('WP_Http')) {
-				include_once ABSPATH . WPINC . '/class-http.php';
-			}
 
-			$request = new WP_Http();
-
-			$response = $request->request('https://api.ip2location.io/?' . http_build_query([
-				'key' => $api_key,
-				'src' => 'wordpress-wzdicb',
+		if (!empty($api_key) && preg_match('/^[0-9A-Z]{10}$/', $api_key)) {
+			$response = wp_remote_get('https://api.ip2location.com/v2/?' . http_build_query([
+				'key'   => $api_key,
+				'check' => 1,
 			]), ['timeout' => 3]);
 
 			$json = json_decode($response['body']);
 
-			if (isset($json->error)) {
-				$response = $request->request('https://api.ip2location.com/v2/?' . http_build_query([
-					'key'   => $api_key,
-					'check' => 1,
-				]), ['timeout' => 3]);
-
-				$json = json_decode($response['body']);
-
-				if (!empty($json)) {
-					$legacyApiIpl = true;
-				}
+			if (!empty($json)) {
+				$legacyApiIpl = true;
 			}
 		}
 
@@ -1579,7 +1554,8 @@ class IP2LocationCountryBlocker
 											<input name="api_key" type="text" id="api_key" value="' . esc_attr($api_key) . '" class="regular-text" />';
 
 		if ($legacyApiIpl) {
-			echo ' <strong><i>(legacy API)</i></strong>';
+			echo '
+											<strong><em>(Legacy API)</em></strong>';
 		}
 
 		echo '
@@ -1587,7 +1563,7 @@ class IP2LocationCountryBlocker
 										</td>
 									</tr>';
 
-		if (!empty($api_key)) {
+		if ($legacyApiIpl) {
 			if (!empty($json)) {
 				if (preg_match('/^[0-9]+$/', $json->response)) {
 					echo '
@@ -1680,30 +1656,15 @@ class IP2LocationCountryBlocker
 
 		$legacyApiIpx = false;
 		if (!empty($px_api_key)) {
-			if (!class_exists('WP_Http')) {
-				include_once ABSPATH . WPINC . '/class-http.php';
-			}
-
-			$request = new WP_Http();
-
-			$response = $request->request('https://api.ip2location.io/?' . http_build_query([
-				'key' => $px_api_key,
-				'src' => 'wordpress-wzdicb',
+			$response = wp_remote_get('https://api.ip2proxy.com/?' . http_build_query([
+				'key'   => $px_api_key,
+				'check' => 1,
 			]), ['timeout' => 3]);
 
 			$json = json_decode($response['body']);
 
-			if (isset($json->error)) {
-				$response = $request->request('https://api.ip2proxy.com/?' . http_build_query([
-					'key'   => $px_api_key,
-					'check' => 1,
-				]), ['timeout' => 3]);
-
-				$json = json_decode($response['body']);
-
-				if (!empty($json)) {
-					$legacyApiIpx = true;
-				}
+			if (!empty($json)) {
+				$legacyApiIpx = true;
 			}
 		}
 
@@ -1810,147 +1771,241 @@ class IP2LocationCountryBlocker
 		if (!$this->is_setup_completed()) {
 			echo '
 			<div id="modal-get-started" class="ip2location-modal" style="display:block">
-				<div class="ip2location-modal-content" style="width:400px;height:250px">
-					<div align="center"><img src="' . plugins_url('/assets/img/logo.png', __FILE__) . '" width="256" height="31" align="center"></div>
-
-					<p>
-						' . sprintf(__('%1$sIP2Location Country Blocker%2$s is a plugin to block visitor by their location.', 'ip2location-country-blocker'), '<strong>', '</strong>') . '
+				<div class="ip2location-modal-content">
+					<div align="center" style="margin:10px auto;">
+						<img src="' . plugins_url('/assets/img/logo.png', __FILE__) . '" width="200" height="24" align="center" alt="IP2Location"><br>
+						<img src="' . plugins_url('/assets/img/get-started.png', __FILE__) . '" width="160" height="125" align="center" style="margin-top:5px;" alt="IP2Location Country Blocker">
+					</div>
+					<p style="margin-top:0;">
+						' . sprintf(__('%1$sIP2Location Country Blocker%2$s is a plugin designed to restrict visitors or traffic based on their geolocation determined by their IP address', 'ip2location-country-blocker'), '<strong>', '</strong>') . '
 					</p>
 					<p>
-						' . __('This is a step-by-step guide to setup this plugin.', 'ip2location-country-blocker') . '
+						' . __('Please follow these steps to complete the setup.', 'ip2location-country-blocker') . '
 					</p>';
 
 			if (!extension_loaded('bcmath')) {
 				echo '
 					<span class="dashicons dashicons-warning"></span> ' . sprintf(__('IP2Location requires %1$s PHP extension enabled. Please enable this extension in your %2$s.', 'ip2location-country-blocker'), '<strong>bcmath</strong>', '<strong>php.ini</strong>') . '
-					<p style="text-align:center;margin-top:60px">
-						<button class="button button-primary" disabled>' . __('Get Started', 'ip2location-country-blocker') . '</button>
+					<p style="text-align:center;margin-top:25px">
+						<button class="button button-primary" style="padding:3px 18px;" disabled>' . __('Get Started', 'ip2location-country-blocker') . '</button>
 					</p>';
 			} else {
 				echo '
-					<p style="text-align:center;margin-top:100px">
-						<button class="button button-primary" id="btn-get-started">' . __('Get Started', 'ip2location-country-blocker') . '</button>
+					<p style="text-align:center;margin-top:25px">
+						<button class="button button-primary" id="btn-get-started" style="padding:3px 18px;">' . __('Get Started', 'ip2location-country-blocker') . '</button>
 					</p>';
 			}
 
 			echo '
 				</div>
 			</div>
-			<div id="modal-step-1" class="ip2location-modal">
-				<div class="ip2location-modal-content" style="width:400px;height:320px">
-					<div align="center">
-						<h1>' . __('Sign Up IP2Location LITE', 'ip2location-country-blocker') . '</h1>
-						<table class="setup" width="200">
-							<tr>
-								<td align="center">
-									<img src="' . plugins_url('/assets/img/step-1-selected.png', __FILE__) . '" width="32" height="32" align="center"><br>
-									<strong>' . __('Step 1', 'ip2location-country-blocker') . '</strong>
-								</td>
-								<td align="center">
-									<img src="' . plugins_url('/assets/img/step-2.png', __FILE__) . '" width="32" height="32" align="center"><br>
-									' . __('Step 2', 'ip2location-country-blocker') . '
-								</td>
-								<td align="center">
-									<img src="' . plugins_url('/assets/img/step-3.png', __FILE__) . '" width="32" height="32" align="center"><br>
-									' . __('Step 3', 'ip2location-country-blocker') . '
-								</td>
-							</tr>
-						</table>
-						<div class="line"></div>
-					</div>
 
-					<form>
-						<p>
-							<label>' . __('Enter IP2Location LITE download token', 'ip2location-country-blocker') . '</label>
-							<input type="text" id="setup_token" class="regular-text code" maxlength="64" style="width:100%">
-						</p>
-						<p class="description">
-							' . sprintf(__('Don\'t have an account yet? Sign up a %1$s free account%2$s to obtain your download token.', 'ip2location-country-blocker'), '<a href="https://lite.ip2location.com/sign-up#wordpress-wzdicb" target="_blank">', '</a>') . '
-						</p>
-						<p id="token_status">&nbsp;</p>
-					</form>
-					<p style="text-align:right;margin-top:30px">
-						<button id="btn-to-step-2" class="button button-primary" disabled>' . __('Next', 'ip2location-country-blocker') . ' &raquo;</button>
+			<div id="modal-step-1" class="ip2location-modal">
+				<div class="ip2location-modal-content">
+					<div class="ip2location-sel-form">
+						<div class="ip2location-sel-con">
+							<h1 style="line-height:1.2;font-size:23px;text-align:center;margin-bottom:25px;">' . __('Choose Query Method', 'ip2location-country-blocker') . '</h1>
+							<div class="ip2location-sel-img-div">
+								<input width="100" type="radio" name="ipl-sel" id="db" value="db" checked>
+								<label for="db">
+									<span class="ip2location-sel-img">
+										<img src="' . plugins_url('/assets/img/db.png', __FILE__) . '" width="90" height="90" align="center" alt="IP2Location BIN Database">
+									</span>
+								</label>
+								<h4 style="margin-bottom:0;">' . __('IP2Location BIN Database (Local Query)', 'ip2location-country-blocker') . '</h4>
+								<p style="margin-top:8px;">' . __('Free geolocation database download', 'ip2location-country-blocker') . '</p>
+							</div>
+							<div class="ip2location-sel-img-div">
+								<input type="radio" name="ipl-sel" id="api" value="api" >
+								<label for="api">
+									<span class="ip2location-sel-img">
+										<img src="' . plugins_url('/assets/img/api.png', __FILE__) . '" width="90" height="90" align="center" alt="IP2Location.io IP Geolocation API">
+									</span>
+								</label>
+								<h4 style="margin-bottom:0;">' . __('IP2Location.io IP Geolocation API (Remote Query)', 'ip2location-country-blocker') . '</h4>
+								<p style="margin-top:8px;">' . __('Free 30K IP geolocation queries per month', 'ip2location-country-blocker') . '</p>
+							</div>
+						</div>
+					</div>
+					<p style="text-align:right;margin-top:15px">
+						<button id="btn-to-step-1" class="button button-primary" style="padding:3px 18px;">' . __('Next', 'ip2location-country-blocker') . ' &raquo;</button>
 					</p>
 				</div>
 			</div>
-			<div id="modal-step-2" class="ip2location-modal">
-				<div class="ip2location-modal-content" style="width:400px;height:320px">
+
+			<!-- db -->
+			<div id="modal-db-step-1" class="ip2location-modal">
+				<div class="ip2location-modal-content">
 					<div align="center">
-						<h1>' . __('Download IP2Location Database', 'ip2location-country-blocker') . '</h1>
-						<table class="setup" width="200">
+						<h1 style="line-height:1.2;font-size:23px;margin-bottom:25px;">' . __('Set Up IP2Location LITE BIN Database', 'ip2location-country-blocker') . '</h1>
+						<table class="setup ip2location-steps" width="200">
 							<tr>
 								<td align="center">
-									<img src="' . plugins_url('/assets/img/step-1.png', __FILE__) . '" width="32" height="32" align="center"><br>
+									<img src="' . plugins_url('/assets/img/step-1-selected.png', __FILE__) . '" width="36" height="36" align="center" alt="Wizard Step 1"><br>
 									' . __('Step 1', 'ip2location-country-blocker') . '
 								</td>
 								<td align="center">
-									<img src="' . plugins_url('/assets/img/step-2-selected.png', __FILE__) . '" width="32" height="32" align="center"><br>
-									<strong>' . __('Step 2', 'ip2location-country-blocker') . '</strong>
+									<img src="' . plugins_url('/assets/img/step-2.png', __FILE__) . '" width="36" height="36" align="center" alt="Wizard Step 2"><br>
+									' . __('Step 2', 'ip2location-country-blocker') . '
 								</td>
 								<td align="center">
-									<img src="' . plugins_url('/assets/img/step-3.png', __FILE__) . '" width="32" height="32" align="center"><br>
+									<img src="' . plugins_url('/assets/img/step-3.png', __FILE__) . '" width="36" height="36" align="center" alt="Wizard Step 3"><br>
 									' . __('Step 3', 'ip2location-country-blocker') . '
 								</td>
 							</tr>
 						</table>
-						<div class="line"></div>
+						<div class="ip2location-line"></div>
+					</div>
+					<form>
+						<p>
+							<label>' . __('Enter IP2Location LITE download token', 'ip2location-country-blocker') . '</label>
+							<input type="text" id="setup_token" class="regular-text code" maxlength="64" style="width:100%; margin-top: 10px; margin-bottom: 4px;">
+						</p>
+						<p class="description">
+							' . sprintf(__('Don\'t have an account yet? Sign up a %1$s free IP geolocation account%2$s to obtain your download token.', 'ip2location-country-blocker'), '<a href="https://lite.ip2location.com/sign-up#wordpress-wzdicb" target="_blank">', '</a>') . '
+						</p>
+						<p id="token_status" style="margin-top:20px;margin-bottom:20px;">&nbsp;</p>
+					</form>
+					<p style="text-align:right;margin-top:15px">
+						<button id="btn-to-db-step-0" class="button button-secondary" style="padding:3px 18px;margin-right:8px;" >&laquo; ' . __('Previous', 'ip2location-country-blocker') . '</button>
+						<button id="btn-to-db-step-2" class="button button-primary" style="padding:3px 18px;" disabled>' . __('Next', 'ip2location-country-blocker') . ' &raquo;</button>
+					</p>
+				</div>
+			</div>
+
+			<div id="modal-db-step-2" class="ip2location-modal">
+				<div class="ip2location-modal-content">
+					<div align="center">
+						<h1 style="line-height:1.2;font-size:23px;margin-bottom:25px;">' . __('Download IP2Location BIN Database', 'ip2location-country-blocker') . '</h1>
+						<table class="setup ip2location-steps" width="200">
+							<tr>
+								<td align="center">
+									<img src="' . plugins_url('/assets/img/step-1-selected.png', __FILE__) . '" width="36" height="36" align="center" alt="Wizard Step 1"><br>
+									' . __('Step 1', 'ip2location-country-blocker') . '
+								</td>
+								<td align="center">
+									<img src="' . plugins_url('/assets/img/step-2-selected.png', __FILE__) . '" width="36" height="36" align="center" alt="Wizard Step 2"><br>
+									' . __('Step 2', 'ip2location-country-blocker') . '
+								</td>
+								<td align="center">
+									<img src="' . plugins_url('/assets/img/step-3.png', __FILE__) . '" width="36" height="36" align="center" alt="Wizard Step 3"><br>
+									' . __('Step 3', 'ip2location-country-blocker') . '
+								</td>
+							</tr>
+						</table>
+						<div class="ip2location-line"></div>
 					</div>
 
 					<form style="height:140px">
 						<p id="ip2location_download_status"></p>
 					</form>
 					<p style="text-align:right;margin-top:30px">
-						<button id="btn-to-step-1" class="button button-primary" disabled>&laquo; ' . __('Previous', 'ip2location-country-blocker') . '</button>
-						<button id="btn-to-step-3" class="button button-primary" disabled>' . __('Next', 'ip2location-country-blocker') . ' &raquo;</button>
+						<button id="btn-to-db-step-1" class="button button-secondary" style="padding:3px 18px;margin-right:8px;" disabled>&laquo; ' . __('Previous', 'ip2location-country-blocker') . '</button>
+						<button id="btn-to-db-step-3" class="button button-primary" style="padding:3px 18px;" disabled>' . __('Next', 'ip2location-country-blocker') . ' &raquo;</button>
 					</p>
 				</div>
 			</div>
-			<div id="modal-step-3" class="ip2location-modal">
-				<div class="ip2location-modal-content" style="width:400px;height:320px">
+
+			<div id="modal-db-step-3" class="ip2location-modal">
+				<div class="ip2location-modal-content">
 					<div align="center">
-						<h1>' . __('Setup Rules', 'ip2location-country-blocker') . '</h1>
-						<table class="setup" width="200">
+						<h1 style="line-height:1.2;font-size:23px;margin-bottom:25px;">' . __('Configure The Rules', 'ip2location-country-blocker') . '</h1>
+						<table class="setup ip2location-steps" width="200">
 							<tr>
 								<td align="center">
-									<img src="' . plugins_url('/assets/img/step-1.png', __FILE__) . '" width="32" height="32" align="center"><br>
+									<img src="' . plugins_url('/assets/img/step-1-selected.png', __FILE__) . '" width="36" height="36" align="center" alt="Wizard Step 1"><br>
 									' . __('Step 1', 'ip2location-country-blocker') . '
 								</td>
 								<td align="center">
-									<img src="' . plugins_url('/assets/img/step-2.png', __FILE__) . '" width="32" height="32" align="center"><br>
+									<img src="' . plugins_url('/assets/img/step-2-selected.png', __FILE__) . '" width="36" height="36" align="center" alt="Wizard Step 2"><br>
 									' . __('Step 2', 'ip2location-country-blocker') . '
 								</td>
 								<td align="center">
-									<img src="' . plugins_url('/assets/img/step-3-selected.png', __FILE__) . '" width="32" height="32" align="center"><br>
-									<strong>' . __('Step 3', 'ip2location-country-blocker') . '</strong>
+									<img src="' . plugins_url('/assets/img/step-3-selected.png', __FILE__) . '" width="36" height="36" align="center" alt="Wizard Step 3"><br>
+									' . __('Step 3', 'ip2location-country-blocker') . '
 								</td>
 							</tr>
 						</table>
-						<div class="line"></div>
+						<div class="ip2location-line"></div>
 					</div>
 
-					<form style="height:140px">
+					<form style="height:75px;">
 						<p>
-							' . __('Please press the finish button and configure your rules.', 'ip2location-country-blocker') . '
+							' . __('Please click the “Finish” button to start configuring your rules.', 'ip2location-country-blocker') . '
 						</p>
 					</form>
 					<p style="text-align:right;margin-top:30px">
-						<button class="button button-primary" onclick="window.location.href=\'' . admin_url('admin.php?page=ip2location-country-blocker') . '\';">' . __('Finish', 'ip2location-country-blocker') . '</button>
+						<button class="button button-primary" style="padding:3px 18px;" onclick="window.location.href=\'' . admin_url('admin.php?page=ip2location-country-blocker') . '\';">' . __('Finish', 'ip2location-country-blocker') . '</button>
 					</p>
 				</div>
 			</div>
 
-			<div id="modal-step-4" class="ip2location-modal">
-				<div class="ip2location-modal-content" style="width:400px;height:320px">
+			<!-- api -->
+			<div id="modal-api-step-1" class="ip2location-modal">
+				<div class="ip2location-modal-content">
 					<div align="center">
-						<img src="' . plugins_url('/assets/img/step-end.png', __FILE__) . '" width="300" height="225" align="center"><br>
-						' . __('Congratulations! You have completed the setup.', 'ip2location-country-blocker') . '
+						<h1 style="line-height:1.2;font-size:23px;margin-bottom:25px;">' . __('Set Up IP2Location.io IP Geolocation Service', 'ip2location-country-blocker') . '</h1>
+						<table class="setup ip2location-steps" width="200">
+							<tr>
+								<td align="center">
+									<img src="' . plugins_url('/assets/img/step-1-selected.png', __FILE__) . '" width="36" height="36" align="center" alt="Wizard Step 1"><br>
+									' . __('Step 1', 'ip2location-country-blocker') . '
+								</td>
+								<td align="center">
+									<img src="' . plugins_url('/assets/img/step-3.png', __FILE__) . '" width="36" height="36" align="center" alt="Wizard Step 2"><br>
+									' . __('Step 2', 'ip2location-country-blocker') . '
+								</td>
+							</tr>
+						</table>
+						<div class="ip2location-api-line"></div>
 					</div>
-					<p style="text-align:right;margin-top:50px">
-						<button class="button button-primary" onclick="window.location.href=\'' . admin_url('admin.php?page=ip2location-country-blocker') . '\';">' . __('Done', 'ip2location-country-blocker') . '</button>
+					<form>
+						<p>
+							<label>' . __('Enter IP2Location.io IP Geolocation API key', 'ip2location-country-blocker') . '</label>
+							<input type="text" id="setup_api_key" class="regular-text code" maxlength="32" style="width:100%;margin-top: 10px; margin-bottom: 4px;">
+						</p>
+						<p class="description">
+							' . sprintf(__('Don\'t have an account yet? Sign up a %1$s free IP geolocation plan%2$s to obtain your API key.', 'ip2location-country-blocker'), '<a href="https://www.ip2location.io/sign-up#wordpress-wzdicb" target="_blank">', '</a>') . '
+						</p>
+						<p id="api_status">&nbsp;</p>
+					</form>
+					<p style="text-align:right;margin-top:30px">
+						<button id="btn-to-api-step-0" class="button button-secondary" style="padding:3px 18px;margin-right:8px;">&laquo; ' . __('Previous', 'ip2location-country-blocker') . '</button>
+						<button id="btn-to-api-step-2" class="button button-primary" style="padding:3px 18px;" >' . __('Next', 'ip2location-country-blocker') . ' &raquo;</button>
 					</p>
 				</div>
-			</div>';
+			</div>
+
+			<div id="modal-api-step-2" class="ip2location-modal">
+				<div class="ip2location-modal-content">
+					<div align="center">
+						<h1 style="line-height:1.2;font-size:23px;margin-bottom:25px;">' . __('Configure The Rules', 'ip2location-country-blocker') . '</h1>
+						<table class="setup ip2location-steps" width="200">
+							<tr>
+								<td align="center">
+									<img src="' . plugins_url('/assets/img/step-1-selected.png', __FILE__) . '" width="36" height="36" align="center" alt="Wizard Step 1"><br>
+									' . __('Step 1', 'ip2location-country-blocker') . '
+								</td>
+								<td align="center">
+									<img src="' . plugins_url('/assets/img/step-3-selected.png', __FILE__) . '" width="36" height="36" align="center" alt="Wizard Step 2"><br>
+									' . __('Step 2', 'ip2location-country-blocker') . '
+								</td>
+							</tr>
+						</table>
+						<div class="ip2location-api-line"></div>
+					</div>
+
+					<form style="height:75px;">
+						<p>
+							' . __('Please click the “Finish” button to start configuring your rules.', 'ip2location-country-blocker') . '
+						</p>
+					</form>
+					<p style="text-align:right;margin-top:30px">
+						<button class="button button-primary" style="padding:3px 18px;" onclick="window.location.href=\'' . admin_url('admin.php?page=ip2location-country-blocker') . '\';">' . __('Finish', 'ip2location-country-blocker') . '</button>
+					</p>
+				</div>
+			</div>
+			';
 		}
 
 		echo '<input type="hidden" id="update_nonce" value="' . wp_create_nonce('update-database') . '">';
@@ -1971,11 +2026,11 @@ class IP2LocationCountryBlocker
 
 	public function check_block()
 	{
-		if (preg_replace('/https?:\/\//', '', $this->get_current_url()) == preg_replace('/https?:\/\//', '', get_option('ip2location_country_blocker_frontend_error_page'))) {
+		if (preg_replace('/https?:\/\//', '', $this->get_current_url()) == preg_replace('/https?:\/\//', '', (string) get_option('ip2location_country_blocker_frontend_error_page'))) {
 			return;
 		}
 
-		if (preg_replace('/https?:\/\//', '', $this->get_current_url()) == preg_replace('/https?:\/\//', '', get_option('ip2location_country_blocker_backend_error_page'))) {
+		if (preg_replace('/https?:\/\//', '', $this->get_current_url()) == preg_replace('/https?:\/\//', '', (string) get_option('ip2location_country_blocker_backend_error_page'))) {
 			return;
 		}
 
@@ -2013,7 +2068,7 @@ class IP2LocationCountryBlocker
 				return;
 			}
 
-			if (preg_match('/(page|post)_id=([0-9]+)/', get_option('ip2location_country_blocker_backend_error_page'), $matches)) {
+			if (preg_match('/(page|post)_id=([0-9]+)/', (string) get_option('ip2location_country_blocker_backend_error_page'), $matches)) {
 				if ($this->get_current_url() == get_permalink($matches[2])) {
 					return;
 				}
@@ -2461,14 +2516,8 @@ class IP2LocationCountryBlocker
 			// Create working directory
 			$wp_filesystem->mkdir($working_dir);
 
-			if (!class_exists('WP_Http')) {
-				include_once ABSPATH . WPINC . '/class-http.php';
-			}
-
-			$request = new WP_Http();
-
 			// Check download permission
-			$response = $request->request('https://www.ip2location.com/download-info?' . http_build_query([
+			$response = wp_remote_get('https://www.ip2location.com/download-info?' . http_build_query([
 				'package' => $code,
 				'token'   => $token,
 				'source'  => 'wp_country_blocker',
@@ -2480,7 +2529,7 @@ class IP2LocationCountryBlocker
 				// Download LITE version
 				$code = 'PX2LITEBIN';
 
-				$response = $request->request('https://www.ip2location.com/download-info?' . http_build_query([
+				$response = wp_remote_get('https://www.ip2location.com/download-info?' . http_build_query([
 					'package' => $code,
 					'token'   => $token,
 					'source'  => 'wp_country_blocker',
@@ -2497,13 +2546,11 @@ class IP2LocationCountryBlocker
 			}
 
 			// Start downloading BIN database from IP2Location website
-			$response = $request->request('https://www.ip2location.com/download?' . http_build_query([
+			$tmp_file = download_url('https://www.ip2location.com/download?' . http_build_query([
 				'file'   => $code,
 				'token'  => $token,
 				'source' => 'wp_country_blocker',
-			]), [
-				'timeout' => 300,
-			]);
+			]));
 
 			if ((isset($response->errors)) || (!in_array('200', $response['response']))) {
 				$wp_filesystem->delete($working_dir, true);
@@ -2515,25 +2562,15 @@ class IP2LocationCountryBlocker
 			}
 
 			// Save downloaded package.
-			$fp = fopen($zip_file, 'w');
-
-			if (!$fp) {
-				exit(json_encode([
-					'status'  => 'ERROR',
-					'message' => __('No permission to write into file system.', 'ip2location-country-blocker'),
-				]));
-			}
-
-			fwrite($fp, $response['body']);
-			fclose($fp);
+			copy($tmp_file, $zip_file);
+			wp_delete_file($tmp_file);
 
 			if (filesize($zip_file) < 51200) {
-				$message = file_get_contents($zip_file);
 				$wp_filesystem->delete($working_dir, true);
 
 				exit(json_encode([
 					'status'  => 'ERROR',
-					'message' => __('Downloaded database is corrupted. Please try again later.', 'ip2location-country-blocker'),
+					'message' => __(file_get_contents($zip_file), 'ip2location-country-blocker'),
 				]));
 			}
 
@@ -2541,7 +2578,7 @@ class IP2LocationCountryBlocker
 			$result = unzip_file($zip_file, $working_dir);
 
 			// Once extracted, delete the package.
-			unlink($zip_file);
+			wp_delete_file($zip_file);
 
 			if (is_wp_error($result)) {
 				$wp_filesystem->delete($working_dir, true);
@@ -2603,23 +2640,24 @@ class IP2LocationCountryBlocker
 		try {
 			$token = (isset($_POST['token'])) ? sanitize_text_field($_POST['token']) : '';
 
-			if (!class_exists('WP_Http')) {
-				include_once ABSPATH . WPINC . '/class-http.php';
-			}
-
-			$request = new WP_Http();
-
 			// Check download permission
-			$response = $request->request('https://www.ip2location.com/download-info?' . http_build_query([
+			$response = wp_remote_get('https://www.ip2location.com/download-info?' . http_build_query([
 				'package' => 'DB1BIN',
 				'token'   => $token,
 				'source'  => 'wp_country_blocker',
 			]));
 
+			if (isset($response['errors'])) {
+				exit(json_encode([
+					'status'  => 'ERROR',
+					'message' => 'Unable to reach remote URL. Please try again later.',
+				]));
+			}
+
 			$parts = explode(';', $response['body']);
 
 			if ($parts[0] != 'OK') {
-				$response = $request->request('https://www.ip2location.com/download-info?' . http_build_query([
+				$response = wp_remote_get('https://www.ip2location.com/download-info?' . http_build_query([
 					'package' => 'DB1LITEBIN',
 					'token'   => $token,
 					'source'  => 'wp_country_blocker',
@@ -2636,6 +2674,62 @@ class IP2LocationCountryBlocker
 			}
 
 			update_option('ip2location_country_blocker_token', $token);
+
+			exit(json_encode([
+				'status'  => 'OK',
+				'message' => '',
+			]));
+		} catch (Exception $e) {
+			exit(json_encode([
+				'status'  => 'ERROR',
+				'message' => $e->getMessage(),
+			]));
+		}
+	}
+
+	public function validate_api_key()
+	{
+		header('Content-Type: application/json');
+
+		if (!current_user_can('administrator')) {
+			exit(json_encode([
+				'status'  => 'ERROR',
+				'message' => __('Permission denied.', 'ip2location-country-blocker'),
+			]));
+		}
+
+		try {
+			$apiKey = (isset($_POST['key'])) ? sanitize_text_field($_POST['key']) : '';
+
+			if (empty($apiKey)) {
+				exit(json_encode([
+					'status'  => 'ERROR',
+					'message' => __('Invalid API key.', 'ip2location-country-blocker'),
+				]));
+			}
+
+			// Check download permission
+			$response = wp_remote_get('https://api.ip2location.io/?' . http_build_query([
+				'key'    => $apiKey,
+				'source' => 'wp_country_blocker',
+			]));
+
+			if (!isset($response['response']['code'])) {
+				exit(json_encode([
+					'status'  => 'ERROR',
+					'message' => __('Remote server is not responding. Please try again later.', 'ip2location-country-blocker'),
+				]));
+			}
+
+			if ($response['response']['code'] != 200) {
+				exit(json_encode([
+					'status'  => 'ERROR',
+					'message' => __('Invalid API key.', 'ip2location-country-blocker'),
+				]));
+			}
+
+			update_option('ip2location_country_blocker_lookup_mode', 'ws');
+			update_option('ip2location_country_blocker_api_key', $apiKey);
 
 			exit(json_encode([
 				'status'  => 'OK',
@@ -2825,12 +2919,7 @@ class IP2LocationCountryBlocker
 		];
 
 		if (isset($options[$feedback])) {
-			if (!class_exists('WP_Http')) {
-				include_once ABSPATH . WPINC . '/class-http.php';
-			}
-
-			$request = new WP_Http();
-			$response = $request->request('https://www.ip2location.com/wp-plugin-feedback?' . http_build_query([
+			wp_remote_get('https://www.ip2location.com/wp-plugin-feedback?' . http_build_query([
 				'name'    => 'ip2location-country-blocker',
 				'message' => $options[$feedback],
 			]), ['timeout' => 5]);
@@ -3130,11 +3219,11 @@ class IP2LocationCountryBlocker
 	private function get_current_url($add_query = true)
 	{
 		if (!isset($_SERVER)) {
-			return;
+			return '';
 		}
 
 		if (!isset($_SERVER['HTTP_HOST'])) {
-			return;
+			return '';
 		}
 
 		$current_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
@@ -3263,16 +3352,10 @@ class IP2LocationCountryBlocker
 		switch (get_option('ip2location_country_blocker_lookup_mode')) {
 			// IP2Location Web Service
 			case 'ws':
-				if (!class_exists('WP_Http')) {
-					include_once ABSPATH . WPINC . '/class-http.php';
-				}
-
 				$this->session['lookup_mode'] = 'WS';
 
-				$request = new WP_Http();
-
 				if (preg_match('/^[0-9A-Z]{32}$/', get_option('ip2location_country_blocker_api_key'))) {
-					$response = $request->request('https://api.ip2location.io/?' . http_build_query([
+					$response = wp_remote_get('https://api.ip2location.io/?' . http_build_query([
 						'key'    => get_option('ip2location_country_blocker_api_key'),
 						'ip'     => $ip,
 						'source' => 'wp-country-blocker',
@@ -3293,7 +3376,7 @@ class IP2LocationCountryBlocker
 						$caches['country_name'] = $json->country_name;
 					}
 				} else {
-					$response = $request->request('https://api.ip2location.com/v2/?' . http_build_query([
+					$response = wp_remote_get('https://api.ip2location.com/v2/?' . http_build_query([
 						'key'     => get_option('ip2location_country_blocker_api_key'),
 						'ip'      => $ip,
 						'package' => 'WS1',
@@ -3345,16 +3428,10 @@ class IP2LocationCountryBlocker
 		switch (get_option('ip2location_country_blocker_px_lookup_mode')) {
 			// IP2Location Web Service
 			case 'px_ws':
-				if (!class_exists('WP_Http')) {
-					include_once ABSPATH . WPINC . '/class-http.php';
-				}
-
 				$this->session['lookup_mode'] = 'WS';
 
-				$request = new WP_Http();
-
 				if (preg_match('/^[0-9A-Z]{32}$/', get_option('ip2location_country_blocker_api_key'))) {
-					$response = $request->request('https://api.ip2location.io/?' . http_build_query([
+					$response = wp_remote_get('https://api.ip2location.io/?' . http_build_query([
 						'key'    => get_option('ip2location_country_blocker_px_api_key'),
 						'ip'     => $ip,
 						'source' => 'wp-country-blocker',
@@ -3380,7 +3457,7 @@ class IP2LocationCountryBlocker
 						];
 					}
 				} else {
-					$response = $request->request('https://api.ip2proxy.com/?' . http_build_query([
+					$response = wp_remote_get('https://api.ip2proxy.com/?' . http_build_query([
 						'key'     => get_option('ip2location_country_blocker_px_api_key'),
 						'ip'      => $ip,
 						'package' => 'PX2',
@@ -3511,17 +3588,6 @@ class IP2LocationCountryBlocker
 		]));
 	}
 
-	private function cache_delete($key)
-	{
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		WP_Filesystem();
-		global $wp_filesystem;
-
-		if (file_exists(IP2LOCATION_DIR . 'caches' . \DIRECTORY_SEPARATOR . md5($key . '_ip2location_country_blocker') . '.json')) {
-			$wp_filesystem->delete(IP2LOCATION_DIR . 'caches' . \DIRECTORY_SEPARATOR . md5($key . '_ip2location_country_blocker') . '.json');
-		}
-	}
-
 	private function cache_get($key)
 	{
 		if (file_exists(IP2LOCATION_DIR . 'caches' . \DIRECTORY_SEPARATOR . md5($key . '_ip2location_country_blocker') . '.json')) {
@@ -3649,7 +3715,7 @@ class IP2LocationCountryBlocker
 			INDEX `idx_ip_address` (`ip_address`)
 		) COLLATE=\'utf8_bin\'');
 
-		$GLOBALS['wpdb']->query('DROP IF EXISTS ' . $GLOBALS['wpdb']->prefix . 'ip2location_country_blocker_rate_limit_log');
+		$GLOBALS['wpdb']->query('DROP TABLE IF EXISTS ' . $GLOBALS['wpdb']->prefix . 'ip2location_country_blocker_rate_limit_log');
 	}
 
 	private function cidr_match($ip, $range)
