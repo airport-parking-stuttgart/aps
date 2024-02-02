@@ -43,13 +43,11 @@ $brokerCommisions = Database::getInstance()->getBrokerCommissions($id);
 							<div class="row">
 								<div class="col-12 broker-item">
 									<label for="">Firma</label>
-									<input type="text" name="broker_company" class="form-control"
-										   value="<?php echo $broker->company ?>">
+									<input type="text" name="broker_company" class="form-control" value="<?php echo $broker->company ?>" required>
 								</div>
 								<div class="col-12 col-sm-4 broker-item">
 									<label for="">Kürzel</label>
-									<input type="text" name="broker_short" class="form-control"
-										   value="<?php echo $broker->short ?>">
+									<input type="text" name="broker_short" class="form-control" value="<?php echo $broker->short ?>" required>
 								</div>
 								<div class="col-12 col-sm-4 broker-item">
 									<label for="">API für</label>
@@ -71,13 +69,11 @@ $brokerCommisions = Database::getInstance()->getBrokerCommissions($id);
 								</div>
 								<div class="col-12 col-sm-6 broker-item">
 									<label for="">Vorname</label>
-									<input type="text" name="broker_firstname" class="form-control"
-										   value="<?php echo $broker->firstname ?>">
+									<input type="text" name="broker_firstname" class="form-control" value="<?php echo $broker->firstname ?>">
 								</div>
 								<div class="col-12 col-sm-6 broker-item">
 									<label for="">Nachname</label>
-									<input type="text" name="broker_lastname" class="form-control"
-										   value="<?php echo $broker->lastname ?>">
+									<input type="text" name="broker_lastname" class="form-control" value="<?php echo $broker->lastname ?>">
 								</div>
 								<div class="col-12 broker-item">
 									<label for="">Strasse / Nr</label>
@@ -140,35 +136,25 @@ $brokerCommisions = Database::getInstance()->getBrokerCommissions($id);
 												<input type="hidden" name="commision_id[]"
 													   value="<?php echo $commission->id ?>">
 												<label for="">Datum von</label>
-												<input type="text" name="commission_date_from[]" placeholder="" class="air-datepicker"
-													   data-language="de"
-													   value="<?php echo $commission->commission_date_from ?>">
+												<input type="text" name="commission_date_from[]" placeholder="" class="air-datepicker" data-language="de" value="<?php echo $commission->commission_date_from ?>">
 											</div>
 											<div class="col-sm-12 col-md-2">
 												<label for="">Datum bis</label>
-												<input type="text" name="commission_date_to[]" placeholder="" class="air-datepicker"
-													   data-language="de"
-													   value="<?php echo $commission->commission_date_to ?>">
+												<input type="text" name="commission_date_to[]" placeholder="" class="air-datepicker" data-language="de" value="<?php echo $commission->commission_date_to ?>">
 											</div>
 											<div class="col-sm-12 col-md-2">
 												<label for="">Vom Umsatz</label>
 												<select name="commission_type[]" class="w100">
-													<option value="brutto" <?php echo $commission->commission_type == 'brutto' ? 'selected' : '' ?>>
-														brutto
-													</option>
-													<option value="netto" <?php echo $commission->commission_type == 'netto' ? 'selected' : '' ?>>
-														netto
-													</option>
+													<option value="brutto" <?php echo $commission->commission_type == 'brutto' ? 'selected' : '' ?>>brutto</option>
+													<option value="netto" <?php echo $commission->commission_type == 'netto' ? 'selected' : '' ?>>netto</option>
 												</select>
 											</div>
 											<div class="col-sm-12 col-md-2">
 												<label for="">Wert</label>
-												<input type="number" name="commission_value[]" class="w100"
-													   placeholder="Wert" value="<?php echo $commission->commission_value ?>">
+												<input type="number" name="commission_value[]" class="w100" placeholder="Wert" value="<?php echo $commission->commission_value ?>">
 											</div>
 											<div class="col-2 add_del_buttons">
-												<span class="btn btn-danger del-table-row"
-													  data-table="commissions" data-id="<?php echo $commission->id ?>">x</span>
+												<span class="btn btn-danger del-table-row" data-table="commissions" data-id="<?php echo $commission->id ?>">x</span>
 												<span class="btn btn-secondary plus-icon add-commission-template">+</span>
 											</div>
 										</div>
@@ -179,13 +165,11 @@ $brokerCommisions = Database::getInstance()->getBrokerCommissions($id);
 										<div class="col-sm-12 col-md-2">
 											<input type="hidden" name="commision_id[]">
 											<label for="">Datum von</label>
-											<input type="text" name="commission_date_from[]" placeholder="" class="air-datepicker"
-												   data-language="de">
+											<input type="text" name="commission_date_from[]" placeholder="" class="air-datepicker" data-language="de">
 										</div>
 										<div class="col-sm-12 col-md-2">
 											<label for="">Datum bis</label>
-											<input type="text" name="commission_date_to[]" placeholder="" class="air-datepicker"
-												   data-language="de">
+											<input type="text" name="commission_date_to[]" placeholder="" class="air-datepicker" data-language="de">
 										</div>
 										<div class="col-sm-12 col-md-2">
 											<label for="">Vom Umsatz</label>
@@ -196,12 +180,10 @@ $brokerCommisions = Database::getInstance()->getBrokerCommissions($id);
 										</div>
 										<div class="col-sm-12 col-md-2">
 											<label for="">Wert</label>
-											<input type="number" name="commission_value[]" class="w100"
-												   placeholder="">
+											<input type="number" name="commission_value[]" class="w100" placeholder="">
 										</div>
 										<div class="col-2 add_del_buttons">
-											<span class="btn btn-danger del-table-row"
-												  data-table="commissions">x</span>
+											<span class="btn btn-danger del-table-row" data-table="commissions">x</span>
 											<span class="btn btn-secondary plus-icon add-commission-template">+</span>
 										</div>
 									</div>
@@ -227,9 +209,7 @@ $brokerCommisions = Database::getInstance()->getBrokerCommissions($id);
 					</div>
 					<div class="row m10">
 						<div class="col-1">
-							<br><button class="btn btn-primary">
-								Speichern
-							</button>
+							<br><button class="btn btn-primary">Speichern</button>
 						</div>
 						<div class="col-1">                    
 							<br><a href="<?php echo '/wp-admin/admin.php?page=vermittler-bearbeiten' ?>" class="btn btn-secondary d-block w-100" >Schließen</a>

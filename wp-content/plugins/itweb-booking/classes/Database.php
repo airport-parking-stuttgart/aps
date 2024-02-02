@@ -4847,7 +4847,33 @@ class Database
 	// get settings
     static function getSettings(){
 		return self::$db->get_row("SELECT * FROM " . self::$prefix . "einstellungen");
-	}	
+	}
+	
+	// save saisons
+    static function saveSaisons($name, $date_from, $date_to)
+    {
+		self::$db->insert(self::$prefix . 'saisons', [
+            'name' => $name,
+			'date_from' => $date_from,
+			'date_to' => $date_to
+        ]);
+    }
+	
+	// update saisons
+    static function updateSaisons($id, $name, $date_from, $date_to)
+    {
+        self::$db->update(self::$prefix . "saisons", [
+            'name' => $name,
+			'date_from' => $date_from,
+			'date_to' => $date_to
+        ], ['id' => $id]);
+    }
+	
+	// get saisons
+    static function getSaisons(){
+		return self::$db->get_results("SELECT * FROM " . self::$prefix . "saisons");
+	}
+	
 	
 	static function saveOrderFomAPS($data, $lot)
     {
@@ -7206,7 +7232,7 @@ class Database
 					for ($i = 0; $i < (count($lines_csv) - 1); $i++) {
 						if ((strpos($file, 'STR') !== false) || (strpos($file, 'STB') !== false) || (strpos($file, 'ST') !== false) ) {
 							// HX Files
-							$data[] = explode(";", mb_convert_encoding($lines_csv[$i], "UTF-8", "iso-8859-1"));
+							$data[] = explode(";", mb_convert_encoding($lines_csv[$i], "UTF-8", "UTF-8"));
 							//$data[] = explode("\t", htmlspecialchars($lines[$i]));
 						} else {
 							// Default files.

@@ -89,7 +89,7 @@ if($parklot->is_for == "hotel"){
 									<div class="col-sm-12 col-md-3">
 										<label for="">Immobilien Name</label><br>
 										<input type="text" name="parklot" size="35" placeholder="Parkplatz"
-													   value="<?php echo $parklot->parklot ?>">
+													   value="<?php echo $parklot->parklot ?>" required>
 									</div>
 									<div class="col-sm-12 col-md-2">
 										<label for="">Produktgruppe</label><br>
@@ -108,11 +108,11 @@ if($parklot->is_for == "hotel"){
 									</div>
 									<div class="col-sm-12 col-md-3">
 										<label for="">Adresse</label><br>
-										<input type="text" name="parklot_adress" size="45" value="<?php echo $parklot->adress ?>">
+										<input type="text" name="parklot_adress" size="45" value="<?php echo $parklot->adress ?>" required>
 									</div>
 									<div class="col-sm-12 col-md-3">
 										<label for="">Telefon-Nr.</label><br>
-										<input type="text" name="parklot_phone" value="<?php echo $parklot->phone ?>">
+										<input type="text" name="parklot_phone" value="<?php echo $parklot->phone ?>" required>
 									</div>
 								</div><br>
 								<div class="row m50">
@@ -136,36 +136,36 @@ if($parklot->is_for == "hotel"){
 										<label for="">Aktiv von</label><br>
 										<input type="text" name="date_from" size="7" placeholder="Von" class=""
 													   autocomplete="off"
-													   data-language="de" value="<?php echo $parklot->datefrom ?>" readonly>
+													   data-language="de" value="<?php echo $parklot->datefrom ?>" readonly required>
 									</div>
 									<div class="col-sm-12 col-md-2 ui-lotdata-date">
 										<label for="">Aktiv bis</label><br>
 										<input type="text" name="date_to" size="7" placeholder="Bis" class=""
 													   autocomplete="off"
-													   data-language="de" value="<?php echo $parklot->dateto ?>" readonly>
+													   data-language="de" value="<?php echo $parklot->dateto ?>" readonly required>
 									</div>
 									<div class="col-sm-12 col-md-1">
 										<label for="">Vorlaufzeit</label>
 										<input type="number" name="booking_lead_time" autocomplete="off" data-language="de"
-											   value="<?php echo $parklot->booking_lead_time ?>">
+											   value="<?php echo $parklot->booking_lead_time != null ? $parklot->booking_lead_time : "0" ?>">
 									</div>
 								</div><br>
 								<div class="row m50">
 									<div class="col-sm-12 col-md-1">
 										<label for="">Kontigent</label>
-										<input type="number" name="contigent" value="<?php echo $parklot->contigent ?>">
+										<input type="number" name="contigent" value="<?php echo $parklot->contigent != null ? $parklot->contigent : "0" ?>" required>
 									</div>
 									<div class="col-sm-12 col-md-1">
 										<label for="">Prefix</label>
-										<input type="text" name="parklot_prefix" value="<?php echo $parklot->prefix ?>">
+										<input type="text" name="parklot_prefix" value="<?php echo $parklot->prefix ?>" required>
 									</div>
 									<div class="col-sm-12 col-md-1">
 										<label for="">Farbcode</label><br>
-										<input type="color" name="parklot_color" value="<?php echo $parklot->color ?>">
+										<input type="color" name="parklot_color" value="<?php echo $parklot->color ?>" required>
 									</div>
 									<div class="col-sm-12 col-md-1">
 										<label for="">Kurzname</label><br>
-										<input type="text" name="parklot_short" value="<?php echo $parklot->parklot_short ?>">
+										<input type="text" name="parklot_short" value="<?php echo $parklot->parklot_short ?>" required>
 									</div>
 									<div class="col-sm-12 col-md-1">
 										<label for="">Entfernung</label><br>
@@ -574,8 +574,9 @@ if($parklot->is_for == "hotel"){
 								<div class="row">
 									<?php foreach ($variations as $variation): ?>
 										<?php $product_variation = new WC_Product_Variation($variation); ?>
+										<?php $name = explode(' - ', $product_variation->get_name()); ?>
 										<div class="col-sm-12 col-md-4">
-											<br><label for=""><?php echo explode(' - ', $product_variation->get_name())[1] ?></label><br>
+											<br><label for=""><?php echo end($name) ?></label><br>
 											<input type="text" class="" name="<?php echo $product_variation->get_id() ?>" value="<?php echo $product_variation->regular_price ?>">
 										</div>
 									<?php endforeach; ?>								

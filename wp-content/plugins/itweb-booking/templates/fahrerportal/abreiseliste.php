@@ -1,6 +1,7 @@
 <?php
 //$products = Database::getInstance()->getProducts();
 // Get All Orders
+$settings = Database::getInstance()->getSettings();
 $filter['list'] = 1;
 
 if(isok($_GET, 'filter')){

@@ -290,15 +290,11 @@ a.btn.disabled{
 						<div class="row m10">							
 							<div class="col-sm-12 col-md-1 ui-lotdata-date">								
 								<label for="">Anreisedatum</label><br>
-								<input type="text" name="date_from" class="air-datepicker form-item form-control date-from"									   
-									   data-language="de" autocomplete="off"
-									   readonly required>
+								<input type="text" name="date_from" class="air-datepicker form-item form-control date-from"	data-language="de" autocomplete="off" readonly required>
 							</div>					
 							<div class="col-sm-12 col-md-1 ui-lotdata-date">								
 								<label for="">Abreisedatum</label><br>
-								<input type="text" name="date_to" class="air-datepicker form-item form-control date-to" 									   
-									   data-language="de" autocomplete="off"
-									   readonly required>
+								<input type="text" name="date_to" class="air-datepicker form-item form-control date-to" data-language="de" autocomplete="off" readonly required>
 							</div>
 							<div class="col-sm-12 col-md-1 ui-lotdata-date">								
 								<label for="">Buchung für</label><br>
@@ -863,17 +859,13 @@ a.btn.disabled{
 					<?php if($_GET['date_from'] != null): ?>
 					<div class="col-sm-12 col-md-1 ui-lotdata-date">
 						<label for="">Hin-Transfer</label><br>
-						<input type="text" name="date_from" class="form-control"							
-							   data-language="de" autocomplete="off" value="<?php echo $_GET['date_from'] ?>"
-							   readonly>
+						<input type="text" name="date_from" class="form-control" data-language="de" autocomplete="off" value="<?php echo $_GET['date_from'] ?>" readonly>
 					</div>
 					<?php endif; ?>
 					<?php if($_GET['date_to'] != null): ?>
 					<div class="col-sm-12 col-md-1 ui-lotdata-date">
 						<label for="">Rück-Transfer</label><br>
-						<input type="text" name="date_to" class="form-control"							
-							   data-language="de" autocomplete="off" value="<?php echo $_GET['date_to'] ?>"
-							   readonly>
+						<input type="text" name="date_to" class="form-control" data-language="de" autocomplete="off" value="<?php echo $_GET['date_to'] ?>" readonly>
 					</div>
 					<?php endif; ?>
 					<div class="col-sm-12 col-md-4">

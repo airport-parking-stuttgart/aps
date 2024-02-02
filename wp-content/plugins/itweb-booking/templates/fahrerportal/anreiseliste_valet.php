@@ -2,6 +2,7 @@
 //$products = Database::getInstance()->getProducts();
 // Get All Orders
 ini_set("memory_limit", "1024M");
+$settings = Database::getInstance()->getSettings();
 $filter['list'] = 1;
 $db = Database::getInstance();
 $product_groups = Database::getInstance()->getProductGroups();

@@ -111,9 +111,6 @@ function itweb_admin_menu()
     add_menu_page('Produkte', 'Produkte', 'read', 'produkte', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/produkte/index.php';
     });
-	add_submenu_page('produkte', 'Produktgruppen', 'Produktgruppen', 'read', 'produktgruppen', function () {
-        require_once plugin_dir_path(__FILE__) . '/templates/produkte/produktgruppen.php';
-    }, 110);
     add_submenu_page('produkte', 'Betreiber', 'Betreiber', 'read', 'betreiber', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/produkte/betreiber.php';
     }, 110);
@@ -122,17 +119,6 @@ function itweb_admin_menu()
     }, 110);
     add_submenu_page('produkte', 'Produkte Bearbeiten', 'Produkte Bearbeiten', 'read', 'produkte-bearbeiten', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/produkte/produkte-bearbeiten.php';
-    }, 110);
-
-    add_submenu_page('produkte', 'Preisschienen', 'Preisschienen', 'read', 'prices', function () {
-        require_once plugin_dir_path(__FILE__) . '/templates/produkte/prices/index.php';
-    }, 110);
-	add_submenu_page('produkte', 'Rabatte', 'Rabatte', 'read', 'rabatte', function () {
-        require_once plugin_dir_path(__FILE__) . '/templates/produkte/discounts/index.php';
-    }, 110);
-
-    add_submenu_page('produkte', 'Zusatzleistungen', 'Zusatzleistungen', 'read', 'zusatzleistungen', function () {
-        require_once plugin_dir_path(__FILE__) . '/templates/produkte/zusatzleistungen-bearbeitung.php';
     }, 110);
 
     // Vermittler Template
@@ -248,12 +234,25 @@ function itweb_admin_menu()
 	add_submenu_page('einstellungen', 'Seitenbetreiber', 'Seitenbetreiber', 'read', 'seitenbetreiber', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/einstellungen/seitenbetreiber.php';
     }, 110);
-	
+	add_submenu_page('einstellungen', 'Produktgruppen', 'Produktgruppen', 'read', 'produktgruppen', function () {
+        require_once plugin_dir_path(__FILE__) . '/templates/produkte/produktgruppen.php';
+    }, 110);
+	add_submenu_page('einstellungen', 'Saisons', 'Saisons', 'read', 'saisons', function () {
+        require_once plugin_dir_path(__FILE__) . '/templates/einstellungen/saisons.php';
+    }, 110);
+	add_submenu_page('einstellungen', 'Preisschienen', 'Preisschienen', 'read', 'prices', function () {
+        require_once plugin_dir_path(__FILE__) . '/templates/produkte/prices/index.php';
+    }, 110);
+	add_submenu_page('einstellungen', 'Rabatte', 'Rabatte', 'read', 'rabatte', function () {
+        require_once plugin_dir_path(__FILE__) . '/templates/produkte/discounts/index.php';
+    }, 110);
+	add_submenu_page('einstellungen', 'Zusatzleistungen', 'Zusatzleistungen', 'read', 'zusatzleistungen', function () {
+        require_once plugin_dir_path(__FILE__) . '/templates/produkte/zusatzleistungen-bearbeitung.php';
+    }, 110);
 	add_submenu_page('einstellungen', 'API', 'API', 'read', 'api', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/einstellungen/api.php';
     }, 110);
 	
-
 	// Entwickler Template
     add_menu_page('Entwicklerbereich', 'Entwicklerbereich', 'read', 'entwicklerbereich', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/dev/index.php';

@@ -8186,7 +8186,6 @@ function getUserPatterns(state) {
     return {
       name: `core/block/${userPattern.id}`,
       id: userPattern.id,
-      type: 'user',
       title: userPattern.title.raw,
       categories: userPattern.wp_pattern_category.map(catId => categories && categories.get(catId) ? categories.get(catId).slug : catId),
       content: userPattern.content.raw,
@@ -19238,9 +19237,7 @@ const ExperimentalBlockEditorProvider = with_registry_provider(props => {
 
   // Syncs the entity provider with changes in the block-editor store.
   useBlockSync(props);
-  return (0,external_wp_element_namespaceObject.createElement)(external_wp_components_namespaceObject.SlotFillProvider, {
-    passthrough: true
-  }, (0,external_wp_element_namespaceObject.createElement)(keyboard_shortcuts.Register, null), (0,external_wp_element_namespaceObject.createElement)(BlockRefsProvider, null, children));
+  return (0,external_wp_element_namespaceObject.createElement)(external_wp_components_namespaceObject.SlotFillProvider, null, (0,external_wp_element_namespaceObject.createElement)(keyboard_shortcuts.Register, null), (0,external_wp_element_namespaceObject.createElement)(BlockRefsProvider, null, children));
 });
 const BlockEditorProvider = props => {
   return (0,external_wp_element_namespaceObject.createElement)(ExperimentalBlockEditorProvider, {
@@ -23377,14 +23374,14 @@ function BlockPattern({
       }
     }
   }, (0,external_wp_element_namespaceObject.createElement)(WithToolTip, {
-    showTooltip: showTooltip && !pattern.type === 'user',
+    showTooltip: showTooltip && !pattern.id,
     title: pattern.title
   }, (0,external_wp_element_namespaceObject.createElement)(external_wp_components_namespaceObject.__unstableCompositeItem, {
     role: "option",
     as: "div",
     ...composite,
     className: classnames_default()('block-editor-block-patterns-list__item', {
-      'block-editor-block-patterns-list__list-item-synced': pattern.type === 'user' && !pattern.syncStatus
+      'block-editor-block-patterns-list__list-item-synced': pattern.id && !pattern.syncStatus
     }),
     onClick: () => {
       onClick(pattern, blocks);
@@ -23404,12 +23401,12 @@ function BlockPattern({
     viewportWidth: viewportWidth
   }), (0,external_wp_element_namespaceObject.createElement)(external_wp_components_namespaceObject.__experimentalHStack, {
     className: "block-editor-patterns__pattern-details"
-  }, pattern.type === 'user' && !pattern.syncStatus && (0,external_wp_element_namespaceObject.createElement)("div", {
+  }, pattern.id && !pattern.syncStatus && (0,external_wp_element_namespaceObject.createElement)("div", {
     className: "block-editor-patterns__pattern-icon-wrapper"
   }, (0,external_wp_element_namespaceObject.createElement)(build_module_icon, {
     className: "block-editor-patterns__pattern-icon",
     icon: library_symbol
-  })), (!showTooltip || pattern.type === 'user') && (0,external_wp_element_namespaceObject.createElement)("div", {
+  })), (!showTooltip || pattern.id) && (0,external_wp_element_namespaceObject.createElement)("div", {
     className: "block-editor-block-patterns-list__item-title"
   }, pattern.title)), !!pattern.description && (0,external_wp_element_namespaceObject.createElement)(external_wp_components_namespaceObject.VisuallyHidden, {
     id: descriptionId
@@ -24122,14 +24119,14 @@ function BlockPatternsSyncFilter({
   const shouldDisableNonUserSources = getShouldDisableNonUserSources(category);
   const patternSyncMenuOptions = (0,external_wp_element_namespaceObject.useMemo)(() => [{
     value: SYNC_TYPES.all,
-    label: (0,external_wp_i18n_namespaceObject._x)('All', 'Option that shows all patterns')
+    label: (0,external_wp_i18n_namespaceObject.__)('All')
   }, {
     value: SYNC_TYPES.full,
-    label: (0,external_wp_i18n_namespaceObject._x)('Synced', 'Option that shows all synchronized patterns'),
+    label: (0,external_wp_i18n_namespaceObject.__)('Synced'),
     disabled: shouldDisableSyncFilter
   }, {
     value: SYNC_TYPES.unsynced,
-    label: (0,external_wp_i18n_namespaceObject._x)('Not synced', 'Option that shows all patterns that are not synchronized'),
+    label: (0,external_wp_i18n_namespaceObject.__)('Not synced'),
     disabled: shouldDisableSyncFilter
   }], [shouldDisableSyncFilter]);
   const patternSourceMenuOptions = (0,external_wp_element_namespaceObject.useMemo)(() => [{
@@ -30891,7 +30888,6 @@ const MediaReplaceFlow = ({
 
 
 
-
 /**
  * Internal dependencies
  */
@@ -31004,7 +31000,6 @@ function BackgroundImagePanelItem(props) {
     title,
     url
   } = attributes.style?.background?.backgroundImage || {};
-  const replaceContainerRef = (0,external_wp_element_namespaceObject.useRef)();
   const {
     mediaUpload
   } = (0,external_wp_data_namespaceObject.useSelect)(select => {
@@ -31083,18 +31078,16 @@ function BackgroundImagePanelItem(props) {
       }
     };
   }, []);
-  const hasValue = hasBackgroundImageValue(props);
   return (0,external_wp_element_namespaceObject.createElement)(external_wp_components_namespaceObject.__experimentalToolsPanelItem, {
     className: "single-column",
-    hasValue: () => hasValue,
+    hasValue: () => hasBackgroundImageValue(props),
     label: (0,external_wp_i18n_namespaceObject.__)('Background image'),
     onDeselect: () => resetBackgroundImage(props),
     isShownByDefault: true,
     resetAllFilter: resetAllFilter,
     panelId: clientId
   }, (0,external_wp_element_namespaceObject.createElement)("div", {
-    className: "block-editor-hooks__background__inspector-media-replace-container",
-    ref: replaceContainerRef
+    className: "block-editor-hooks__background__inspector-media-replace-container"
   }, (0,external_wp_element_namespaceObject.createElement)(media_replace_flow, {
     mediaId: id,
     mediaURL: url,
@@ -31107,16 +31100,8 @@ function BackgroundImagePanelItem(props) {
       url: url
     }),
     variant: "secondary"
-  }, hasValue && (0,external_wp_element_namespaceObject.createElement)(external_wp_components_namespaceObject.MenuItem, {
-    onClick: () => {
-      const [toggleButton] = external_wp_dom_namespaceObject.focus.tabbable.find(replaceContainerRef.current);
-      // Focus the toggle button and close the dropdown menu.
-      // This ensures similar behaviour as to selecting an image, where the dropdown is
-      // closed and focus is redirected to the dropdown toggle button.
-      toggleButton?.focus();
-      toggleButton?.click();
-      resetBackgroundImage(props);
-    }
+  }, (0,external_wp_element_namespaceObject.createElement)(external_wp_components_namespaceObject.MenuItem, {
+    onClick: () => resetBackgroundImage(props)
   }, (0,external_wp_i18n_namespaceObject.__)('Reset '))), (0,external_wp_element_namespaceObject.createElement)(external_wp_components_namespaceObject.DropZone, {
     onFilesDrop: onFilesDrop,
     label: (0,external_wp_i18n_namespaceObject.__)('Drop to upload')
@@ -37481,10 +37466,11 @@ function useMultiOriginColorPresets(settings, {
   return (0,external_wp_element_namespaceObject.useMemo)(() => [...userPresets, ...themePresets, ...(disableDefault ? filters_panel_EMPTY_ARRAY : defaultPresets)], [disableDefault, userPresets, themePresets, defaultPresets]);
 }
 function useHasFiltersPanel(settings) {
-  return useHasDuotoneControl(settings);
+  const hasDuotone = useHasDuotoneControl(settings);
+  return hasDuotone;
 }
 function useHasDuotoneControl(settings) {
-  return settings.color.customDuotone || settings.color.defaultDuotone || settings.color.duotone.length > 0;
+  return settings.color.customDuotone || settings.color.defaultDuotone;
 }
 function FiltersToolsPanel({
   resetAllFilter,
@@ -37565,6 +37551,8 @@ function FiltersPanel({
   };
   const hasDuotone = () => !!value?.filter?.duotone;
   const resetDuotone = () => setDuotone(undefined);
+  const disableCustomColors = !settings?.color?.custom;
+  const disableCustomDuotone = !settings?.color?.customDuotone || colorPalette?.length === 0 && disableCustomColors;
   const resetAllFilter = (0,external_wp_element_namespaceObject.useCallback)(previousValue => {
     return {
       ...previousValue,
@@ -37613,11 +37601,9 @@ function FiltersPanel({
       paddingSize: "medium"
     }, (0,external_wp_element_namespaceObject.createElement)(external_wp_components_namespaceObject.__experimentalVStack, null, (0,external_wp_element_namespaceObject.createElement)("p", null, (0,external_wp_i18n_namespaceObject.__)('Create a two-tone color effect without losing your original image.')), (0,external_wp_element_namespaceObject.createElement)(external_wp_components_namespaceObject.DuotonePicker, {
       colorPalette: colorPalette,
-      duotonePalette: duotonePalette
-      // TODO: Re-enable both when custom colors are supported for block-level styles.
-      ,
-      disableCustomColors: true,
-      disableCustomDuotone: true,
+      duotonePalette: duotonePalette,
+      disableCustomColors: disableCustomColors,
+      disableCustomDuotone: disableCustomDuotone,
       value: duotone,
       onChange: setDuotone
     })))
@@ -40117,7 +40103,7 @@ const withBlockRenameControl = (0,external_wp_compose_namespaceObject.createHigh
     setAttributes,
     isSelected
   } = props;
-  const supportsBlockNaming = (0,external_wp_blocks_namespaceObject.hasBlockSupport)(name, '__experimentalMetadata', false);
+  const supportsBlockNaming = (0,external_wp_blocks_namespaceObject.hasBlockSupport)(name, 'renaming', true);
   return (0,external_wp_element_namespaceObject.createElement)(external_wp_element_namespaceObject.Fragment, null, isSelected && supportsBlockNaming && (0,external_wp_element_namespaceObject.createElement)(inspector_controls, {
     group: "advanced"
   }, (0,external_wp_element_namespaceObject.createElement)(external_wp_components_namespaceObject.TextControl, {

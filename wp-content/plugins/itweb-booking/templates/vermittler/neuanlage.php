@@ -29,11 +29,11 @@ if (isok($_POST, 'broker_company')) {
 					<div class="row m10">
 						<div class="col-2 col-sm-3">
 							<label for="">Firma</label>
-							<input type="text" name="broker_company" class="form-control">
+							<input type="text" name="broker_company" class="form-control" required>
 						</div>
 						<div class="col-2 col-sm-1">
 							<label for="">Kürzel</label>
-							<input type="text" name="broker_short" class="form-control">
+							<input type="text" name="broker_short" class="form-control" required>
 						</div>
 						<div class="col-12 col-sm-1">
 							<label for="">API für</label>
@@ -135,9 +135,7 @@ if (isok($_POST, 'broker_company')) {
 					</div><br>
 					<div class="row m10">
 						<div class="col-12">
-							<button class="btn btn-primary">
-								Speichern
-							</button>
+							<button class="btn btn-primary">Speichern</button>
 						</div>
 					</div>
 				</div>
