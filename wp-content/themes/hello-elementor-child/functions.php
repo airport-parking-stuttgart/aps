@@ -754,13 +754,15 @@ add_action('admin_head', 'custom_hide_jetpack_menu_css');
 
 function custom_admin_styles() {
     $settings = Database::getInstance()->getSettings();
+	$menu_color = $settings->menu_color != null ? $settings->menu_color : "#0080c0";
+	$sub_menu_color = $settings->submenu_color != null ? $settings->submenu_color : "#0d3960";
 	echo 
 	'<style>
         #adminmenuback, #adminmenu, #adminmenuwrap, #wpadminbar {
-            background-color: '.$settings->menu_color.';
+            background-color: '.$menu_color.';
         }
 		#adminmenu .wp-menu-arrow, #adminmenu li.current a.menu-top, #adminmenu .wp-submenu{
-			background: '.$settings->submenu_color.';
+			background: '.$sub_menu_color.';
 		}
     </style>';
 }

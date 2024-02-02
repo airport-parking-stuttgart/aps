@@ -6,7 +6,6 @@ if(isset($_POST) && $_POST != null){
 	//echo "<pre>"; print_r($_POST); echo "</pre>";
 }
 $settings = Database::getInstance()->getSettings();
-//echo "<pre>"; print_r($settings); echo "</pre>";
 ?>
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
 	<div class="page-title itweb_adminpage_head">
