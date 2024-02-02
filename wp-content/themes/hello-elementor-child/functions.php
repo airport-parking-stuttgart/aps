@@ -754,11 +754,7 @@ add_action('admin_head', 'custom_hide_jetpack_menu_css');
 
 function custom_admin_styles() {
     $settings = Database::getInstance()->getSettings();
-<<<<<<< HEAD
 	$menu_color = $settings->menu_color != null ? $settings->menu_color : "#0080c0";
-=======
-	$menu_color = $settings->menu_color != null ? $settings->menu_color : "#1e73be";
->>>>>>> origin/UpdateQA
 	$sub_menu_color = $settings->submenu_color != null ? $settings->submenu_color : "#0d3960";
 	echo 
 	'<style>
