@@ -260,6 +260,9 @@ class Controller extends Base_Controller {
 		$data->contents       = isset( $item->contents ) ? $this->prepare_json( $item->contents ) : array();
 		$data->banner_default = isset( $item->banner_default ) ? absint( $item->banner_default ) : 0;
 		$data->status         = isset( $item->status ) ? absint( $item->status ) : 0;
+		if (isset($data->settings['settings']['type']) && ($data->settings['settings']['type'] === "classic")) {
+			$data->settings['settings']['preferenceCenterType'] = "pushdown";
+		}
 		return $data;
 	}
 

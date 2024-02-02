@@ -1,17 +1,6 @@
 <?php
 
 /**
- * The file that defines the core plugin class
- *
- *
- * @link       https://sourabhagrawal.com/
- * @since      1.0.0
- *
- * @package    Disable_Wp_Notification
- * @subpackage Disable_Wp_Notification/includes
- */
-
-/**
  * The core plugin class.
  *
  * This is used to define internationalization, admin-specific hooks, and

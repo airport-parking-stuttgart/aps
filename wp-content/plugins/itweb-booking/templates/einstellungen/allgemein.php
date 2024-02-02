@@ -27,7 +27,7 @@ $settings = Database::getInstance()->getSettings();
 						</div>
 						<div class="col-sm-12 col-md-1">
 							<label for="">Menüfarbe</label><br>
-							<input type="color" name="menu_color" value="<?php echo $settings->menu_color != null ? $settings->menu_color : "#0080c0" ?>">
+							<input type="color" name="menu_color" value="<?php echo $settings->menu_color != null ? $settings->menu_color : "#1e73be" ?>">
 						</div>
 						<div class="col-sm-12 col-md-1">
 							<label for="">Untermenüfarbe</label><br>

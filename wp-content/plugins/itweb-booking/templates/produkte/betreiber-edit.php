@@ -24,7 +24,7 @@ $clientProducts = wp_list_pluck($clientProducts, 'product_id');
 					<div class="row">
 						<div class="col-sm-12 col-md-3">
 							<label for="">Betreiber</label>
-							<input type="text" name="client" class="form-control" value="<?php echo $client->client ?>">
+							<input type="text" name="client" class="form-control" value="<?php echo $client->client ?>" required>
 							<input type="hidden" name="update" value="update">
 						</div>
 						<div class="col-sm-12 col-md-3">
@@ -65,7 +65,7 @@ $clientProducts = wp_list_pluck($clientProducts, 'product_id');
                         </div>
 						<div class="col-sm-12 col-md-3">
                             <label for="">Kürzel</label>
-                            <input type="text" name="short" class="form-control" value="<?php echo $client->short ?>">
+                            <input type="text" name="short" class="form-control" value="<?php echo $client->short ?>" required>
                         </div>
 					</div>
 				</div>

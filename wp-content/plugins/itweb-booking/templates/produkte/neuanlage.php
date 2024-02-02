@@ -36,6 +36,7 @@ function change_for(e){
             <h3>Neuenlage</h3>
         </div>
         <div class="page-body">
+			<?php if(count($clients) > 0 || count($brokers) > 0 || count($transfers) > 0 || count($product_groups) > 0): ?>
             <form method="POST" action="/wp-content/plugins/itweb-booking/classes/Helper.php"
                   enctype="multipart/form-data">
                 <input type="hidden" name="task" value="save_product">
@@ -105,7 +106,7 @@ function change_for(e){
                                     <div class="row m50">
                                         <div class="col-sm-12 col-md-3">
 											<label for="">Immobilien Name</label><br>
-											<input type="text" name="parklot" size="35" placeholder="">
+											<input type="text" name="parklot" size="35" placeholder="" required>
 										</div>
 										<div class="col-sm-12 col-md-2">
 											<label for="">Produktgruppe</label><br>
@@ -124,11 +125,11 @@ function change_for(e){
 										</div>
 										<div class="col-sm-12 col-md-3">
 											<label for="">Adresse</label><br>
-											<input type="text" name="parklot_adress" size="45" placeholder="">
+											<input type="text" name="parklot_adress" size="45" placeholder="" required>
 										</div>
 										<div class="col-sm-12 col-md-3">
 											<label for="">Telefon-Nr.</label><br>
-											<input type="text" name="parklot_phone" placeholder="">
+											<input type="text" name="parklot_phone" placeholder="" required>
 										</div>
 									</div><br>
 									<div class="row m50">
@@ -151,26 +152,26 @@ function change_for(e){
                                         <div class="col-sm-12 col-md-1 ui-lotdata-date">
 											<label for="">Aktiv von</label><br>
 											<input type="text" id="proActivdateFrom" name="date_from" size="7" placeholder="Von" class="air-datepicker"
-                                                   data-language="de">
+                                                   data-language="de" required>
 										</div>
 										<div class="col-sm-12 col-md-1 ui-lotdata-date">
 											<label for="">Aktiv bis</label><br>
 											<input type="text" id="proActivdateTo" name="date_to" value="2023-12-30" size="7" placeholder="Bis" class="air-datepicker"
-                                                   data-language="de">
+                                                   data-language="de" required>
 										</div>
 										<div class="col-sm-12 col-md-1">
 											<label for="">Vorlaufzeit</label>
-											<input type="number" name="booking_lead_time" data-language="de" autocomplete="off">
+											<input type="number" name="booking_lead_time" data-language="de" autocomplete="off" value="0">
 										</div>
                                     </div><br>
 									<div class="row m50">
 										<div class="col-sm-12 col-md-1">
 											<label for="">Kontigent</label>
-											<input type="number" name="contigent">
+											<input type="number" name="contigent" required>
 										</div>
 										<div class="col-sm-12 col-md-1">
 											<label for="">Prefix</label>
-											<input type="text" name="parklot_prefix" placeholder="">
+											<input type="text" name="parklot_prefix" placeholder="" required>
 										</div>
 										<div class="col-sm-12 col-md-1">
 											<label for="">Farbcode</label><br>
@@ -178,7 +179,7 @@ function change_for(e){
 										</div>
 										<div class="col-sm-12 col-md-1">
 											<label for="">Kurzname</label><br>
-											<input type="text" name="parklot_short">
+											<input type="text" name="parklot_short" required>
 										</div>
 										<div class="col-sm-12 col-md-1">
 											<label for="">Entfernung</label><br>
@@ -186,15 +187,15 @@ function change_for(e){
 										</div>
 										<div class="col-sm-12 col-md-1">
 											<label for="">Preis/Extratag</label><br>
-											<input type="number" name="parklot_extraPrice_perDay">
+											<input type="number" name="parklot_extraPrice_perDay" value="0">
 										</div>
 										<div class="col-sm-12 col-md-1">
 											<label for="">Provision</label><br>
-											<input type="number" name="commision">
+											<input type="number" name="commision" value="0">
 										</div>
 										<div class="col-sm-12 col-md-2">
 											<label for="">Provision WS</label><br>
-											<input type="number" name="commision_ws">
+											<input type="number" name="commision_ws" value="0">
 										</div>
 								   </div>
 								</div>
@@ -327,9 +328,7 @@ function change_for(e){
 												</tr>
 											<?php endforeach; ?>
 											<?php if (count(Database::getInstance()->getAdditionalServices()) <= 0) : ?>
-												<td>
-													No results found!
-												</td>
+												<td>Keine Einträge vorhanden.</td>
 												<td></td>
 												<td></td>
 											<?php endif; ?>
@@ -353,6 +352,34 @@ function change_for(e){
                     </div>
                 </div>
             </form>
+			<?php else: ?>
+				<?php if(count($product_groups) == 0 || $product_groups == null): ?>
+					<div class="row">
+						<div class="col-sm-12 col-md-12">
+							<p>Produkt kann keiner Gruppe zugewiesen werden.</p>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-12 col-md-2">
+							<a href="<?php echo '/wp-admin/admin.php?page=produktgruppen' ?>" class="btn btn-secondary" >Produktgruppe anlegen</a>
+						</div>
+					</div>
+				<?php else: ?>
+					<div class="row">
+						<div class="col-sm-12 col-md-12">
+							<p>Produkt kann nicht zugewiesen werden.</p>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-12 col-md-2">
+							<a href="<?php echo '/wp-admin/admin.php?page=betreiber' ?>" class="btn btn-secondary" >Betreiber anlegen</a>
+						</div>
+						<div class="col-sm-12 col-md-2">
+							<a href="<?php echo '/wp-admin/admin.php?page=vermittler-neuanlage' ?>" class="btn btn-secondary" >Vermittler anlegen anlegen</a>
+						</div>
+					</div>
+				<?php endif; ?>
+			<?php endif; ?>
         </div>
     </div>
 </div>

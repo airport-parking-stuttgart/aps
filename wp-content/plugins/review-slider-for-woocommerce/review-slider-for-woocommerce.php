@@ -20,7 +20,7 @@
  * Plugin Name: 	  Review Slider for WooCommerce
  * Plugin URI:        https://wpreviewslider.com/
  * Description:       Easily display all your WooCommerce reviews at once in a cool summary review slider or grid on your homepage or any other page on your site.
- * Version:           1.4
+ * Version:           1.5
  * Author:            LJ Apps
  * Author URI:        https://wpreviewslider.com/
  * License:           GPL-2.0+
@@ -91,7 +91,7 @@ function srfw_do_this_daily() {
 
 		
 	require_once plugin_dir_path( __FILE__ ) . 'admin/class-review-slider-for-woocommerce-admin.php';
-	$plugin_admin = new Summary_Reviews_Admin( 'review-slider-for-woocommerce', '1.4' );
+	$plugin_admin = new Summary_Reviews_Admin( 'review-slider-for-woocommerce', '1.5' );
 	$plugin_admin->srfw_download_zillow_master();
 	
 }

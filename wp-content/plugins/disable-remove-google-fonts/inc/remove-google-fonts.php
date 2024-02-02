@@ -28,7 +28,6 @@ remove_action( 'wp_head', 'botiga_preconnect_google_fonts' );
  * Dequeue Google Fonts based on URL.
  */
 function drgf_dequeueu_fonts() {
-
 	// Remove fonts added by the Divi Extra theme
 	remove_action( 'wp_footer', 'et_builder_print_font' );
 
@@ -77,6 +76,7 @@ function drgf_dequeueu_fonts() {
 
 	remove_action( 'wp_head', 'hu_print_gfont_head_link', 2 );
 	remove_action('wp_head', 'appointment_load_google_font');
+	remove_action( 'wp_head', 'aca_pre_load_fonts' );
 }
 
 add_action( 'wp_enqueue_scripts', 'drgf_dequeueu_fonts', PHP_INT_MAX );

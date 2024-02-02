@@ -1,15 +1,4 @@
 <?php
-
-/**
- * Fired during plugin deactivation
- *
- * @link       https://sourabhagrawal.com/
- * @since      1.0.0
- *
- * @package    Disable_Wp_Notification
- * @subpackage Disable_Wp_Notification/includes
- */
-
 /**
  * Fired during plugin deactivation.
  *

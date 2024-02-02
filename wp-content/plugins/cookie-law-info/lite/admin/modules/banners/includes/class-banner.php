@@ -238,7 +238,7 @@ class Banner extends Store {
 	 */
 	public function get_type() {
 		$config = $this->get_settings();
-		return isset( $config['settings']['type'] ) ? $config['settings']['type'] : 'classic';
+		return isset( $config['settings']['type'] ) ? $config['settings']['type'] : 'box';
 	}
 
 	/**

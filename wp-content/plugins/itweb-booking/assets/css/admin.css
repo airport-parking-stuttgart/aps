@@ -95,7 +95,8 @@ select {
 .broker-item,
 .group-item,
 .child-group-item,
-.api-item {
+.api-item,
+.saison-item {
     margin: 10px 0;
 }
 
@@ -106,7 +107,8 @@ select {
 .service-item:last-child .plus-icon,
 .group-item:last-child .plus-icon,
 .child-group-item:last-child .plus-icon,
-.api-item:last-child .plus-icon {
+.api-item:last-child .plus-icon,
+.saison-item:last-child .plus-icon {
     display: inline-block;
 }
 

@@ -5,32 +5,35 @@
     background-size: 16px 16px;
 }
 
-.ip2location-modal{display:none;position:fixed;z-index:1;padding-top:100px;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:#000;background-color:rgba(0,0,0,0.4)}
-.ip2location-modal-content{background-color:#fefefe;margin:auto;padding:20px;border:1px solid #888;width:50%}
+.ip2location-modal{display:none;position:fixed;z-index:99999;padding-top:30px;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:#000;background-color:rgba(0,0,0,0.4);outline: 0;}
+.ip2location-modal-content{background-color:#fefefe;margin:auto;padding:20px;border:1px solid #888;width:70%;border-radius: 0.3rem;}
 .ip2location-close{color:#aaa;float:right;font-size:28px;font-weight:700}
 .ip2location-close:hover,.ip2location-close:focus{color:#000;text-decoration:none;cursor:pointer}
+.ip2location-sel-con{text-align:center;}
+.ip2location-sel-img-div {display: inline-block;margin: 4px 3px;max-width:180px;}
+.ip2location-sel-form .ip2location-sel-con input{display: none;}
+.ip2location-sel-form  label{position: relative;color: #fff;background-color: #aaa; font-size: 26px;text-align: center;height: 140px;line-height: 140px;cursor: pointer;border: 3px solid transparent;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: 700;border-radius:10px;}
+.ip2location-sel-form .ip2location-sel-con input + label{border: 1px solid #dcdada;background-color: #ffffff;}
+.ip2location-sel-form .ip2location-sel-con input:checked + label{border: 1.5px solid #61a4d9;background-color: #ffffff;}
+.ip2location-sel-form .ip2location-sel-con input:checked + label:after{content: "\2713";width: 15px;height: 15px;line-height: 15px;border-radius: 100%;background-color: #2fcc71;z-index: 999;position: absolute;top: 8px;right: 8px;font-size:10px;}
+.ip2location-sel-img {padding:20px;}
+.ip2location-steps td{padding:0 20px;}
+.ip2location-line{display:block;border-top:1px solid #8898ea;margin-top:-3.1em;margin-bottom:65px;width:190px;}
+.ip2location-api-line{display:block;border-top:1px solid #8898ea;margin-top:-3.1em;margin-bottom:65px;width:120px;}
+
+@media (min-width: 576px){
+.ip2location-modal{display:none;position:fixed;z-index:999;padding-top:100px;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:#000;background-color:rgba(0,0,0,0.4);outline: 0;}
+.ip2location-modal-content{max-width:420px;background-color:#fefefe;margin:auto;padding:20px;border:1px solid #888;width:50%;border-radius: 0.3rem;}
+.ip2location-steps td{padding:0 40px;}
+.ip2location-line{display:block;border-top:1px solid #8898ea;margin-top:-3.1em;margin-bottom:65px;width:250px;}
+.ip2location-api-line{display:block;border-top:1px solid #8898ea;margin-top:-3.1em;margin-bottom:65px;width:150px;}
+}
 
 .text-danger{color:#cc0000}
-.line{display:block;border-top:1px solid #6162AC;margin-top:-2.8em;margin-bottom:50px}
-
-.iplcb-panel {
-    border: 1px solid #888;
-    border-radius:4px;
-    padding:15px;
-    background-color:#fefefe
-}
-
-.dashicons.spin {
-    animation: dashicons-spin 1s infinite;
-    animation-timing-function: linear
-}
+.iplcb-panel {border: 1px solid #888;border-radius:4px;padding:15px;background-color:#fefefe}
+.dashicons.spin {animation: dashicons-spin 1s infinite; animation-timing-function: linear}
 
 @keyframes dashicons-spin {
-    0% {
-        transform: rotate(0deg)
-    }
-
-    100% {
-        transform: rotate(360deg)
-    }
+    0% {transform: rotate(0deg)}
+    100% {transform: rotate(360deg)}
 }

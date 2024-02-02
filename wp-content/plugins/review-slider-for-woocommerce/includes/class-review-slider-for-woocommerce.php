@@ -47,6 +47,7 @@ class Summary_Reviews {
 	 * @var      string    $plugintoken    The string used to uniquely identify this plugin.
 	 */
 	protected $plugintoken;
+	protected $_token;
 
 	/**
 	 * The current version of the plugin.
@@ -69,7 +70,7 @@ class Summary_Reviews {
 	public function __construct() {
 
 		$this->_token = 'review-slider-for-woocommerce';
-		$this->version = '1.4';
+		$this->version = '1.5';
 		//using this for development
 		//$this->version = time();
 

@@ -35,7 +35,7 @@ $clients = Database::getInstance()->getAllClients();
 							</div>
 							<div class="col-sm-12 col-md-3">
 								<label for="">Betreiber</label>
-								<input type="text" name="client" class="form-control">
+								<input type="text" name="client" class="form-control" required>
 								<input type="hidden" name="save" value="save">
 							</div>
 							<div class="col-sm-12 col-md-3">
@@ -73,7 +73,7 @@ $clients = Database::getInstance()->getAllClients();
 							</div>
 							<div class="col-sm-12 col-md-1">
 								<label for="">Kürzel</label>
-								<input type="text" name="short" class="form-control">
+								<input type="text" name="short" class="form-control" required>
 							</div>
 						</div>
 					</div>
