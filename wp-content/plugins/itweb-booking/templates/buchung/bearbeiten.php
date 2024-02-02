@@ -7,18 +7,32 @@ $companies = Database::getInstance()->getAllCompanies();
 
 $dateto = date('Y-m-d', strtotime(date('Y-m-d')));
 $datefrom = date('Y-m-d', strtotime($dateto . '-2 day'));
+
 if($_GET['anreiseVon'])
 	$anreiseVon = date('Y-m-d', strtotime($_GET['anreiseVon']));
 if($_GET['anreiseBis'])
 	$anreiseBis = date('Y-m-d', strtotime($_GET['anreiseBis']));
 
+
+if($_GET['abreiseVon']){
+	$abreiseVon = date('Y-m-d', strtotime($_GET['abreiseVon']));
+	$anreiseVon = $anreiseBis = $_GET['anreiseVon'] = $_GET['anreiseBis'] = null;
+}
+if($_GET['abreiseBis']){
+	$abreiseBis = date('Y-m-d', strtotime($_GET['abreiseBis']));
+	$anreiseVon = $anreiseBis = $_GET['anreiseVon'] = $_GET['anreiseBis'] = null;
+}
+	
+
 if(isok($_GET, 'token')){
-	$datefrom = $dateto = $anreise = $abreise = "";
+	$datefrom = $dateto = $anreiseVon = $anreiseBis = $abreiseVon = $abreiseBis = "";
 	$token = $_GET['token'];
 	unset($_GET['date_from']);
 	unset($_GET['date_to']);
 	unset($_GET['anreiseVon']);
 	unset($_GET['anreiseBis']);
+	unset($_GET['abreiseVon']);
+	unset($_GET['abreiseBis']);
 	unset($_GET['payment_method']);
 	unset($_GET['betreiber']);
 	$filter['datum_von'] = $filter['datum_bis'] = $filter['buchung_von'] = $filter['buchung_bis'] = "";
@@ -27,9 +41,11 @@ if(isok($_GET, 'token')){
 }
 
 if((isok($_GET, 'anreiseVon') && isok($_GET, 'anreiseBis')) || ($anreiseVon != "" && $anreiseBis != "")){
-	$token = $datefrom = $dateto = "";
+	$token = $datefrom = $dateto = $abreiseVon = $abreiseBis = "";
 	unset($_GET['date_from']);
 	unset($_GET['date_to']);
+	unset($_GET['abreiseVon']);
+	unset($_GET['abreiseBis']);
 	unset($_GET['token']);
 	$filter['token'] = $filter['buchung_von'] = $filter['buchung_bis'] = "";
 	$filter['datum_von'] = $anreiseVon;
@@ -48,14 +64,40 @@ if((isok($_GET, 'anreiseVon') && isok($_GET, 'anreiseBis')) || ($anreiseVon != "
 	$allorders = Database::getInstance()->get_bookinglistV2("wc-processing", $filter, "");
 }
 
+if((isok($_GET, 'abreiseVon') && isok($_GET, 'abreiseBis')) || ($abreiseVon != "" && $abreiseBis != "")){
+	$token = $datefrom = $dateto = $anreiseVon = $anreiseBis = "";
+	unset($_GET['date_from']);
+	unset($_GET['date_to']);
+	unset($_GET['token']);
+	unset($_GET['anreiseVon']);
+	unset($_GET['anreiseBis']);
+	$filter['token'] = $filter['buchung_von'] = $filter['buchung_bis'] = "";
+	$filter['datum_von_ab'] = $abreiseVon;
+	$filter['datum_bis_ab'] = $abreiseBis;	
+	if((isok($_GET, 'product'))){
+		unset($_GET['betreiber']);
+		$filter['product'] = $_GET['product'];
+	}
+	elseif((isok($_GET, 'betreiber'))){
+		$filter['betreiber'] = $_GET['betreiber'];
+	}
+	if((isok($_GET, 'payment_method'))){
+		$filter['payment_method'] = $_GET['payment_method'];
+	}
+	$filter['orderBy'] = "Abreisedatum";
+	$allorders = Database::getInstance()->get_bookinglistV2("wc-processing", $filter, "");
+}
+
 if((isok($_GET, 'date_from') && isok($_GET, 'date_to')) || ($datefrom != "" && $dateto != "")){
 	if($_GET['date_from'])
 		$datefrom = date('Y-m-d', strtotime($_GET['date_from']));
 	if($_GET['date_to'])
 		$dateto = date('Y-m-d', strtotime($_GET['date_to']));
-	$token = $anreise = $abreise = "";
+	$token = $anreiseVon = $abreiseBis = $abreiseVon = $abreiseBis = "";
 	unset($_GET['anreiseVon']);
 	unset($_GET['anreiseBis']);
+	unset($_GET['abreiseVon']);
+	unset($_GET['abreiseBis']);
 	unset($_GET['token']);
 	$filter['datum_von'] = $filter['datum_bis'] = $filter['token'] = "";
 	$filter['buchung_von'] = $datefrom;
@@ -79,7 +121,7 @@ if((isok($_GET, 'date_from') && isok($_GET, 'date_to')) || ($datefrom != "" && $
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
     <div class="page <?php echo $_GET['page'] ?>">
 		<div class="page-title itweb_adminpage_head">
-			<h3>Buchung Bearbeiten TEST</h3>
+			<h3>Buchung Bearbeiten</h3>
 		</div>
 		<br>
 		<div class="page-body">
@@ -102,6 +144,12 @@ if((isok($_GET, 'date_from') && isok($_GET, 'date_to')) || ($datefrom != "" && $
 							</div>
 							<div class="col-sm-12 col-md-1 col-lg-1 ui-lotdata-date">
 								<input type="text" id="arrivaldateTo" name="anreiseBis" placeholder="Anreise bis" class="form-item form-control single-datepicker" value="<?php echo $anreiseBis != "" ? date('d.m.Y', strtotime($anreiseBis)) : ''; ?>">
+							</div>
+							<div class="col-sm-12 col-md-1 col-lg-1 ui-lotdata-date">
+								<input type="text" id="departuredateFrom" name="abreiseVon" placeholder="Abreise von" class="form-item form-control single-datepicker" value="<?php echo $abreiseVon != "" ? date('d.m.Y', strtotime($abreiseVon)) : ''; ?>">
+							</div>
+							<div class="col-sm-12 col-md-1 col-lg-1 ui-lotdata-date">
+								<input type="text" id="departuredateTo" name="abreiseBis" placeholder="Abreise bis" class="form-item form-control single-datepicker" value="<?php echo $abreiseBis != "" ? date('d.m.Y', strtotime($abreiseBis)) : ''; ?>">
 							</div>
 						</div>
 						<div class="row my-2">
@@ -176,6 +224,8 @@ if((isok($_GET, 'date_from') && isok($_GET, 'date_to')) || ($datefrom != "" && $
 					<th>Parkdauer</th>
 					<th>Personen</th>
 					<th>E-Mail</th>
+					<th>Telefon</th>
+					<th>Kennzeichen</th>
 					<th>Zahlungsart</th>
 					<th>Gebühren</th>
 					<th>Service</th>				
@@ -226,6 +276,12 @@ if((isok($_GET, 'date_from') && isok($_GET, 'date_to')) || ($datefrom != "" && $
 						</td>					
 						<td>
 							<?php echo $booking->Email ? $booking->Email : "-" ?>
+						</td>
+						<td>
+							<?php echo $booking->Telefon ? $booking->Telefon : "-" ?>
+						</td>
+						<td>
+							<?php echo $booking->Kennzeichen ? $booking->Kennzeichen : "-" ?>
 						</td>
 						<td>
 							<?php echo $booking->Bezahlmethode ? $booking->Bezahlmethode : "-" ?>

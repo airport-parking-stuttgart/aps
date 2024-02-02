@@ -12,7 +12,7 @@ if($_POST){
 		
 	}
 	else{
-		$data['internalADPrefix'] = $_POST['product_id'];
+		$data['product'] = $_POST['product_id'];
 		$data['arrivalDate'] = $_POST['startDateOnly'];
 		$data['departureDate'] = $_POST['endDateOnly'];
 		$data['arrivalTime'] = $_POST['order_time_from'];
@@ -29,11 +29,9 @@ if($_POST){
 		$data['paymentOptions'] = $_POST['payment_method_title'];
 		$data['totalParkingCosts'] = $_POST['price'];
 		$data['bookingState'] = 'N';
-		$data['creationDate'] = date('Y-m-d');
-		echo "<pre>";
-		print_r($data);
-		echo "</pre>";
-		Database::getInstance()->importOrder($data);
+		$data['creationDate'] = $_POST['bookingDate'];
+		echo "<pre>"; print_r($data);echo "</pre>";
+		Database::getInstance()->devAddBooking($data);
 		echo "<br>OK";
 	}
 		
@@ -46,6 +44,10 @@ if($_POST){
 		<div class="col-sm-12 col-md-1">
 			<label for="">Product_ID (Bei APG die APG-ID)</label>
 			<input type="text" name="product_id" class="form-control">
+		</div>
+		<div class="col-sm-12 col-md-1">
+			<label for="">Buchungsdatum</label>
+			<input type="text" name="bookingDate" class="form-control">
 		</div>
 		<div class="col-sm-12 col-md-1">
 			<label for="">Datum von</label>
