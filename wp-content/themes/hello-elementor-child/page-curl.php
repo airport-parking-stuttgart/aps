@@ -28,6 +28,30 @@ $order = new WC_Order($order_id->post_id);
         }
 }
 
+if($_GET["request"] == 'apm' && $_GET['pw'] == 'apg_req54894136' && $_GET['set_processing'] == 1){
+	$order_id = $wpdb->get_row("SELECT post_id FROM {$wpdb->prefix}postmeta WHERE meta_key = 'token' and meta_value = '" . $_POST['token'] . "'");
+	$order = new WC_Order($order_id->post_id);
+        if (!empty($order)) {
+            $order->update_status( 'processing' );
+			Orders::updateOrder([
+					'order_status' => 'wc-processing'
+				], ['order_id' => $order_id->post_id]);
+				
+			$order_items = $order->get_items();
+			foreach ( $order_items as $key => $value ) {
+				$order_item_id = $key;
+				$product_value = $value->get_data();
+				$product_id    = $product_value['product_id'];
+			}
+			$product = wc_get_product( $product_id );
+			$price = $_POST['price'];
+			$order_items[ $order_item_id ]->set_total( $price );
+			$order->calculate_taxes();
+			$order->calculate_totals();
+			$order->save();
+        }
+}
+
 if($_GET["request"] == 'apm' && $_GET['pw'] == 'apg_req54894136' && $_GET['update'] == 1){
         $db = Database::getInstance();
 	$db->updateOrderFomAPG($_POST);

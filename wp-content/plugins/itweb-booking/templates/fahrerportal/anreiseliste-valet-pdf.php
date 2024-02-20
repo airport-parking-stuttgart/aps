@@ -103,7 +103,7 @@ foreach ($result as $r) {
     $html .= "<td style=' font-size: 12px; border: 1px solid black; padding:3px; white-space: nowrap;'>" . ++$ord . "</td>";
     $html .= "<td style=' font-size: 12px; border: 1px solid black; padding:3px; white-space: nowrap; background-color:" . $color . "'>" . $r->Code . "</td>";
     $html .= "<td style=' font-size: 12px; border: 1px solid black; padding:3px; white-space: nowrap;'>" . $r->Token . "</td>";
-    $html .= "<td style=' font-size: 12px; border: 1px solid black; padding:3px; white-space: nowrap;'>" . $customor . "</td>";
+    $html .= "<td style=' font-size: 12px; border: 1px solid black; padding:3px; white-space: nowrap;'>" . $customor . "<br>" . $r->Telefon . "</td>";
     $html .= "<td style=' font-size: 12px; border: 1px solid black; padding:3px; white-space: nowrap;'>" . date("d.m.Y",  strtotime($r->Anreisedatum)) . "</td>";
     $html .= "<td style=' font-size: 12px; border: 1px solid black; padding:3px; white-space: nowrap;'>" . $anreisezeit . "</td>";
     $html .= "<td style=' font-size: 12px; border: 1px solid black; padding:3px; white-space: nowrap;'>" . $parkplatz . "</td>";

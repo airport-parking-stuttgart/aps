@@ -5,7 +5,7 @@ $current_user = wp_get_current_user();
 $mitarbeiter = $db->getActivUser_einsatzplan();
 
 $wochentage = array("So.", "Mo.", "Di.", "Mi.", "Do.", "Fr.", "Sa.");
-$months = array('1' => 'Januar', '2' => 'Fabruar', '3' => 'März', '4' => 'April', '5' => 'Mai', '6' => 'Juni',
+$months = array('1' => 'Januar', '2' => 'Februar', '3' => 'März', '4' => 'April', '5' => 'Mai', '6' => 'Juni',
 				'7' => 'Juli', '8' => 'August', '9' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Dezember');
 if (isset($_GET['month']) && $_GET['month'] < 10)
     $zero = '0';

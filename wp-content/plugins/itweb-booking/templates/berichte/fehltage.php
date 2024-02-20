@@ -3,8 +3,9 @@ $db = Database::getInstance();
 $mitarbeiter = $db->getActivUser_einsatzplan();
 $grund_array = array('U' => 'Urlaub', 'SU' => 'Sonderurlaub', 'F' => 'Freistellung', 'BF' => 'Bezahlte Freistellung', 'K' => 'Krank 1', 'KK' => 'Krank 2', 'UF' => 'Überstundenfrei',
 				'BFS' => 'Berufsschule', 'FB' => 'Fortbildung', 'GR' => 'Geschäftsreise', 'X' => 'Sperren', 'DEL' => 'Löschen');
-$months = array('1' => 'Januar', '2' => 'Fabruar', '3' => 'März', '4' => 'April', '5' => 'Mai', '6' => 'Juni',
+$months = array('1' => 'Januar', '2' => 'Februar', '3' => 'März', '4' => 'April', '5' => 'Mai', '6' => 'Juni',
 			'7' => 'Juli', '8' => 'August', '9' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Dezember');
+$wochentage = array("So.", "Mo.", "Di.", "Mi.", "Do.", "Fr.", "Sa.");
 if (isset($_GET["month"]))
 	$c_month = $_GET["month"];
 else
@@ -132,6 +133,13 @@ thead th {
 .table_div_filter{
 	width: 33%;
 }
+
+tr:nth-child(even) {
+	background-color: #f2f2f2;
+}
+.bottom_line{
+	border-bottom: 4px solid black;
+}
 </style>
 
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
@@ -243,8 +251,9 @@ thead th {
 								<?php for($i = 1; $i <= $daysInMonth; $i++): ?>
 								<?php $day = $i < 10 ? "0" . $i : $i; ?>
 								<?php $date = $c_year . "-" . $c_month . "-" . $day; ?>
-									<tr>										
-										<td><?php echo $day . "." . $c_month . "." . $c_year; ?></th>
+								<?php $wochentag = date('Y-m-d', strtotime($date)); ?>	
+									<tr class="<?php echo $wochentage[date("w", strtotime($wochentag))] == "So." ? "bottom_line" : "" ?>">										
+										<td><?php echo $wochentage[date("w", strtotime($wochentag))] . " " .  $day . "." . $c_month . "." . $c_year; ?></th>
 										<?php foreach($grund_array as $key => $val): ?>						
 											<?php if($key == 'X' || $key == 'DEL') continue; ?>
 											<?php if(isset($_GET['grund']) && $_GET['grund'] != $key) continue; ?>

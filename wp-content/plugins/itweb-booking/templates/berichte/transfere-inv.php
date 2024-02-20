@@ -64,7 +64,11 @@ if(isset($_GET['transfere'])){
 	}
 }
 ?>
-
+<style>
+tr:nth-child(even) {
+	background-color: #f2f2f2 !important;
+}
+</style>
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
 	<div class="page-title itweb_adminpage_head">
 		<h3>Rechnungen</h3>
@@ -119,7 +123,7 @@ if(isset($_GET['transfere'])){
 								<th>Rücktransfer</th>
 								<th>Hin- und Rücktransfer</th>
 								<th>Rechnungsbetrag</th>
-								<th>Ansehen</th>
+								<th>Aktion</th>
 							</tr>
 							</thead>
 							<tbody>
@@ -188,7 +192,7 @@ if(isset($_GET['transfere'])){
 									<td><?php echo $preis_zurück ?></td>
 									<td><?php echo $preis_beide ?></td>
 									<td><?php echo $gesamtbetrag > 0 ? $gesamtbetrag : "0" ?></td>
-									<td><a class="" href="<?php echo basename($_SERVER['REQUEST_URI'])?>&pdf=1&tr=<?php echo $user_id ?>&month=<?php echo $i . '&inv-year=' . $year ?>" target="_blank">Anzeigen</a></td>
+									<td><a class="btn btn-sm btn-secondary" href="<?php echo basename($_SERVER['REQUEST_URI'])?>&pdf=1&tr=<?php echo $user_id ?>&month=<?php echo $i . '&inv-year=' . $year ?>" target="_blank">Anzeigen</a></td>
 								</tr>
 							<?php endfor; ?>
 							</tbody>

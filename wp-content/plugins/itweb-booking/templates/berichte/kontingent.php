@@ -9,8 +9,8 @@ if (!empty($_POST)) {
         }
 
         if (str_contains($key, 'basic')) {
-            [$basic_p, $basic_val] = explode("_", $key, 3); // Use list() for destructuring
-            Database::getInstance()->updateBasicContingent($basic_p, $basic_val);
+            $parts = explode("_", $key);
+			Database::getInstance()->updateBasicContingent($parts[1], $val);
         } else {
             [$sql_date, $sql_p_id] = explode("_", $key, 3); // Use list() for destructuring
             Database::getInstance()->saveContingent($sql_date, $sql_p_id, $val);

@@ -52,9 +52,10 @@ if (isset($_GET["selected"])) {
     $salesFor = "Alle Umsätze";
 }
 
-$months = array('1' => 'Januar', '2' => 'Fabruar', '3' => 'März', '4' => 'April', '5' => 'Mai', '6' => 'Juni',
+$months = array('1' => 'Januar', '2' => 'Februar', '3' => 'März', '4' => 'April', '5' => 'Mai', '6' => 'Juni',
     '7' => 'Juli', '8' => 'August', '9' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Dezember');
 $years = array('2021' => '2021', '2022' => '2022', '2023' => '2023', '2024' => '2024', '2025' => '2025');
+$wochentage = array("So.", "Mo.", "Di.", "Mi.", "Do.", "Fr.", "Sa.");
 
 if (isset($_GET['month']) && $_GET['month'] < 10)
     $zero = '0';
@@ -78,7 +79,14 @@ $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $c_month, $c_year);
 //echo "<pre>"; print_r($salesMonthArrival); echo "</pre>";
 
 ?>
-
+<style>
+tr:nth-child(even) {
+	background-color: #f2f2f2;
+}
+.bottom_line{
+	border-bottom: 4px solid black;
+}
+</style>
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
     <div class="page-title itweb_adminpage_head">
         <h3>Tägliche Buchungen</h3>
@@ -183,16 +191,17 @@ $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $c_month, $c_year);
 					<tbody>
 					<?php $nr = 1; while ($daysInMonth >= $d): ?>
 						<?php foreach ($salesMonth as $operator) : ?>
+							<?php $wochentag = date('Y-m-d', strtotime($operator->Datum)); ?>
 							<?php if ($d == $operator->Tag): ?>
 							<?php 
 							$sum_buchungen += $operator->Buchungen; 
 							$sum_brutto += ($operator->Brutto_k + $operator->Brutto_b);
 							$sum_netto += ($operator->Netto_k + $operator->Netto_b);
-							$sum_tage += $operator->Tage;
+							$sum_tage += $operator->Tage;							
 							?>
-								<tr>
+								<tr class="<?php echo $wochentage[date("w", strtotime($wochentag))] == "So." ? "bottom_line" : "" ?>">
 									<td><?php echo $nr < 10 ? "0".$nr : $nr ?></td>
-									<td><?php echo date('d.m.', strtotime($operator->Datum)) ?></td>
+									<td><?php echo $wochentage[date("w", strtotime($wochentag))] . " " . date('d.m.', strtotime($operator->Datum)) ?></td>
 									<td><?php echo $operator->Buchungen ?></td>
 									<td><?php echo number_format(($operator->Brutto_k + $operator->Brutto_b) / $operator->Buchungen, 2, ",", ".") ?></td>
 									<td><?php echo number_format(($operator->Netto_k + $operator->Netto_b) / $operator->Buchungen, 2, ",", ".") ?></td>
@@ -204,12 +213,17 @@ $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $c_month, $c_year);
 							<?php endif; ?>
 						<?php endforeach; ?>
 						<?php if ($inday == 0): ?>
-							<tr>
+							<?php
+							$d1 = $d < 10 ? '0' . $d : $d;
+							$c_month1 = $c_month < 10 ? '0' . $c_month : $c_month;
+							?>
+							<tr class="<?php echo $wochentage[date("w", strtotime($c_year."-".$c_month1."-".$d1))] == "So." ? "bottom_line" : "" ?>">
 								<td><?php echo $nr < 10 ? "0".$nr : $nr ?></td>
-								<td><?php 
-									echo $d < 10 ? '0' . $d : $d;
+								<td><?php									
+									echo $wochentage[date("w", strtotime($c_year."-".$c_month1."-".$d1))] . " ";
+									echo $d1;
 									echo ".";
-									echo $c_month < 10 ? '0' . $c_month : $c_month;
+									echo $c_month1;
 									//echo ".";
 									//echo $c_year;                                                                                  
 									?></td>										
@@ -221,7 +235,7 @@ $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $c_month, $c_year);
 						<?php endif;
 						$d++; ?>
 					<?php $nr++; endwhile; ?>
-						<tr>
+						<tr style="background: #aed8fd">
 							<td><strong>Summe</strong></td>
 							<td>&nbsp;</td>
 							<td><strong><?php echo $sum_buchungen ?></strong></td>
@@ -255,6 +269,7 @@ $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $c_month, $c_year);
 					<tbody>
 					<?php $nr = 1; while ($daysInMonth >= $t): ?>
 						<?php foreach ($salesMonthArrival as $operator) : ?>
+							<?php $wochentag = date('Y-m-d', strtotime($operator->Datum)); ?>
 							<?php if ($t == $operator->Tag): ?>
 							<?php 
 							$sum_buchungen += $operator->Buchungen; 
@@ -262,9 +277,9 @@ $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $c_month, $c_year);
 							$sum_netto += ($operator->Netto_k + $operator->Netto_b);
 							$sum_tage += $operator->Tage;
 							?>
-								<tr>
+								<tr class="<?php echo $wochentage[date("w", strtotime($wochentag))] == "So." ? "bottom_line" : "" ?>">
 									<td><?php echo $nr < 10 ? "0".$nr : $nr ?></td>
-									<td><?php echo date('d.m.', strtotime($operator->Datum)) ?></td>
+									<td><?php echo $wochentage[date("w", strtotime($wochentag))] . " " . date('d.m.', strtotime($operator->Datum)) ?></td>
 									<td><?php echo $operator->Buchungen ?></td>
 									<td><?php echo number_format(($operator->Brutto_k + $operator->Brutto_b) / $operator->Buchungen, 2, ",", ".") ?></td>
 									<td><?php echo number_format(($operator->Netto_k + $operator->Netto_b) / $operator->Buchungen, 2, ",", ".") ?></td>
@@ -276,12 +291,17 @@ $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $c_month, $c_year);
 							<?php endif; ?>
 						<?php endforeach; ?>
 						<?php if ($inday == 0): ?>
-							<tr>
+							<?php
+							$t1 = $t < 10 ? '0' . $t : $t;
+							$c_month1 = $c_month < 10 ? '0' . $c_month : $c_month;
+							?>
+							<tr class="<?php echo $wochentage[date("w", strtotime($c_year."-".$c_month1."-".$t1))] == "So." ? "bottom_line" : "" ?>">
 								<td><?php echo $nr < 10 ? "0".$nr : $nr ?></td>
-								<td><?php 
-									echo $t < 10 ? '0' . $t : $t;
+								<td><?php									
+									echo $wochentage[date("w", strtotime($c_year."-".$c_month1."-".$t1))] . " ";
+									echo $t1;
 									echo ".";
-									echo $c_month < 10 ? '0' . $c_month : $c_month;
+									echo $c_month1;
 									//echo ".";
 									//echo $c_year;                                                                                  
 									?></td>										
@@ -293,7 +313,7 @@ $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $c_month, $c_year);
 						<?php endif;
 						$t++; ?>
 					<?php $nr++; endwhile; ?>
-						<tr>
+						<tr style="background: #aed8fd">
 							<td><strong>Summe</strong></td>
 							<td>&nbsp;</td>
 							<td><strong><?php echo $sum_buchungen ?></strong></td>

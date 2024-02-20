@@ -205,6 +205,9 @@ function itweb_admin_menu()
     add_menu_page('Statistiken', 'Statistiken', 'read', 'statistics', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/statistics/index.php';
     });
+	add_submenu_page('statistics', 'Buchungen', 'Buchungen', 'read', 'bookings', function () {
+        require_once plugin_dir_path(__FILE__) . '/templates/statistics/buchungen.php';
+    }, 110);
 	add_submenu_page('statistics', 'Parkdauer', 'Parkdauer', 'read', 'parkdauer', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/statistics/parkdauer.php';
     }, 110);
@@ -216,6 +219,9 @@ function itweb_admin_menu()
     }, 110);
 	add_submenu_page('statistics', 'Jahresüberblick', 'Jahresüberblick', 'read', 'statistik-monatumsatz', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/statistics/month-umsatz.php';
+    }, 110);
+	add_submenu_page('statistics', 'Jahresvergleich', 'Jahresvergleich', 'read', 'statistik-jahresvergleich', function () {
+        require_once plugin_dir_path(__FILE__) . '/templates/statistics/jahresvergleich.php';
     }, 110);
 	add_submenu_page('statistics', 'Kontingent', 'Kontingent', 'read', 'statistik-kontingent', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/statistics/kontingent.php';
@@ -237,9 +243,6 @@ function itweb_admin_menu()
 	add_submenu_page('einstellungen', 'Produktgruppen', 'Produktgruppen', 'read', 'produktgruppen', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/produkte/produktgruppen.php';
     }, 110);
-	add_submenu_page('einstellungen', 'Saisons', 'Saisons', 'read', 'saisons', function () {
-        require_once plugin_dir_path(__FILE__) . '/templates/einstellungen/saisons.php';
-    }, 110);
 	add_submenu_page('einstellungen', 'Preisschienen', 'Preisschienen', 'read', 'prices', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/produkte/prices/index.php';
     }, 110);
@@ -248,6 +251,9 @@ function itweb_admin_menu()
     }, 110);
 	add_submenu_page('einstellungen', 'Zusatzleistungen', 'Zusatzleistungen', 'read', 'zusatzleistungen', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/produkte/zusatzleistungen-bearbeitung.php';
+    }, 110);
+	add_submenu_page('einstellungen', 'Saisons', 'Saisons', 'read', 'saisons', function () {
+        require_once plugin_dir_path(__FILE__) . '/templates/einstellungen/saisons.php';
     }, 110);
 	add_submenu_page('einstellungen', 'API', 'API', 'read', 'api', function () {
         require_once plugin_dir_path(__FILE__) . '/templates/einstellungen/api.php';

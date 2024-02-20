@@ -25,27 +25,38 @@ if ( ! wp_doing_ajax() ) {
 	<?php if ( WC()->cart->needs_payment() ) : ?>
 		<ul class="wc_payment_methods payment_methods methods">
 			<?php
-			if ( ! empty( $available_gateways ) ) {
-				
-				$discount_id = $_SESSION['parklots'][$_SESSION['product_id']]['discount_id'];
-				$discount = Database::getInstance()->getDiscountsById($discount_id);
-				//echo "<pre>"; print_r($discount); echo "</pre>";
-				foreach ( $available_gateways as $gateway ) {
+			if(array_values($_SESSION['parklots'])[0]['discount'] == "true"){
+				$productSession = array_values($_SESSION['parklots'])[0];
+			}
+			else{
+				$productSession = array_values($_SESSION['parklots'])[1];
+			}
+			if($productSession["datefrom"] != null && $productSession["dateto"] != null){
+				if ( ! empty( $available_gateways ) ) {
 					
-					//echo "<pre>"; print_r($_SESSION); echo "</pre>";
-					
-					if($_SESSION['product_id'] == null)
-						break;
-					
-					if($gateway->id == 'cod' && (($_SESSION['parklots'][$_SESSION['product_id']]['discount'] == "true" || $_SESSION['discount'] == "true")) && $discount->methode == 'on'){						
-						continue;
-					}						
-					else{
-						wc_get_template( 'checkout/payment-method.php', array( 'gateway' => $gateway ) );
-					}						
+					$discount_id = $_SESSION['parklots'][$_SESSION['product_id']]['discount_id'];
+					$discount = Database::getInstance()->getDiscountsById($discount_id);
+					//echo "<pre>"; print_r($discount); echo "</pre>";
+					foreach ( $available_gateways as $gateway ) {
+						
+						//echo "<pre>"; print_r($_SESSION); echo "</pre>";
+						
+						if($_SESSION['product_id'] == null)
+							break;
+						
+						if($gateway->id == 'cod' && (($_SESSION['parklots'][$_SESSION['product_id']]['discount'] == "true" || $_SESSION['discount'] == "true")) && $discount->methode == 'on'){						
+							continue;
+						}						
+						else{
+							wc_get_template( 'checkout/payment-method.php', array( 'gateway' => $gateway ) );
+						}						
+					}
+				} else {
+					echo '<li class="woocommerce-notice woocommerce-notice--info woocommerce-info">' . apply_filters( 'woocommerce_no_available_payment_methods_message', WC()->customer->get_billing_country() ? esc_html__( 'Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ) : esc_html__( 'Please fill in your details above to see available payment methods.', 'woocommerce' ) ) . '</li>'; // @codingStandardsIgnoreLine
 				}
-			} else {
-				echo '<li class="woocommerce-notice woocommerce-notice--info woocommerce-info">' . apply_filters( 'woocommerce_no_available_payment_methods_message', WC()->customer->get_billing_country() ? esc_html__( 'Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ) : esc_html__( 'Please fill in your details above to see available payment methods.', 'woocommerce' ) ) . '</li>'; // @codingStandardsIgnoreLine
+			}
+			else{
+				echo '<script type="text/javascript">window.location.href = "https://'.$_SERVER['HTTP_HOST'].'";</script>';
 			}
 			?>
 		</ul>

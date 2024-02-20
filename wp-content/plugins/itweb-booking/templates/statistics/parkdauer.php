@@ -39,7 +39,7 @@ if(empty($_GET['site']) || $_GET['site'] == 1){
 }
 
 if($_GET['site'] == 2){
-	$months = array('1' => 'Januar', '2' => 'Fabruar', '3' => 'März', '4' => 'April', '5' => 'Mai', '6' => 'Juni',
+	$months = array('1' => 'Januar', '2' => 'Februar', '3' => 'März', '4' => 'April', '5' => 'Mai', '6' => 'Juni',
 				'7' => 'Juli', '8' => 'August', '9' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Dezember');
 	if (isset($_GET["month"]))
 		$c_month = $_GET["month"];
