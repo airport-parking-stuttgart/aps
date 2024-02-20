@@ -1,9 +1,11 @@
 <?php
+global $wpdb;
 $id = $_GET['edit'];
 $db = Database::getInstance();
 $product = wc_get_product($id);
 $orderCancellations = $db->getOrderCancellationByProductId($id);
 $parklot = $db->getParklotByProductId($id);
+$group_id = $parklot->group_id;
 $additionalServices = $db->getAdditionalServices();
 $productRestrictions = $db->getRestrictionsByProductId($id);
 $productDiscounts = $db->getDiscountsByProductId($id);
@@ -28,7 +30,7 @@ if($parklot->is_for == "hotel"){
 	}
 }
 
-
+//echo "<pre>"; print_r($prices); echo "</pre>";
 ?>
 
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
@@ -56,26 +58,26 @@ if($parklot->is_for == "hotel"){
             </div>
             <div class="tabs">
                 <div class="row my-4 ui-product-tabs">
-                    <div class="col-2 ui-product-sep">
+                    <div class="col-1 ui-product-sep">
                         <a href="javascript:void(0)" class="tab-open ui-product-tabs-text" data-target="#tab1">Immobilie</a>
                     </div>
 					<?php if($parklot->is_for != "hotel"): ?>
-						<div class="col-2 ui-product-sep">
+						<div class="col-1 ui-product-sep">
 							<a href="javascript:void(0)" class="tab-open ui-product-tabs-text" data-target="#tab2">Beschreibung</a>
 						</div>
 						<div class="col-2 ui-product-sep">
 							<a href="javascript:void(0)" class="tab-open ui-product-tabs-text" data-target="#tab3">Buchungsbestätigung</a>
 						</div>
-						<div class="col-2 ui-product-sep">
+						<div class="col-1 ui-product-sep">
 							<a href="javascript:void(0)" class="tab-open ui-product-tabs-text" data-target="#tab4">Zusatzleistung</a>
 						</div>
 					<?php endif; ?>
 					<?php if($parklot->is_for != "hotel"): ?>
-                    <div class="col-2 ui-product-sep">
+                    <div class="col-1 ui-product-sep">
                         <a href="javascript:void(0)" class="tab-open ui-product-tabs-text" data-target="#tab5">Kalender</a>
                     </div>
 					<?php else: ?>
-					<div class="col-2 ui-product-sep">
+					<div class="col-1 ui-product-sep">
                         <a href="javascript:void(0)" class="tab-open ui-product-tabs-text" data-target="#tab5">Preisliste</a>
                     </div>
 					<?php endif; ?>
@@ -406,12 +408,8 @@ if($parklot->is_for == "hotel"){
 												<div class="col-sm-12 col-md-2">
 													<label for="">Gebühr Fix / Protzent</label>
 													<select name="cancellation_type[]" class="w100">
-														<option value="fix" <?php echo $cancellation->type == 'fix' ? 'selected' : '' ?>>
-															Fix
-														</option>
-														<option value="percent" <?php echo $cancellation->type == 'percent' ? 'selected' : '' ?>>
-															%
-														</option>
+														<option value="fix" <?php echo $cancellation->type == 'fix' ? 'selected' : '' ?>>Fix</option>
+														<option value="percent" <?php echo $cancellation->type == 'percent' ? 'selected' : '' ?>>%</option>
 													</select>
 												</div>
 												<div class="col-sm-12 col-md-1">

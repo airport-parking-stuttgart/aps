@@ -35,7 +35,7 @@ if(file_exists(ABSPATH . 'wp-content/uploads/valet-protokolle/u_k1-' . get_post_
 else
 	$unterschrift_k = 0;
 
-
+date_default_timezone_set('Europe/Berlin');
 if(isset($_POST["update_val"])){
 	//echo "<pre>"; print_r($_POST); echo "</pre>";
 	
@@ -257,8 +257,8 @@ if(isset($_POST["update_val"])){
 						<td style="width: 200px; text-align: center;"><strong>Mitarbeiter</strong></td>
 					</tr>
 					<tr>
-						<td><?php echo get_post_meta($order_id, 'Annahmedatum MA', true) ? dateFormat(get_post_meta($order_id, 'Annahmedatum MA', true), 'de') : "&nbsp;" ?></td>
-						<td><?php echo get_post_meta($order_id, 'Annahmezeit MA', true) ?></td>
+						<td><?php echo get_post_meta($order_id, 'Annahmedatum MA', true) ? dateFormat(get_post_meta($order_id, 'Annahmedatum MA', true), 'de') : dateFormat(date('Y-m-d'), 'de') ?></td>
+						<td><?php echo get_post_meta($order_id, 'Annahmezeit MA', true) ? get_post_meta($order_id, 'Annahmezeit MA', true) : date('H:i') ?></td>
 						<td><?php echo get_post_meta($order_id, 'Annahme MA', true) ?></td>
 					</tr>
 				</table>
@@ -560,11 +560,11 @@ if(isset($_POST["update_val"])){
 					<div class="row">
 						<div class="col-sm-12 col-md-3 col-lg-3">
 							<label for="a-m-date">Datum</label><br>
-							<input type="text" name="a-m-date" placeholder="" class="single-datepicker" value="<?php echo $booking['a-m-date'] ? $booking['a-m-date'] : ""; ?>">
+							<input type="text" name="a-m-date" placeholder="" class="single-datepicker" value="<?php echo $booking['a-m-date'] ? $booking['a-m-date'] : date('d.m.Y'); ?>">
 						</div>						
 						<div class="col-sm-12 col-md-3 col-lg-2">
 							<label for="a-m-time">Uhrzeit</label><br>
-							<input type="time" name="a-m-time" placeholder="" class="" value="<?php echo $booking['a-m-time'] ? $booking['a-m-time'] : ""; ?>" >
+							<input type="time" name="a-m-time" placeholder="" class="" value="<?php echo $booking['a-m-time'] ? $booking['a-m-time'] : date('H:i'); ?>" >
 						</div>
 						<div class="col-sm-12 col-md-4 col-lg-3">
 							<label for="a-m-user">Mitarbeiter</label><br>

@@ -13,9 +13,6 @@ $kurzfristig = Database::getInstance()->getTime_BookingsV2($date, 'kf', $filter)
 $mittelfristig = Database::getInstance()->getTime_BookingsV2($date, 'mf', $filter);
 $langfristig = Database::getInstance()->getTime_BookingsV2($date, 'lf', $filter);
 
-echo "<pre>";
-//print_r($kurzfristig);
-echo "</pre>";
 ?>
 
 <div class="page container-fluid <?php echo $_GET['page'] ?>">

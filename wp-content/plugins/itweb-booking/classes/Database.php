@@ -1182,6 +1182,11 @@ class Database
         return self::$db->get_row("select p.* from " . self::$prefix . "parklots p inner join " . self::$prefix . "orders o on p.product_id = o.product_id where o.order_id = $id");
     }
 	
+	// get client product id by group id
+    static function getProductIdByGroupId($id)
+    {
+        return self::$db->get_row("select product_id from " . self::$prefix . "parklots where group_id = $id and is_for = 'betreiber'");
+    }
 
     // delete parklot by product id
     static function deleteParklotsByProductId($id)
@@ -1545,7 +1550,7 @@ class Database
         return self::$db->get_results("
 			SELECT DATE_FORMAT(o.post_date,'%Y-%m-%d') AS Datum, DATE_FORMAT(o.post_date,'%Y') AS Jahr, DATE_FORMAT(o.post_date,'%c') AS Monat, 
 			DATE_FORMAT(o.post_date,'%e') AS Tag, 
-			COUNT(parklots.parklot) AS Buchungen,
+			COUNT(o.post_date) AS Buchungen,
 			SUM(ROUND(o.b_total, 2) ) AS Brutto_b, 
 			SUM(ROUND(o.b_total / 119 * 100, 4) ) AS Netto_b,
 			SUM(ROUND(o.m_v_total, 2) ) AS Brutto_k, 
@@ -3549,6 +3554,7 @@ class Database
 			o.Uhrzeit_bisEdit AS Uhrzeit_bisEdit,
 			o.nr_people AS Personenanzahl,
 			o.email AS Email,
+			o.phone AS Telefon,
 			o.Kennzeichen AS Kennzeichen,
 			o.Parkplatz AS Parkplatz,
 			o.Bezahlmethode AS Bezahlmethode,
@@ -3561,7 +3567,7 @@ class Database
 			o.Sonstige_1 AS Sonstige_1,
 			o.Sonstige_2 AS Sonstige_2,
 			o.Sperrgepack AS Sperrgepack,
-			o.order_status AS Status,
+			p.post_status AS Status,
 			o.editByArr AS editByArr,
 			o.editByRet AS editByRet,
 			pl.order_lot AS order_lot,
@@ -3596,6 +3602,7 @@ class Database
 			'' AS Uhrzeit_bisEdit,
 			ot.nr_people AS Personenanzahl,
 			ot.email AS Email,
+			ot.phone AS Telefon,
 			'' AS Kennzeichen,
 			'' AS Parkplatz,
 			'' AS Bezahlmethode,
@@ -4127,9 +4134,8 @@ class Database
 
 		FROM " . self::$prefix . "orders o
 
-		INNER JOIN " . self::$prefix . "parklots pl
+		INNER JOIN " . self::$prefix . "parklots pl ON pl.product_id = o.product_id		
 		JOIN " . self::$prefix_DB . "posts p ON p.ID = o.order_id
-		ON pl.product_id = o.product_id
 		WHERE p.post_status = 'wc-processing' AND o.deleted = 0 
 		AND DATE(o.post_date) = '".$date."'
 		AND " . $days. $product . " 
@@ -4209,11 +4215,11 @@ class Database
 	static function statistic_getBookingsV2($year, $status)
     {	
 		if($status == 'processing')
-			$bStatus = "o.deleted = 0 AND o.order_status = 'wc-processing'";
+			$bStatus = "o.deleted = 0 AND p.post_status = 'wc-processing'";
 		elseif($status == 'cancelled')
-			$bStatus = "(o.deleted = 0 OR o.deleted = 1) AND o.order_status = 'wc-cancelled'";
+			$bStatus = "(o.deleted = 0 OR o.deleted = 1) AND p.post_status = 'wc-cancelled'";
 		else
-			$bStatus = "o.deleted = 0 AND o.order_status = 'wc-processing'";
+			$bStatus = "o.deleted = 0 AND p.post_status = 'wc-processing'";
 	
 		return self::$db->get_results("
 		SELECT COUNT(MONTH(o.post_date)) AS Anzahl, YEAR(o.post_date) AS Jahr, MONTH(o.post_date) AS Monat, ROUND(SUM(o.b_total), 2) AS Barzahlung, ROUND(SUM(o.m_v_total), 2) AS Kreditkarte
@@ -4221,10 +4227,53 @@ class Database
 		INNER JOIN " . self::$prefix . "parklots pl ON pl.product_id = o.product_id
 		JOIN " . self::$prefix_DB . "posts p ON p.ID = o.order_id
 		WHERE ".$bStatus."
-		AND YEAR(o.post_date)= ".$year." AND MONTH(o.post_date) BETWEEN 1 AND 12
+		AND YEAR(o.post_date)= ".$year."
 		GROUP BY MONTH(o.post_date)
 		ORDER BY MONTH(o.post_date)");
 	}
+	
+	// get sales arrivals product by id
+    static function statistic_getSalesArrivalsProducts($bookingDate, $month, $year, $product_id, $selected, $period, $status)
+    {
+		if($selected == "betreiber" && $product_id != ""){
+			$joinTable = "LEFT JOIN " . self::$prefix . "clients_products cp ON cp.product_id = parklots.product_id";
+			$andFor = "AND parklots.is_for = 'betreiber' AND cp.client_id = " . $product_id;
+		}
+		else{
+			$joinTable = "INNER JOIN " . self::$prefix . "brokers_products bp ON bp.product_id = parklots.product_id";
+			$andFor = "AND parklots.is_for = 'vermittler' AND bp.broker_id = " . $product_id;
+		}
+		if($period = "month")
+			$andMonth = "AND MONTH(o.date_from) ='" . $month . "'";
+		else
+			$andMonth = "";
+		if($status == 'processing')
+			$bStatus = "o.deleted = 0 AND p.post_status = 'wc-processing'";
+		elseif($status == 'cancelled')
+			$bStatus = "(o.deleted = 0 OR o.deleted = 1) AND p.post_status = 'wc-cancelled'";
+		else
+			$bStatus = "o.deleted = 0 AND p.post_status = 'wc-processing'";
+		
+        return self::$db->get_results("
+			SELECT DATE_FORMAT(o.date_from,'%Y-%m-%d') AS Datum, DATE_FORMAT(o.date_from,'%Y') AS Jahr, DATE_FORMAT(o.date_from,'%c') AS Monat, 
+			DATE_FORMAT(o.date_from,'%e') AS Tag, 
+			COUNT(parklots.parklot) AS Buchungen,
+			SUM(ROUND(o.b_total, 2) ) AS Brutto_b, 
+			SUM(ROUND(o.b_total / 119 * 100, 4) ) AS Netto_b,
+			SUM(ROUND(o.m_v_total, 2) ) AS Brutto_k, 
+			SUM(ROUND(o.m_v_total / 119 * 100, 4) ) AS Netto_k, 
+			ROUND(SUM(o.provision ), 2) AS Provision,
+			SUM(DATEDIFF(o.date_to, o.date_from)) AS Tage,
+			parklots.parklot
+			FROM " . self::$prefix . "orders o
+			LEFT JOIN " . self::$prefix . "parklots parklots ON o.product_id = parklots.product_id
+			JOIN " . self::$prefix_DB . "posts p ON p.ID = o.order_id
+			" . $joinTable . "
+			WHERE ".$bStatus." AND DATE(o.post_date) <= '" . $bookingDate . "' AND YEAR(o.date_from) ='" . $year . "' 
+				" . $andMonth . " 
+				" . $andFor . "
+			GROUP BY Datum ORDER BY Datum ASC");
+    }
 
 	static function getRatings($product_id)
     {
@@ -4870,8 +4919,42 @@ class Database
     }
 	
 	// get saisons
-    static function getSaisons(){
-		return self::$db->get_results("SELECT * FROM " . self::$prefix . "saisons");
+    static function getSaisons($group_id){
+		return self::$db->get_results("SELECT * FROM " . self::$prefix . "saisons WHERE group_id = " . $group_id);
+	}
+	
+	// get saisons by group id and date
+    static function getSaisonsByGroupDate($group_id, $date){
+		return self::$db->get_row("SELECT * FROM " . self::$prefix . "saisons WHERE group_id = " . $group_id . " AND '" . $date . "' BETWEEN DATE(date_from) AND DATE(date_to)");
+	}
+		
+	// save preisstaffel
+    static function savePreisstaffel($data)
+    {
+		self::$db->insert(self::$prefix . 'preisstaffel', [
+            'product_id' => $data['product_id'],
+			'saison_id' => $data['saison_id'],
+			'price_id' => $data['price_id'],
+			'typ' => $data['typ'],
+			'wert' => $data['wert']
+        ]);
+    }
+	
+	// update preisstaffel
+    static function updatePreisstaffel($data)
+    {
+        self::$db->update(self::$prefix . "preisstaffel", [
+            'product_id' => $data['product_id'],
+			'saison_id' => $data['saison_id'],
+			'price_id' => $data['price_id'],
+			'typ' => $data['typ'],
+			'wert' => $data['wert']
+        ], ['id' => $data['id']]);
+    }
+	
+	// get preisstaffel
+    static function getPreisstaffel($saison_id, $product_id, $price_id){
+		return self::$db->get_row("SELECT * FROM " . self::$prefix . "preisstaffel WHERE saison_id = $saison_id AND product_id = $product_id AND price_id = $price_id");
 	}
 	
 	
@@ -5861,10 +5944,18 @@ class Database
 			$order = Orders::createWCOrder($product);
 			$order_id = $order->get_id();
 			
-			$payment_method = 'MasterCard';
-			$transaction_id = 'm';
-			$barzahlung = 0;
-			$mv = $data['price'];		
+			if($dataC->paid == 1){
+				$payment_method = 'MasterCard';
+				$transaction_id = 'm';
+				$barzahlung = 0;
+				$mv = $data['price'];
+			}
+			else{
+				$payment_method = 'Barzahlung';
+				$transaction_id = 'barzahlung';
+				$barzahlung = $data['price'];
+				$mv = 0;
+			}	
 
 			// add a bunch of meta data
 			add_post_meta($order_id, '_transaction_id', $transaction_id, true);
@@ -5988,20 +6079,26 @@ class Database
 			$woo_order->calculate_totals();
 			$woo_order->save();
 			
-			$barzahlung = 0;
-			$mv = number_format($dataC->total_price_brutto, 2, ".", ".");		
-			
-			self::$db->update(self::$prefix_DB . 'wc_order_product_lookup', [
-				'product_net_revenue' => (float)$data['parking_update'] / 119 * 100,
-				'product_gross_revenue' => (float)$data['parking_update'],
-				'tax_amount' => (float)$data['parking_update'] / 119 * 19
-			], ['order_id' => $order_id->order_id]);
+			if($dataC->paid == 1){
+				$payment_method = 'MasterCard';
+				$transaction_id = 'm';
+				$barzahlung = 0;
+				$mv = number_format($dataC->total_price_brutto, 2, ".", ".");
+			}
+			else{
+				$payment_method = 'Barzahlung';
+				$transaction_id = 'barzahlung';
+				$barzahlung = number_format($dataC->total_price_brutto, 2, ".", ".");
+				$mv = 0;
+			}
 			
 			$nameTemp = explode(" ",$dataC->name);
 			$firstName = $nameTemp[0];
 			$lastName = $nameTemp[1];
 
 			// add a bunch of meta data
+			update_post_meta($order_id->order_id, '_transaction_id', $transaction_id);
+			update_post_meta($order_id->order_id, '_payment_method_title', $payment_method);
 			update_post_meta($order_id->order_id, '_billing_first_name', $firstName);
 			update_post_meta($order_id->order_id, '_billing_last_name', $lastName);
 			update_post_meta($order_id->order_id, '_billing_phone', $dataC->phone);
@@ -6039,6 +6136,7 @@ class Database
 				'return_flight_number' => $dataC->flight_return_nr,
 				'b_total' => $barzahlung,
 				'm_v_total' => $mv,
+				'Bezahlmethode' => $payment_method,
 				'order_price' => number_format($dataC->total_price_brutto, 2, ".", "."),
 				'provision' => $commission,
 				'nr_people' => $dataC->persons
@@ -6530,6 +6628,12 @@ class Database
     {
         return self::$db->get_row("SELECT name FROM " . self::$prefix . "prices p
 				INNER JOIN " . self::$prefix . "events e ON e.price_id = p.id
+				WHERE DATE(e.datefrom) = '" . $date . "' AND e.product_id = " . $id);
+    }
+	
+	static function getPriceIdByDateAndProductID($date, $id)
+    {
+        return self::$db->get_row("SELECT price_id FROM " . self::$prefix . "events e				
 				WHERE DATE(e.datefrom) = '" . $date . "' AND e.product_id = " . $id);
     }
 	

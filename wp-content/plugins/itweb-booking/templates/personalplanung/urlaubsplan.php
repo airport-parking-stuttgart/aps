@@ -9,7 +9,7 @@ $grund_array = array('U' => 'Urlaub', 'SU' => 'Sonderurlaub', 'F' => 'Freistellu
 				'BFS' => 'Berufsschule', 'FB' => 'Fortbildung', 'GR' => 'Geschäftsreise', 'X' => 'Sperren', 'DEL' => 'Löschen');
 
 $wochentage = array("So.", "Mo.", "Di.", "Mi.", "Do.", "Fr.", "Sa.");
-$months = array('1' => 'Januar', '2' => 'Fabruar', '3' => 'März', '4' => 'April', '5' => 'Mai', '6' => 'Juni',
+$months = array('1' => 'Januar', '2' => 'Februar', '3' => 'März', '4' => 'April', '5' => 'Mai', '6' => 'Juni',
 				'7' => 'Juli', '8' => 'August', '9' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Dezember');
 if (isset($_GET['month']) && $_GET['month'] < 10)
     $zero = '0';

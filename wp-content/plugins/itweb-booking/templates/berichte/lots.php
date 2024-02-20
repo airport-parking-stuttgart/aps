@@ -168,7 +168,17 @@ foreach($brokers as $broker){
 //echo "<pre>"; print_r($selected); echo "</pre>";	
 
 ?>
-
+<style>
+tr:nth-child(even) {
+	background-color: #f2f2f2 !important;
+}
+.bottom_line{
+	border-bottom: 4px solid black;
+}
+.umsatz_table{
+	border-collapse: collapse !important;
+}
+</style>
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
     <div class="page-title itweb_adminpage_head">
         <h3>Ist-Tagesumsätze</h3>
@@ -366,7 +376,7 @@ foreach($brokers as $broker){
 								<?php while($dateW1 != date('Y-m-d', strtotime($dateW2 . '+1 day'))) : ?>	
 									<?php $operator = Database::getInstance()->getSalesLotsV2($dateW1, $lot->product_id); ?>
 									<?php if($operator): ?>
-										<tr>
+										<tr class="<?php echo $wochentage[date("w", strtotime($dateW1))] == "So." ? "bottom_line" : "" ?>">
 											<td><?php echo $wochentage[date("w", strtotime($dateW1))] . " " . date('d.m.Y', strtotime($dateW1)) ?></td>
 											<td><?php echo $operator->Produkt ?></td>									
 											<td><?php echo $operator->Buchungen; $sumBuchungen += $operator->Buchungen;?></td>
@@ -399,7 +409,7 @@ foreach($brokers as $broker){
 													echo number_format($operator->Netto_b + $operator->Netto_k,2,".","."); ?></td>
 										</tr>
 									<?php else: ?>
-										<tr>
+										<tr class="<?php echo $wochentage[date("w", strtotime($dateW1))] == "So." ? "bottom_line" : "" ?>">
 											<td><?php echo $wochentage[date("w", strtotime($dateW1))] . " " . date('d.m.Y', strtotime($dateW1)) ?></td>
 											<td><?php echo $lot->parklot ?></td>									
 											<td><?php echo 0;?></td>
@@ -423,7 +433,7 @@ foreach($brokers as $broker){
 										</tr>		
 									<?php endif; ?>
 								<?php $dateW1 = date('Y-m-d', strtotime($dateW1 . '+1 day')); endwhile; ?>
-									<tr>
+									<tr style="background: #aed8fd !important">
 										<td><strong><?php echo "Summe" ?></strong></td>
 										<td><strong><?php echo $lot->parklot ?></strong></td>									
 										<td><strong><?php echo $sumBuchungen;?></strong></td>

@@ -48,7 +48,7 @@ if(file_exists(ABSPATH . 'wp-content/uploads/valet-protokolle/u_k-' . get_post_m
 else
 	$unterschrift_k = 0;
 
-
+date_default_timezone_set('Europe/Berlin');
 if(isset($_POST["update_val"])){
 	//echo "<pre>"; print_r($_POST); echo "</pre>";
 	
@@ -273,8 +273,8 @@ if(isset($_POST["update_val"])){
 						<td style="width: 200px; text-align: center;"><strong>Kunde</strong></td>
 					</tr>
 					<tr>
-						<td><?php echo get_post_meta($order_id, 'Übergabedatum K', true) ? dateFormat(get_post_meta($order_id, 'Übergabedatum K', true), 'de') : "&nbsp;" ?></td>
-						<td><?php echo get_post_meta($order_id, 'Übergabezeit K', true) ?></td>
+						<td><?php echo get_post_meta($order_id, 'Übergabedatum K', true) ? dateFormat(get_post_meta($order_id, 'Übergabedatum K', true), 'de') : dateFormat(date('Y-m-d'), 'de') ?></td>
+						<td><?php echo get_post_meta($order_id, 'Übergabezeit K', true) ? get_post_meta($order_id, 'Übergabezeit K', true) : date('H:i')?></td>
 						<td><?php echo get_post_meta($order_id, 'Übergabe K', true) ?></td>
 					</tr>
 				</table>
@@ -562,11 +562,11 @@ if(isset($_POST["update_val"])){
 					<div class="row">
 						<div class="col-sm-12 col-md-3 col-lg-3">
 							<label for="u-kunde-date">Datum</label><br>
-							<input type="text" name="u-kunde-date" placeholder="" class="single-datepicker" value="<?php echo $booking['u-kunde-date'] ? $booking['u-kunde-date'] : ""; ?>">
+							<input type="text" name="u-kunde-date" placeholder="" class="single-datepicker" value="<?php echo $booking['u-kunde-date'] ? $booking['u-kunde-date'] : date('d.m.Y'); ?>">
 						</div>						
 						<div class="col-sm-12 col-md-3 col-lg-3">
 							<label for="u-kunde-time">Uhrzeit</label><br>
-							<input type="time" name="u-kunde-time" placeholder="" class="" value="<?php echo $booking['u-kunde-time'] ? $booking['u-kunde-time'] : ""; ?>">
+							<input type="time" name="u-kunde-time" placeholder="" class="" value="<?php echo $booking['u-kunde-time'] ? $booking['u-kunde-time'] : date('H:i'); ?>">
 						</div>
 						<div class="col-sm-12 col-md-4 col-lg-4">
 							<label for="u-kunde">Kunde</label><br>

@@ -158,6 +158,7 @@ $rerund = Database::getInstance()->get_bookinglistV2("wc-cancelled", $filte, " A
 						<tr>
 							<th>Nr.</th>
 							<th>Datum</th>
+							<th>Stornodatum</th>
 							<th>Produkt</th>
 							<th>Buchungsnummer</th>
 							<th>Name</th>
@@ -182,10 +183,17 @@ $rerund = Database::getInstance()->get_bookinglistV2("wc-cancelled", $filte, " A
 									get_post_meta($booking->order_id, 'editBooking_refund', true) == null && $product->deleted == 0) && $product->is_for == 'betreiber' && 
 									get_post_meta($booking->order_id, 'paypal_rerunded', true) == 0
 								):
+								
+								global $wpdb;
+								$sql = "select DATE(comment_date) as cancel_date from " . $wpdb->prefix . "comments where comment_post_ID = " . $booking->order_id . " AND (comment_content = 
+										'Bestellung vom Kunden storniert. Status der Bestellung von Zahlung ausstehend auf Storniert geändert.' OR comment_content = 
+										'Status der Bestellung von In Bearbeitung auf Storniert geändert.')";
+								$cancel_date = $wpdb->get_row($sql);
 							?>
 							<tr>
 								<td><?php echo $k ?></td>
 								<td><?php echo date('Y-m-d', strtotime($booking->Buchungsdatum)); ?></td>
+								<td><?php echo date('d.m.Y', strtotime($cancel_date->cancel_date)); ?></td>
 								<td><?php echo $product->parklot_short ?></td>
 								<td><?php echo $booking->Token ?></td>
 								<td><?php echo $booking->Vorname . ' ' . $booking->Nachname ?></td>

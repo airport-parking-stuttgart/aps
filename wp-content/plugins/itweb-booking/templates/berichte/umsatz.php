@@ -48,7 +48,7 @@ if (isset($_GET["selected"])) {
     $salesFor = "Alle Umsätze";
 }
 
-$months = array('1' => 'Januar', '2' => 'Fabruar', '3' => 'März', '4' => 'April', '5' => 'Mai', '6' => 'Juni',
+$months = array('1' => 'Januar', '2' => 'Februar', '3' => 'März', '4' => 'April', '5' => 'Mai', '6' => 'Juni',
     '7' => 'Juli', '8' => 'August', '9' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Dezember');
 $years = array('2021' => '2021', '2022' => '2022', '2023' => '2023', '2024' => '2024', '2025' => '2025');
 
@@ -128,7 +128,17 @@ foreach($brokers as $broker){
 
 //echo "<pre>"; print_r($anteil); echo "</pre>";
 ?>
-
+<style>
+tr:nth-child(even) {
+	background-color: #f2f2f2 !important;
+}
+.bottom_line{
+	border-bottom: 4px solid black;
+}
+.umsatz_table{
+	border-collapse: collapse !important;
+}
+</style>
 <div class="page container-fluid <?php echo $_GET['page'] ?>">
     <div class="page-title itweb_adminpage_head">
         <h3>Tägliche Buchungen</h3>
@@ -313,7 +323,7 @@ foreach($brokers as $broker){
 
                     <details>
                         <summary class="itweb_add_head-summary">Umsatz nach Tag</summary>
-                        <table class="" id="daySales">
+                        <table class="umsatz_table" id="daySales">
                             <thead>
                             <tr>
 								<th>Nr.</th>
@@ -335,7 +345,7 @@ foreach($brokers as $broker){
                                 <?php foreach ($salesMonth as $operator) : ?>
                                     <?php if ($d == $operator->Tag): ?>
 									<?php $wochentag = date('Y-m-d', strtotime($operator->Datum)) ?>
-                                        <tr>
+                                        <tr class="<?php echo $wochentage[date("w", strtotime($wochentag))] == "So." ? "bottom_line" : "" ?>">
                                             <td><?php echo $nr < 10 ? "0".$nr : $nr ?></td>
 											<td><?php echo $wochentage[date("w", strtotime($wochentag))] . " " . date('d.m.', strtotime($operator->Datum)) ?></td>
                                             <td><?php echo $operator->Buchungen ?></td>
@@ -355,17 +365,16 @@ foreach($brokers as $broker){
                                     <?php endif; ?>
                                 <?php endforeach; ?>
                                 <?php if ($inday == 0): ?>
-                                    <tr>
+                                    <?php
+									$t = $d < 10 ? '0' . $d : $d;
+									$m = $c_month < 10 ? '0' . $c_month : $c_month;
+									$y = $c_year;
+									$datefull = $y . "-" . $m . "-" . $t;
+									$wochentag = date('Y-m-d', strtotime($datefull));
+									?>
+									<tr class="<?php echo $wochentage[date("w", strtotime($wochentag))] == "So." ? "bottom_line" : "" ?>">
 										<td><?php echo $nr < 10 ? "0".$nr : $nr ?></td>
-                                        <td><?php
-											$t = $d < 10 ? '0' . $d : $d;
-											$m = $c_month < 10 ? '0' . $c_month : $c_month;
-											$y = $c_year;
-											$datefull = $y . "-" . $m . "-" . $t;
-											$wochentag = date('Y-m-d', strtotime($datefull));
-											echo $wochentage[date("w", strtotime($wochentag))] . " " . $t . "." . $m;
-                                                                                 
-                                            ?></td>										
+                                        <td><?php echo $wochentage[date("w", strtotime($wochentag))] . " " . $t . "." . $m; ?></td>										
                                         <td><?php echo '0' ?></td>
                                         <td><?php echo '0.00' ?></td>
                                         <td><?php echo '0.00' ?></td>
@@ -380,7 +389,7 @@ foreach($brokers as $broker){
                                 <?php endif;
                                 $d++; ?>
                             <?php $nr++; endwhile; ?>
-                            <tr><strong>
+                            <tr style="background: #aed8fd !important"><strong>
                                     <td><strong>Summe:</strong></td>
 									<td><strong></strong></td>
                                     <td><strong><?php echo $sumOrders != null ? $sumOrders : "0" ?></strong></td>

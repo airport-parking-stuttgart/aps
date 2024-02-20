@@ -867,10 +867,7 @@ class Helper
         }
         update_post_meta($product->get_id(), '_product_image_gallery', implode(',', array_merge($image_ids, $product->get_gallery_image_ids())));
 		update_post_meta($product->get_id(), '_thumbnail_id', implode(',', array_merge($image_ids, $product->get_gallery_image_ids())));
-        
-		//echo "<pre>";
-		//print_r($_POST);
-		//echo "</pre>";
+		
 		header('Location: ' . $_SERVER['HTTP_REFERER']);
     }
 
